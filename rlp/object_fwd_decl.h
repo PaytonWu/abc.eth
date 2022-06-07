@@ -1,4 +1,4 @@
-// Copyright(c) 2022 - present, Payton Wu (payton.wu@outlook.com) & abc contributors.
+// Copyright(c) 2022 - present, Payton Wu (payton.wu@outlook.com) & contributors.
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
 #if !defined(RLP_OBJECT_FWD_DECL_H)
