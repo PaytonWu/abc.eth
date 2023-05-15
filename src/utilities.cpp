@@ -1,12 +1,10 @@
 // Copyright(c) 2023 - present, Payton Wu (payton.wu@outlook.com) & abc contributors.
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
+#include <abc/ethereum/crypto/utilities.h>
 
-#ifndef ABC_ETH1_RLP_DETAILS_ENCODE
-#define ABC_ETH1_RLP_DETAILS_ENCODE
-
-#pragma once
+namespace abc::ethereum::crypto::utilities {
 
 
 
-#endif //ABC_ETH1_RLP_DETAILS_ENCODE
+}
