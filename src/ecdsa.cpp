@@ -4,8 +4,6 @@
 #include <abc/ethereum/crypto/ecdsa.h>
 
 #include <cryptopp/oids.h>
-#include <cryptopp/ripemd.h>
-#include <cryptopp/hex.h>
 #include <cryptopp/osrng.h>
 
 using namespace CryptoPP;

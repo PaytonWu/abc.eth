@@ -18,4 +18,5 @@ auto public_key(private_key_t const & private_key) -> public_key_t;
 
 }
 
+
 #endif //ABC_ETH_INCLUDE_ABC_ETHEREUM_CRYPTO_ECDSA

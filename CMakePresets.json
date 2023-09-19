@@ -3,7 +3,7 @@
     "configurePresets": [
         {
             "name": "mingw-ucrt64-base",
-            "generator": "Ninja",
+            "generator": "Unix Makefiles",
             "binaryDir": "${sourceDir}/build-${presetName}",
             "cacheVariables": {
                 "CMAKE_CXX_COMPILER": "g++",

@@ -110,15 +110,25 @@ find_package(fmt CONFIG REQUIRED)
 find_package(range-v3 CONFIG REQUIRED)
 find_package(CryptoPP REQUIRED)
 
+include(ExternalProject)
+
+ExternalProject_Add(
+    ABC
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/abc
+    BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/third_party/abc/build
+    INSTALL_COMMAND ""
+)
+add_library(abc STATIC IMPORTED)
+set_property(TARGET abc PROPERTY IMPORTED_LOCATION ${CMAKE_CURRENT_BINARY_DIR}/third_party/abc/build/libabc.a)
+add_dependencies(abc ABC)
+
 include_directories(third_party/abc/include)
 include_directories(include)
 aux_source_directory(src SRCS)
 add_library(${ABC_ETH_LIBRARY} ${SRCS})
-target_link_libraries(${ABC_ETH_LIBRARY} PRIVATE fmt::fmt-header-only cryptopp-static)
+add_dependencies(${ABC_ETH_LIBRARY} abc)
+target_link_libraries(${ABC_ETH_LIBRARY} PRIVATE abc fmt::fmt-header-only cryptopp-static)
 
-if (BUILD_SHARED_LIBS)
-    target_compile_definitions(${ABC_ETH_LIBRARY} PRIVATE ABC_DLL ABC_EXPORT)
-endif()
 
 if (WITH_TESTS)
     enable_testing()

@@ -7,7 +7,16 @@
 
 using namespace abc::ethereum;
 
-TEST(address, from) {
-    auto result = types::address::from("0x0000000000000000000000000000000000000000");
+TEST(address, from_zero_address) {
+    std::string_view raw_address = "0x0000000000000000000000000000000000000000";
+    auto result = types::address::from(raw_address);
     EXPECT_TRUE(result.has_value());
+    EXPECT_EQ(result.value().hex_string().to_string(), raw_address);
+}
+
+TEST(address, from_nonzero_address) {
+    abc::hex_string raw_address = abc::hex_string::from("0xffffffffffffffffffffffffffffffffffffffff").value();
+    auto result = types::address::from(raw_address);
+    EXPECT_TRUE(result.has_value());
+    EXPECT_EQ(result.value().hex_string(), raw_address);
 }

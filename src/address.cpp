@@ -33,7 +33,11 @@ address::address(crypto::ecdsa::public_key_t const & public_key) {
     std::memcpy(raw_address_.data(), digest + 12, 20);
 }
 
-address::address(abc::hex_string const & hex_string) noexcept : raw_address_{address_storage_t::from(hex_string.to_bytes<byte_numbering::msb0>()).value()} {
+address::address(abc::hex_string const & hex_string) noexcept : raw_address_{ bytes20_t::from<byte_numbering::msb0>(hex_string.bytes<byte_numbering::msb0>()).value() } {
+    assert(hex_string.bytes_size() == length);
+}
+
+address::address(bytes20_t const & address_bytes) noexcept : raw_address_{address_bytes} {
 }
 
 auto address::from(crypto::ecdsa::public_key_t const & public_key) -> expected<address, std::error_code> {
@@ -48,8 +52,12 @@ auto address::from(abc::hex_string const & hex_string) -> expected<address, std:
     return address{hex_string};
 }
 
+auto address::from(bytes20_t address_bytes) -> address {
+    return address{std::move(address_bytes)};
+}
+
 auto address::from(std::string_view hex_string) -> expected<address, std::error_code> {
-    return hex_string::from(hex_string).transform_error([](auto && ec) { return make_error_code(ec); }).and_then([](auto && hex_str) { return address::from(hex_str); });
+    return hex_string::from(hex_string).and_then([](auto && hex_str) { return address::from(hex_str); });
 }
 
 }

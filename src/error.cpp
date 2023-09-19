@@ -18,6 +18,12 @@ auto ethereum_category() -> std::error_category const & {
 
         [[nodiscard]] auto message(int const code) const -> std::string override {
             switch (static_cast<errc>(code)) {
+                case errc::invalid_private_key:
+                    return "invalid private key";
+
+                case errc::invalid_private_key_length:
+                    return "invalid private key length";
+
                 case errc::invalid_address:
                     return "invalid address";
 
