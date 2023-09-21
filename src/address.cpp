@@ -1,11 +1,12 @@
 // Copyright(c) 2023 - present, Payton Wu (payton.wu@outlook.com) & abc contributors.
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
-#include <abc/ethereum/types/address.h>
 #include <abc/bytes.h>
+#include <abc/ethereum/crypto/keccak.h>
 #include <abc/ethereum/error.h>
+#include <abc/ethereum/types/address.h>
 
-#include <cryptopp/keccak.h>
+#include <range/v3/algorithm/copy.hpp>
 
 #include <memory>
 
@@ -13,35 +14,26 @@ using namespace CryptoPP;
 
 namespace abc::ethereum::types {
 
-address::address(crypto::ecdsa::public_key_t const & public_key) {
-    ECP::Point const & point = public_key.GetPublicElement();
-    size_t size = point.x.ByteCount();
+address::address(crypto::secp256k1::public_key const & public_key) {
+    auto const & bytes = public_key.bytes().subbytes(1);
+    auto const & hash = ethereum::crypto::keccak256_t::digest(bytes);
 
-    bytes pubkey_bytes;
-    pubkey_bytes.resize(size * 2);
-
-    point.x.Encode(&pubkey_bytes[0], size);
-    point.y.Encode(&pubkey_bytes[size], size);
-
-    // Hash the public key using Keccak-256
-    Keccak_256 hash;
-    byte digest[32];
-    hash.Update(pubkey_bytes.data(), size * 2);
-    hash.Final(digest);
-
-    // Take the last 20 bytes of the hash as the address
-    std::memcpy(raw_address_.data(), digest + 12, 20);
+    ranges::copy(hash.subbytes(12), std::begin(raw_address_));
 }
 
-address::address(abc::hex_string const & hex_string) noexcept : raw_address_{ bytes20_t::from<byte_numbering::msb0>(hex_string.bytes<byte_numbering::msb0>()).value() } {
+address::address(abc::hex_string const & hex_string) noexcept : raw_address_{ bytes20_be_t::from<byte_numbering::msb0>(hex_string.bytes<byte_numbering::msb0>()).value() } {
     assert(hex_string.bytes_size() == length);
 }
 
-address::address(bytes20_t const & address_bytes) noexcept : raw_address_{address_bytes} {
+address::address(bytes20_be_t const & address_bytes) noexcept : raw_address_{address_bytes} {
 }
 
-auto address::from(crypto::ecdsa::public_key_t const & public_key) -> expected<address, std::error_code> {
+auto address::from(crypto::secp256k1::public_key const & public_key) -> address {
     return address{public_key};
+}
+
+auto address::from(crypto::secp256k1::private_key const & private_key) -> expected<address, std::error_code> {
+    return private_key.public_key().transform([](auto && pubkey) { return address::from(pubkey); });
 }
 
 auto address::from(abc::hex_string const & hex_string) -> expected<address, std::error_code> {
@@ -52,7 +44,7 @@ auto address::from(abc::hex_string const & hex_string) -> expected<address, std:
     return address{hex_string};
 }
 
-auto address::from(bytes20_t address_bytes) -> address {
+auto address::from(bytes20_be_t address_bytes) -> address {
     return address{std::move(address_bytes)};
 }
 

@@ -14,6 +14,7 @@ enum class errc {
     success = 0,
     invalid_private_key,
     invalid_private_key_length,
+    invalid_public_key,
     invalid_address,
     invalid_transaction,
     invalid_block,
