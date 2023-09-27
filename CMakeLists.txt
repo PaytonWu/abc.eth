@@ -51,6 +51,8 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang" OR "${CMAKE_CXX_COMPILER_ID}" MAT
 
     if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
         add_compile_options(-Wsuggest-final-methods -Wsuggest-final-types -Wsuggest-override)
+        add_compile_definitions($<$<CONFIG:Debug>:_GLIBCXX_ASSERTIONS>)
+        add_compile_definitions($<$<CONFIG:Debug>:_GLIBCXX_DEBUG_PEDANTIC>)
     endif()
 
     # options for Debug
@@ -116,6 +118,8 @@ ExternalProject_Add(
     ABC
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/third_party/abc
     BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/third_party/abc/build
+    CMAKE_ARGS
+        -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
     INSTALL_COMMAND ""
 )
 add_library(abc STATIC IMPORTED)

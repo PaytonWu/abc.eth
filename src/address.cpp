@@ -15,10 +15,14 @@ using namespace CryptoPP;
 namespace abc::ethereum::types {
 
 address::address(crypto::secp256k1::public_key const & public_key) {
-    auto const & bytes = public_key.bytes().subbytes(1);
-    auto const & hash = ethereum::crypto::keccak256_t::digest(bytes);
+    auto const & bytes = public_key.bytes();
+    auto const & hash_result = bytes.subspan(1).transform([](auto && bytes) { return ethereum::crypto::keccak256_t::digest(bytes); });
+    assert(hash_result.is_ok());
+    auto const & hash = hash_result.value();
+//    [[maybe_unused]] auto const _ = hash_result.and_then([](auto && bytes) { return bytes.subspan(12); })
+//        .transform([this](auto && span) { ranges::copy(span, std::begin(raw_address_)); });
 
-    ranges::copy(hash.subbytes(12), std::begin(raw_address_));
+    ranges::copy(hash.subspan(12).value(), std::begin(raw_address_));
 }
 
 address::address(abc::hex_string const & hex_string) noexcept : raw_address_{ bytes20_be_t::from<byte_numbering::msb0>(hex_string.bytes<byte_numbering::msb0>()).value() } {
