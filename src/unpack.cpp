@@ -16,8 +16,8 @@ auto decode_length(bytes_view_t input) -> expected<decoded_item, std::error_code
         return make_unexpected(make_error_code(errc::empty_input));
     }
 
-    auto const length = input.size();
-    auto const prefix = input[0];
+    std::size_t const length = input.size();
+    std::size_t const prefix = input[0];
     if (prefix <= 0x7F) {
         return decoded_item{ 0, 1, type::bytes };
     }
@@ -48,23 +48,29 @@ auto decode_length(bytes_view_t input) -> expected<decoded_item, std::error_code
 }
 
 auto decode(bytes_view_t input, bool decode_list_item, std::size_t & offset) -> expected<object, std::error_code>;
-auto decode_list(bytes_view_t input, std::size_t & offset) -> expected<object, std::error_code>;
+auto decode_list(bytes_view_t input) -> expected<object, std::error_code>;
 
-auto decode(bytes_view_t input, std::size_t & offset, object & result) -> expected<object, std::error_code> {
-    auto decoded_item = decode_length(input).transform([input, &offset](auto const & decoded_item) -> object {
-        object o;
+struct decoded_object {
+    object object{};
+    std::size_t offset{ 0 };
+};
 
+auto decode(bytes_view_t input) -> expected<decoded_object, std::error_code> {
+    return decode_length(input).transform([input](auto const & decoded_item) {
+        decoded_object o;
+
+        o.object.type = decoded_item.object_type;
         switch (decoded_item.object_type) {
             case type::bytes: {
-                auto const bytes_view = input.subview(decoded_item.offset, decoded_item.length);
-                o.data = bytes_t::from(bytes_view);
-                offset = decoded_item.offset + decoded_item.length;
+                auto const view = input.subview(decoded_item.offset, decoded_item.length);
+                o.object.data.bytes.size = view.size();
+                o.object.data.bytes.ptr = view.data();
+                o.offset = decoded_item.offset + decoded_item.length;
                 break;
             }
 
             case type::list: {
-                auto const bytes_view = input.subview(decoded_item.offset, decoded_item.length);
-                o.data = decoded_item.length;
+
                 break;
             }
 
@@ -77,12 +83,24 @@ auto decode(bytes_view_t input, std::size_t & offset, object & result) -> expect
 }
 
 auto decode_list(bytes_view_t input) -> expected<object, std::error_code> {
-    auto const length = input.size();
-    std::size_t offset = 0;
+    if (input.empty()) {
+        return make_unexpected(make_error_code(errc::empty_input));
+    }
 
-    object o;
-    o.type = type::list;
+    std::vector<object> list;
+    object result;
+    result.type = type::list;
 
+    auto item = decode(input);
+    while (item.has_value()) {
+        list.push_back(item.value().object);
+
+        if (item.value().offset == input.size()) {
+            break;
+        }
+
+        item = decode(input.subview(item.value().offset));
+    }
 
 }
 

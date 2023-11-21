@@ -43,8 +43,8 @@ auto decode_length(bytes_view_t input) -> expected<decoded_item, std::error_code
         return make_unexpected(make_error_code(errc::empty_input));
     }
 
-    auto const length = input.size();
-    auto const prefix = input[0];
+    std::size_t const length = input.size();
+    std::size_t const prefix = input[0];
     if (prefix <= 0x7F) {
         return decoded_item{ 0, 1, type::bytes };
     }

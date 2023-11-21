@@ -9,8 +9,8 @@
 namespace abc::ethereum::rlp {
 
 enum class type {
-    bytes = 0,
-    string = 1,
+    invalid = 0,
+    bytes = 1,
     list = 2,
 };
 

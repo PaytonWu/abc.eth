@@ -20,15 +20,21 @@
 namespace abc::ethereum::rlp {
 
 struct object_array {
-    std::vector<std::unique_ptr<object>> items{};
+    std::size_t size{ 0 };
+    object const * ptr{ nullptr };
 };
 
 struct object_bytes {
-    bytes_t bytes{};
+    std::size_t size{ 0 };
+    byte const * ptr{ nullptr };
 };
 
 struct object {
-    std::variant<std::monostate, object_array, object_bytes> data;
+    union {
+        object_array array{};
+        object_bytes bytes;
+    } data;
+    type type{ type::invalid };
 
     object() = default;
 };
