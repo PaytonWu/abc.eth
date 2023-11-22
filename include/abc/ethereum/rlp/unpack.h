@@ -31,57 +31,10 @@ class unpack_user {
 }
 
 struct [[nodiscard]] decoded_item {
-    std::size_t offset;
-    std::size_t length;
-    type object_type;
+    std::size_t offset{ 0 };
+    std::size_t length{ 0 };
+    type object_type{ type::invalid };
 };
-
-auto to_integer(bytes_be_view_t bytes) -> expected<std::uint64_t, std::error_code>;
-
-auto decode_length(bytes_view_t input) -> expected<decoded_item, std::error_code> {
-    if (input.empty()) {
-        return make_unexpected(make_error_code(errc::empty_input));
-    }
-
-    std::size_t const length = input.size();
-    std::size_t const prefix = input[0];
-    if (prefix <= 0x7F) {
-        return decoded_item{ 0, 1, type::bytes };
-    }
-
-    if (prefix <= 0xB7 and length > prefix - 0x80) {
-        return decoded_item{ .offset = 1, .length = static_cast<std::size_t>(prefix - 0x80), .object_type = type::bytes};
-    }
-
-    if (prefix <= 0xBF and length > prefix - 0xB7 and length > prefix - 0xB7 + to_integer(bytes_be_view_t::from(input.subview(1, prefix - 0xB7))).value()) {
-        std::size_t const length_of_bytes_length = prefix - 0xB7;
-        std::size_t const bytes_length = static_cast<std::size_t>(to_integer(bytes_be_view_t::from(input.subview(1, length_of_bytes_length))).value());
-
-        return decoded_item{ .offset = 1 + length_of_bytes_length, .length = bytes_length, .object_type = type::bytes };
-    }
-
-    if (prefix <= 0xF7 and length > prefix - 0xC0) {
-        return decoded_item{ .offset = 1, .length = static_cast<std::size_t>(prefix - 0xC0), .object_type = type::list };
-    }
-
-    if (prefix <= 0xFF and length > prefix - 0xF7 and length > prefix - 0xF7 + to_integer(bytes_be_view_t::from(input.subview(1, prefix - 0xF7))).value()) {
-        std::size_t const length_of_list_length = prefix - 0xF7;
-        std::size_t const list_length = static_cast<std::size_t>(to_integer(bytes_be_view_t::from(input.subview(1, length_of_list_length))).value());
-
-        return decoded_item{ .offset = 1 + length_of_list_length, .length = list_length, .object_type = type::list };
-    }
-
-    return make_unexpected(make_error_code(errc::invalid_encoded_data));
-}
-
-auto decode(bytes_view_t input, bool decode_list_item, std::size_t & offset) -> expected<object, std::error_code>;
-auto decode_list(bytes_view_t input, std::size_t & offset) -> expected<object, std::error_code>;
-
-
-template <std::integral T>
-auto unpack_integer(std::span<std::byte const> bytes) -> T {
-
-}
 
 namespace details {
 
