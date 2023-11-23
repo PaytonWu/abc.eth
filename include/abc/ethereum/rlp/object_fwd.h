@@ -37,6 +37,8 @@ struct object {
     type type{ type::invalid };
 
     object() = default;
+    constexpr object(rlp::type t) : type{ t } {
+    }
 };
 
 }

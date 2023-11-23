@@ -5,74 +5,78 @@
 
 #include <cassert>
 
-namespace abc::ethereum::rlp {
 
-namespace details {
+namespace abc::ethereum::rlp::details {
 
 auto to_integer(bytes_be_view_t bytes) -> expected<std::uint64_t, std::error_code>;
 
-auto decode_length(bytes_view_t input, std::size_t & offset) -> expected<decoded_item, std::error_code> {
-    if (input.empty() || offset >= input.size()) {
+auto decode_raw(bytes_view_t input, std::size_t & offset) -> expected<decoded_raw, std::error_code> {
+    if (offset >= input.size()) {
         return make_unexpected(make_error_code(errc::empty_input));
     }
 
-    decoded_item result;
+    decoded_raw raw_item;
 
     std::size_t const length = input.size() - offset;
-    std::size_t const prefix = input[offset];
+    std::size_t const selector = input[offset];
 
     do {
-        if (prefix <= 0x7F) {
-            result.offset = offset;
-            result.length = 1;
-            result.object_type = type::bytes;
+        if (selector <= 0x7F) {
+            raw_item.offset = offset;
+            raw_item.length = 1;
+            raw_item.object_type = type::bytes;
 
             break;
         }
 
-        if (prefix <= 0xB7 and length > prefix - 0x80) {
-            result.offset = offset + 1;
-            result.length = static_cast<std::size_t>(prefix - 0x80);
-            result.object_type = type::bytes;
+        if (selector <= 0xB7 and length > selector - 0x80) {
+            raw_item.offset = offset + 1;
+            raw_item.length = static_cast<std::size_t>(selector - 0x80);
+            raw_item.object_type = type::bytes;
 
             break;
         }
 
-        if (prefix <= 0xBF and length > prefix - 0xB7 and length > prefix - 0xB7 + to_integer(bytes_be_view_t::from(input.subview(offset + 1, prefix - 0xB7))).value()) {
-            std::size_t const length_of_bytes_length = prefix - 0xB7;
-            std::size_t const bytes_length = static_cast<std::size_t>(to_integer(bytes_be_view_t::from(input.subview(offset + 1, length_of_bytes_length))).value());
+        if (selector <= 0xBF and length > selector - 0xB7) {
+            std::size_t const length_of_length = selector - 0xB7;
+            std::size_t const length_of_bytes = static_cast<std::size_t>(to_integer(bytes_be_view_t::from(input.subview(offset + 1, length_of_length))).value());
 
-            result.offset = offset + 1 + length_of_bytes_length;
-            result.length = bytes_length;
-            result.object_type = type::bytes;
+            if (length > length_of_length + length_of_bytes) {
+                raw_item.offset = offset + 1 + length_of_length;
+                raw_item.length = length_of_bytes;
+                raw_item.object_type = type::bytes;
+
+                break;
+            }
+        }
+
+        if (selector <= 0xF7 and length > selector - 0xC0) {
+            raw_item.offset = offset + 1;
+            raw_item.length = static_cast<std::size_t>(selector - 0xC0);
+            raw_item.object_type = type::list;
 
             break;
         }
 
-        if (prefix <= 0xF7 and length > prefix - 0xC0) {
-            result.offset = offset + 1;
-            result.length = static_cast<std::size_t>(prefix - 0xC0);
-            result.object_type = type::list;
+        assert(selector <= 0xFF);
+        if (length > selector - 0xF7) {
+            std::size_t const length_of_length = selector - 0xF7;
+            std::size_t const length_of_bytes = to_integer(bytes_be_view_t::from(input.subview(offset + 1, selector - 0xF7))).value();
 
-            break;
-        }
+            if (length > length_of_length + length_of_bytes) {
+                raw_item.offset = offset + 1 + length_of_length;
+                raw_item.length = length_of_bytes;
+                raw_item.object_type = type::list;
 
-        if (prefix <= 0xFF and length > prefix - 0xF7 and length > prefix - 0xF7 + to_integer(bytes_be_view_t::from(input.subview(offset + 1, prefix - 0xF7))).value()) {
-            std::size_t const length_of_list_length = prefix - 0xF7;
-            std::size_t const list_length = static_cast<std::size_t>(to_integer(bytes_be_view_t::from(input.subview(offset + 1, length_of_list_length))).value());
-
-            result.offset = offset + 1 + length_of_list_length;
-            result.length = list_length;
-            result.object_type = type::list;
-
-            break;
+                break;
+            }
         }
 
         return make_unexpected(make_error_code(errc::invalid_encoded_data));
     } while (false);
 
-    offset = result.offset + result.length;
-    return result;
+    offset = raw_item.offset + raw_item.length;
+    return raw_item;
 }
 
 auto decode_list(bytes_view_t input, size_t & offset) -> expected<object, std::error_code>;
@@ -82,7 +86,7 @@ auto decode_single(bytes_view_t input, std::size_t & offset) -> expected<object,
         return make_unexpected(make_error_code(errc::empty_input));
     }
 
-    return decode_length(input, offset).transform([input](auto const & decoded_item) {
+    return decode_raw(input, offset).transform([input](auto const & decoded_item) {
         object o;
 
         o.type = decoded_item.object_type;
@@ -100,7 +104,7 @@ auto decode_single(bytes_view_t input, std::size_t & offset) -> expected<object,
             case type::list: {
                 auto const view = input.subview(decoded_item.offset, decoded_item.length);
                 std::size_t sub_offset = 0;
-                o = decode_list(view, sub_offset).value_or(object{});
+                o = decode_list(view, sub_offset).value_or(object{ rlp::type::list });
 
                 assert(o.type == type::list);
 
@@ -145,4 +149,3 @@ auto decode_list(bytes_view_t input, size_t & offset) -> expected<object, std::e
 
 }
 
-}

@@ -7,9 +7,11 @@
 #pragma once
 
 #include "error.h"
+#include "object_fwd.h"
 #include "object_type.h"
 #include "unpack_decl.h"
-#include "object_fwd.h"
+#include "zone/allocator.h"
+#include "zone/arena.h"
 
 #include <abc/byte.h>
 #include <abc/bytes_view.h>
@@ -20,23 +22,18 @@
 #include <concepts>
 #include <system_error>
 
-namespace abc::ethereum::rlp {
-
-namespace details {
+namespace abc::ethereum::rlp::details {
 
 class unpack_user {
 
 };
 
-}
 
-struct [[nodiscard]] decoded_item {
+struct [[nodiscard]] decoded_raw {
     std::size_t offset{ 0 };
     std::size_t length{ 0 };
     type object_type{ type::invalid };
 };
-
-namespace details {
 
 class context {
 private:
@@ -45,12 +42,10 @@ private:
 
     std::size_t trail_;
 
+    zone::arena<zone::allocator> arena_;
 public:
     auto execute(bytes_view_t data, std::size_t & offset) -> int;
 };
-
-}
-
 
 class unpacker {
 public:
