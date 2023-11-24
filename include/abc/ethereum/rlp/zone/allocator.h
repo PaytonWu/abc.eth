@@ -7,6 +7,7 @@
 #pragma once
 
 #include <abc/memory.h>
+#include <abc/byte.h>
 
 #include <cstddef>
 
@@ -60,7 +61,7 @@ struct chunk {
 class allocator {
 private:
     chunk header_{};
-    std::byte * allocate_begin_{ nullptr };
+    byte * allocate_begin_{ nullptr };
     std::size_t free_size_{ 0 };
 
 public:
@@ -77,7 +78,7 @@ public:
     requires (std::is_same_v<aligned, T> && std::has_single_bit(Alignment))
     [[nodiscard]]
     auto
-    allocate(std::size_t size) -> std::byte * {
+    allocate(std::size_t size) -> byte * {
         static_assert(std::has_single_bit(Alignment), "Alignment must be a power of 2");
 
         auto * aligned_address = address_aligned_at<Alignment>(allocate_begin_);
@@ -97,7 +98,7 @@ public:
     requires(std::is_same_v<aligned, T>)
     [[nodiscard]]
     auto
-    allocate(std::size_t size, alignment alignment) -> std::byte * {
+    allocate(std::size_t size, alignment alignment) -> byte * {
         assert(std::has_single_bit(static_cast<std::size_t>(alignment)));
 
         auto * aligned_address = address_aligned_at(alignment, allocate_begin_);
@@ -117,7 +118,7 @@ public:
     requires(std::is_same_v<unaligned, T>)
     [[nodiscard]]
     auto
-    allocate(std::size_t size) -> std::byte * {
+    allocate(std::size_t size) -> byte * {
         auto * unaligned_address = allocate_begin_;
         if (free_size_ < size) {
             expand(*this, size);

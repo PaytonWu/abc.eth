@@ -9,5 +9,5 @@
 using namespace abc::ethereum::rlp::zone;
 
 TEST(arena, default_constructor) {
-    ASSERT_NO_THROW(arena<allocator> arena{});
+    ASSERT_NO_THROW(abc::ethereum::rlp::zone::arena<allocator> arena{});
 }

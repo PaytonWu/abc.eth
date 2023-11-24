@@ -3,14 +3,28 @@
 
 #include <abc/ethereum/rlp/unpack.h>
 
-#include <cassert>
+#include <abc/ethereum/rlp/error.h>
+#include <abc/converter.h>
 
+#include <cassert>
 
 namespace abc::ethereum::rlp::details {
 
-auto to_integer(bytes_be_view_t bytes) -> expected<std::uint64_t, std::error_code>;
+auto context::to_integer(bytes_be_view_t bytes) -> expected<std::uint64_t, std::error_code> {
+    auto const length = bytes.size();
 
-auto decode_raw(bytes_view_t input, std::size_t & offset) -> expected<decoded_raw, std::error_code> {
+    if (length == 0) {
+        return make_unexpected(make_error_code(errc::empty_input));
+    }
+
+    if (length > sizeof(std::uint64_t)) {
+        return make_unexpected(make_error_code(errc::invalid_encoded_data));
+    }
+
+    return convert_to<std::uint64_t>::from(bytes);
+}
+
+auto context::decode_raw(bytes_view_t input, std::size_t & offset) -> expected<decoded_raw, std::error_code> {
     if (offset >= input.size()) {
         return make_unexpected(make_error_code(errc::empty_input));
     }
@@ -79,14 +93,12 @@ auto decode_raw(bytes_view_t input, std::size_t & offset) -> expected<decoded_ra
     return raw_item;
 }
 
-auto decode_list(bytes_view_t input, size_t & offset) -> expected<object, std::error_code>;
-
-auto decode_single(bytes_view_t input, std::size_t & offset) -> expected<object, std::error_code> {
+auto context::decode_single(bytes_view_t input, std::size_t & offset) -> expected<object, std::error_code> {
     if (input.empty() || offset >= input.size()) {
         return make_unexpected(make_error_code(errc::empty_input));
     }
 
-    return decode_raw(input, offset).transform([input](auto const & decoded_item) {
+    return decode_raw(input, offset).transform([this, input](auto const & decoded_item) {
         object o;
 
         o.type = decoded_item.object_type;
@@ -121,7 +133,7 @@ auto decode_single(bytes_view_t input, std::size_t & offset) -> expected<object,
     });
 }
 
-auto decode_list(bytes_view_t input, size_t & offset) -> expected<object, std::error_code> {
+auto context::decode_list(bytes_view_t input, size_t & offset) -> expected<object, std::error_code> {
     if (input.empty() || offset >= input.size()) {
         return make_unexpected(make_error_code(errc::empty_input));
     }
@@ -142,9 +154,15 @@ auto decode_list(bytes_view_t input, size_t & offset) -> expected<object, std::e
     }
 
     result.data.array.size = list.size();
-    result.data.array.ptr = list.data();
+    result.data.array.ptr = reinterpret_cast<object *>(arena_.allocate_align(sizeof(object) * list.size(), alignof(object)));
+    std::memcpy(result.data.array.ptr, list.data(), sizeof(object) * list.size());
 
     return result;
+}
+
+auto context::execute(abc::bytes_view_t data, std::size_t & offset) -> int {
+    auto result = decode_single(data, offset);
+    return 0;
 }
 
 }

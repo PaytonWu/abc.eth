@@ -6,15 +6,14 @@
 
 #pragma once
 
+#include "arena_fwd_decl.h"
+
 #include <cstdint>
 
 namespace abc::ethereum::rlp::zone {
 
 inline constexpr std::size_t ABC_RLP_ARENA_CHUNK_SIZE = { 8192 };
 inline constexpr std::size_t ABC_RLP_ARENA_ALIGNMENT = { sizeof(void*) };
-
-template <typename AllocatorT>
-class [[nodiscard]] arena;
 
 }
 

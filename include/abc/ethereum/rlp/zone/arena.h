@@ -10,6 +10,7 @@
 #include "arena_decl.h"
 #include "constructor.h"
 
+#include <abc/byte.h>
 #include <abc/memory.h>
 
 #include <cstddef>
@@ -35,17 +36,17 @@ public:
 
     template <std::size_t Alignment>
     [[nodiscard]]
-    auto allocate_align(std::size_t size) -> std::byte * {
+    auto allocate_align(std::size_t size) -> byte * {
         return allocator_.template allocate<aligned, Alignment>(size);
     }
 
     template <typename T, std::size_t Alignment = alignof(T)>
     [[nodiscard]]
-    auto allocate_align() -> std::byte * {
+    auto allocate_align() -> byte * {
         return allocate_align<Alignment>(sizeof(T));
     }
 
-    [[nodiscard]] auto allocate_align(std::size_t size, std::size_t alignment = ABC_RLP_ARENA_ALIGNMENT) -> std::byte * {
+    [[nodiscard]] auto allocate_align(std::size_t size, std::size_t alignment = ABC_RLP_ARENA_ALIGNMENT) -> byte * {
         return allocator_.template allocate<aligned>(size, alignment);
     }
 

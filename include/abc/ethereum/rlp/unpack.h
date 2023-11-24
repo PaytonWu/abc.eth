@@ -45,6 +45,12 @@ private:
     zone::arena<zone::allocator> arena_;
 public:
     auto execute(bytes_view_t data, std::size_t & offset) -> int;
+
+private:
+    auto to_integer(bytes_be_view_t bytes) -> expected<std::uint64_t, std::error_code>;
+    auto decode_raw(bytes_view_t input, std::size_t & offset) -> expected<decoded_raw, std::error_code>;
+    auto decode_list(bytes_view_t input, std::size_t & offset) -> expected<object, std::error_code>;
+    auto decode_single(bytes_view_t input, std::size_t & offset) -> expected<object, std::error_code>;
 };
 
 class unpacker {

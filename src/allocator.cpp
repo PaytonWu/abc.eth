@@ -20,7 +20,7 @@ allocator::allocator(std::size_t const chunk_size) : free_size_{ chunk_size } {
     chunk_ptr->chunk_size = chunk_size;
 
     header_.next = chunk_ptr;
-    allocate_begin_ = reinterpret_cast<std::byte *>(chunk_ptr) + sizeof(chunk);
+    allocate_begin_ = reinterpret_cast<byte *>(chunk_ptr) + sizeof(chunk);
 }
 
 allocator::~allocator() noexcept {
@@ -85,7 +85,7 @@ void allocator::clear() noexcept {
     }
     header_.next = current;
     assert(current == nullptr);
-    allocate_begin_ = reinterpret_cast<std::byte *>(header_.next) + sizeof(chunk);
+    allocate_begin_ = reinterpret_cast<byte *>(header_.next) + sizeof(chunk);
     free_size_ = header_.next->chunk_size;
 }
 

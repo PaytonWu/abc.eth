@@ -5,6 +5,7 @@
 #define ABC_ETH_INCLUDE_ABC_ETHEREUM_RLP_OBJECT_FWD
 
 #pragma once
+
 #include "object_fwd_decl.h"
 #include "object_type.h"
 
@@ -21,7 +22,7 @@ namespace abc::ethereum::rlp {
 
 struct object_array {
     std::size_t size{ 0 };
-    object const * ptr{ nullptr };
+    object * ptr{ nullptr };
 };
 
 struct object_bytes {
