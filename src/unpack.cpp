@@ -162,7 +162,17 @@ auto context::decode_list(bytes_view_t input, size_t & offset) -> expected<objec
 
 auto context::execute(abc::bytes_view_t data, std::size_t & offset) -> int {
     auto result = decode_single(data, offset);
-    return 0;
+    if (result.has_value()) {
+        data_ = result.value();
+        if (offset < data.size()) {
+            return 1;
+        }
+
+        assert(offset == data.size());
+        return 0;
+    }
+
+    return -1;
 }
 
 }

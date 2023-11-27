@@ -37,12 +37,9 @@ struct [[nodiscard]] decoded_raw {
 
 class context {
 private:
-    byte const * start_;
-    byte const * current_;
-
-    std::size_t trail_;
-
     zone::arena<zone::allocator> arena_;
+    object data_;
+
 public:
     auto execute(bytes_view_t data, std::size_t & offset) -> int;
 
