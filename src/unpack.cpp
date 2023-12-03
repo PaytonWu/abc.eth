@@ -10,6 +10,26 @@
 
 namespace abc::ethereum::rlp::details {
 
+auto unpack_list_stack::push(object const & obj) -> void {
+    list_items_.push_back(obj);
+}
+
+auto unpack_list_stack::result() -> expected<object, std::error_code> {
+    if (list_items_.empty()) {
+        return make_unexpected(make_error_code(errc::empty_input));
+    }
+
+    object result;
+    result.type = type::list;
+    result.data.array.size = list_items_.size();
+    result.data.array.ptr = reinterpret_cast<object *>(arena_.allocate_align(sizeof(object) * list_items_.size(), alignof(object)));
+    std::memcpy(result.data.array.ptr, list_items_.data(), sizeof(object) * list_items_.size());
+
+    list_items_.clear();
+
+    return result;
+}
+
 auto context::to_integer(bytes_be_view_t bytes) -> expected<std::uint64_t, std::error_code> {
     auto const length = bytes.size();
 
@@ -75,7 +95,7 @@ auto context::decode_raw(bytes_view_t input, std::size_t & offset) -> expected<d
         assert(selector <= 0xFF);
         if (length > selector - 0xF7) {
             std::size_t const length_of_length = selector - 0xF7;
-            std::size_t const length_of_bytes = to_integer(bytes_be_view_t::from(input.subview(offset + 1, selector - 0xF7))).value();
+            std::size_t const length_of_bytes = to_integer(bytes_be_view_t::from(input.subview(offset + 1, length_of_length))).value();
 
             if (length > length_of_length + length_of_bytes) {
                 raw_item.offset = offset + 1 + length_of_length;
@@ -94,7 +114,7 @@ auto context::decode_raw(bytes_view_t input, std::size_t & offset) -> expected<d
 }
 
 auto context::decode_single(bytes_view_t input, std::size_t & offset) -> expected<object, std::error_code> {
-    if (input.empty() || offset >= input.size()) {
+    if (offset >= input.size()) {
         return make_unexpected(make_error_code(errc::empty_input));
     }
 
@@ -134,28 +154,50 @@ auto context::decode_single(bytes_view_t input, std::size_t & offset) -> expecte
 }
 
 auto context::decode_list(bytes_view_t input, size_t & offset) -> expected<object, std::error_code> {
-    if (input.empty() || offset >= input.size()) {
+    if (offset >= input.size()) {
         return make_unexpected(make_error_code(errc::empty_input));
     }
 
-    std::vector<object> list;
-    object result;
-    result.type = type::list;
-
-    auto item = decode_single(input, offset);
-    while (item.has_value()) {
-        list.push_back(item.value());
-
-        if (offset >= input.size()) {
-            break;
-        }
-
-        item = decode_single(input, offset);
+    if (stack_.size() >= 1024) {
+        return make_unexpected(make_error_code(errc::stack_overflow));
     }
 
-    result.data.array.size = list.size();
-    result.data.array.ptr = reinterpret_cast<object *>(arena_.allocate_align(sizeof(object) * list.size(), alignof(object)));
-    std::memcpy(result.data.array.ptr, list.data(), sizeof(object) * list.size());
+    expected<object, std::error_code> result;
+
+    stack_.emplace();
+    while (offset < input.size()) {
+        std::size_t const pre_offset = offset;
+
+        auto item = decode_single(input, offset);
+        if (!item.has_value()) {
+            return make_unexpected(item.error());
+        }
+
+        auto & item_value = item.value();
+        switch (item_value.type) {
+            case type::bytes:
+                stack_.top().push(item_value);
+                break;
+
+            case type::list: {
+                auto const view = input.subview(pre_offset, offset - pre_offset);
+                std::size_t sub_offset = 0;
+                auto const list_item = decode_list(view, sub_offset);
+                if (!list_item.has_value()) {
+                    return make_unexpected(list_item.error());
+                }
+                stack_.top().push(list_item.value());
+                break;
+            }
+
+            default:
+                assert(false);
+                unreachable();
+        }
+    }
+
+    result = stack_.top().result();
+    stack_.pop();
 
     return result;
 }

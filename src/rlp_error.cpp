@@ -27,6 +27,9 @@ auto rlp_category() -> std::error_category const & {
                 case errc::invalid_encoded_data:
                     return "input does not conform to RLP encoding form";
 
+                case errc::stack_overflow:
+                    return "rlp decode stack overflow";
+
                 default:
                     return "unknown error";
             }

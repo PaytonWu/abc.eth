@@ -21,6 +21,7 @@
 #include <cstdint>
 #include <concepts>
 #include <system_error>
+#include <stack>
 
 namespace abc::ethereum::rlp::details {
 
@@ -28,6 +29,22 @@ class unpack_user {
 
 };
 
+class unpack_list_stack {
+private:
+    zone::arena<zone::allocator> arena_{};
+    std::vector<object> list_items_{};
+
+public:
+    unpack_list_stack() = default;
+    unpack_list_stack(unpack_list_stack const &) = delete;
+    auto operator=(unpack_list_stack const &) -> unpack_list_stack & = delete;
+    unpack_list_stack(unpack_list_stack &&) = default;
+    auto operator=(unpack_list_stack &&) -> unpack_list_stack & = default;
+    ~unpack_list_stack() = default;
+
+    auto push(object const & obj) -> void;
+    auto result() -> expected<object, std::error_code>;
+};
 
 struct [[nodiscard]] decoded_raw {
     std::size_t offset{ 0 };
@@ -39,6 +56,7 @@ class context {
 private:
     zone::arena<zone::allocator> arena_;
     object data_;
+    std::stack<unpack_list_stack> stack_;
 
 public:
     auto execute(bytes_view_t data, std::size_t & offset) -> int;
