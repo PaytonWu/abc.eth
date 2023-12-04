@@ -108,7 +108,7 @@ private:
     }
 
     auto append_buffer(std::span<byte const> input) -> void {
-        // stream_.write(input);
+        stream_.append(input);
     }
 };
 
