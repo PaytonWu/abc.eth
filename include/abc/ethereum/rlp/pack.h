@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "concepts.h"
+
 #include <abc/byte.h>
 #include <abc/converter.h>
 
@@ -50,6 +52,12 @@ public:
         return *this;
     }
 
+    auto pack_bytes(bytes_view_t input) -> packer & {
+        auto const bytes = encode_bytes(input);
+        append_buffer(bytes);
+        return *this;
+    }
+
     auto pack_list(std::vector<std::string_view> const & input) -> packer & {
         std::vector<bytes_t> bytes;
         bytes.reserve(input.size());
@@ -69,6 +77,24 @@ public:
         }
 
         append_buffer(encode_list(bytes));
+        return *this;
+    }
+
+    auto pack_list(std::vector<bytes_view_t> const & input) -> packer & {
+        std::vector<bytes_t> bytes;
+        bytes.reserve(input.size());
+        for (auto const & item : input) {
+            bytes.push_back(encode_bytes(item));
+        }
+
+        append_buffer(encode_list(bytes));
+        return *this;
+    }
+
+    template <typename T> requires is_serializable<T, packer>
+    auto pack(T const & object) -> packer & {
+        object.serialize(*this);
+        pack_list();
         return *this;
     }
 
@@ -92,6 +118,14 @@ private:
         return encode_length(input.size(), 0x80).template to<byte_numbering::none>() + input;
     }
 
+    auto encode_bytes(bytes_view_t input) -> bytes_t {
+        if (input.size() == 1 && input[0] < 0x80) {
+            return bytes_t { input[0] };
+        }
+
+        return encode_length(input.size(), 0x80).template to<byte_numbering::none>() + input;
+    }
+
     auto encode_list(std::vector<bytes_t> const & input) -> bytes_t {
         bytes_t output;
         for (auto const & item : input) {
@@ -99,6 +133,10 @@ private:
         }
 
         return encode_length(static_cast<uint64_t>(output.size()), 0xc0).template to<byte_numbering::none>() + output;
+    }
+
+    auto encode_list() -> bytes_t {
+        return encode_length(stream_.size(), 0xc0).template to<byte_numbering::none>() + stream_.bytes();
     }
 
     template <std::integral T>

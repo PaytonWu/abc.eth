@@ -1,19 +1,14 @@
 // Copyright(c) 2023 - present, Payton Wu (payton.wu@outlook.com) & the contributors.
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
-#ifndef ABC_ETH_INCLUDE_ABC_ETHEREUM_TYPES_ETH1_HEADER
-#define ABC_ETH_INCLUDE_ABC_ETHEREUM_TYPES_ETH1_HEADER
-
-#pragma once
-
-#include <abc/ethereum/types/address.h>
-#include <abc/fixed_bytes.h>
-#include <abc/fixed_hash.h>
-#include <abc/uint128.h>
+#include <abc/ethereum/types/eth1/header.h>
+#include <abc/ethereum/rlp/pack.h>
+#include <abc/ethereum/rlp/sbuffer.h>
 
 namespace abc::ethereum::types::eth1 {
 
-struct header {
+/*
+ * struct header {
     h256_t parent_hash;
     h256_t uncle_hash;
     address coinbase;
@@ -36,9 +31,13 @@ struct header {
     std::optional<uint64_t> excess_blob_gas;
     std::optional<h256_t> parent_beacon_block_root;
 };
+ */
+auto pack(header const & h) -> bytes_t {
+    bytes_t ret;
+    ret.reserve(h.parent_hash.size() + h.uncle_hash.size() + h.coinbase.length + h.state_root.size() + h.transactions_root.size() + h.receipts_root.size() + h.logs_bloom.size() + sizeof(h.difficulty) + sizeof(h.number) + sizeof(h.gas_limit) + sizeof(h.gas_used) + sizeof(h.timestamp) + h.extra_data.size() + h.mix_hash.size() + h.nonce.size() + sizeof(h.base_fee_per_gas) + sizeof(h.withdrawals_root) + sizeof(h.blob_gas_used) + sizeof(h.excess_blob_gas) + sizeof(h.parent_beacon_block_root));
 
-[[nodiscard]] auto pack(header const & h) -> bytes_t;
-
+    ret += h.parent_hash;
+    return ret;
 }
 
-#endif //ABC_ETH_INCLUDE_ABC_ETHEREUM_TYPES_ETH1_HEADER
+}

@@ -3,6 +3,7 @@
 
 #include <abc/uint128.h>
 #include <abc/fixed_hash.h>
+#include <abc/ethereum/types/eth1/header.h>
 
 #include <gtest/gtest.h>
 
