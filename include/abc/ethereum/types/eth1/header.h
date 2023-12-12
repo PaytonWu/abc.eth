@@ -35,9 +35,32 @@ struct header {
     std::optional<uint64_t> blob_gas_used;
     std::optional<uint64_t> excess_blob_gas;
     std::optional<h256_t> parent_beacon_block_root;
-};
 
-[[nodiscard]] auto pack(header const & h) -> bytes_t;
+    template <typename Serializer>
+    auto serialize(Serializer & serializer) const -> Serializer & {
+        serializer << parent_hash;
+        serializer << uncle_hash;
+        serializer << coinbase;
+        serializer << state_root;
+        serializer << transactions_root;
+        serializer << receipts_root;
+        serializer << logs_bloom;
+        serializer << difficulty;
+        serializer << number;
+        serializer << gas_limit;
+        serializer << gas_used;
+        serializer << timestamp;
+        serializer << extra_data;
+        serializer << mix_hash;
+        serializer << nonce;
+        serializer << base_fee_per_gas;
+        serializer << withdrawals_root;
+        serializer << blob_gas_used;
+        serializer << excess_blob_gas;
+        serializer << parent_beacon_block_root;
+        return serializer;
+    }
+};
 
 }
 

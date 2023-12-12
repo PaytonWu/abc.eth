@@ -25,7 +25,7 @@ public:
     ~sbuffer() = default;
 
     auto append(bytes_view_t bytes) -> void;
-    auto data() const noexcept -> bytes_view_t;
+    auto bytes_view() const noexcept -> bytes_view_t;
     auto clear() noexcept -> void;
 };
 

@@ -9,7 +9,7 @@ auto sbuffer::append(bytes_view_t bytes) -> void {
     buffer_ += bytes;
 }
 
-auto sbuffer::data() const noexcept -> bytes_view_t {
+auto sbuffer::bytes_view() const noexcept -> bytes_view_t {
     return buffer_;
 }
 
