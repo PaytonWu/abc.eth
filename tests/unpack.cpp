@@ -1,14 +1,17 @@
 // Copyright(c) 2023 - present, Payton Wu (payton.wu@outlook.com) & the contributors.
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
-#include <abc/uint128.h>
-#include <abc/fixed_hash.h>
+#include <abc/ethereum/rlp/pack.h>
+#include <abc/ethereum/rlp/sbuffer.h>
 #include <abc/ethereum/types/eth1/header.h>
+#include <abc/fixed_hash.h>
+#include <abc/uint128.h>
 
 #include <gtest/gtest.h>
 
 TEST(unpack, eth_header) {
     using namespace abc::ethereum::types;
+    using namespace abc::ethereum::rlp;
 
     eth1::header header{
         .parent_hash = abc::h256_t{},
@@ -32,4 +35,9 @@ TEST(unpack, eth_header) {
         .excess_blob_gas = std::nullopt,
         .parent_beacon_block_root = std::nullopt
     };
+
+    sbuffer buffer{};
+    packer<sbuffer> packer{ buffer };
+
+    packer.pack(header);
 }

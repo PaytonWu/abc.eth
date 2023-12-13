@@ -14,6 +14,7 @@
 #include <abc/ethereum/types/address.h>
 #include <abc/fixed_bytes.h>
 #include <abc/fixed_hash.h>
+#include <abc/uint128.h>
 
 #include <cstdint>
 #include <concepts>
@@ -53,6 +54,13 @@ public:
     auto pack(types::address const & address) -> packer & {
         auto const bytes = encode_bytes(bytes_view_t{ address.bytes() });
         append_buffer(bytes);
+        return *this;
+    }
+
+    auto pack(uint128_t const value) -> packer & {
+        value.
+        auto const bytes = convert_to<bytes_be_t>::from(value).transform([](auto && bytes_be) { return bytes_be.template to<byte_numbering::none>(); }).value();
+        append_buffer(encode_bytes(bytes));
         return *this;
     }
 
