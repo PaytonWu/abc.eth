@@ -53,11 +53,11 @@ struct header {
         serializer << extra_data;
         serializer << mix_hash;
         serializer << nonce;
-        serializer << base_fee_per_gas;
-        serializer << withdrawals_root;
-        serializer << blob_gas_used;
-        serializer << excess_blob_gas;
-        serializer << parent_beacon_block_root;
+        serializer.pack(base_fee_per_gas);
+        serializer.pack(withdrawals_root);
+        serializer.pack(blob_gas_used);
+        serializer.pack(excess_blob_gas);
+        serializer.pack(parent_beacon_block_root);
         return serializer;
     }
 };

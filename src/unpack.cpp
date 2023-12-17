@@ -73,7 +73,7 @@ auto context::decode_raw(bytes_view_t input, std::size_t & offset) -> expected<d
 
         if (selector <= 0xBF and length > selector - 0xB7) {
             std::size_t const length_of_length = selector - 0xB7;
-            std::size_t const length_of_bytes = static_cast<std::size_t>(to_integer(bytes_be_view_t::from(input.subview(offset + 1, length_of_length))).value());
+            std::size_t const length_of_bytes = static_cast<std::size_t>(to_integer(bytes_be_view_t::from<abc::byte_numbering::none>(input.subview(offset + 1, length_of_length))).value());
 
             if (length > length_of_length + length_of_bytes) {
                 raw_item.offset = offset + 1 + length_of_length;

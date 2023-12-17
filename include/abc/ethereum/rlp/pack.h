@@ -21,65 +21,89 @@
 #include <span>
 #include <string_view>
 
-namespace abc::ethereum::rlp {
+namespace abc::ethereum::rlp
+{
 
 template <is_packing_stream Stream>
-class packer {
+class packer
+{
 private:
     Stream & stream_;
 
 public:
     packer() = delete;
+
     packer(packer const &) = delete;
-    auto operator=(packer const &) -> packer & = delete;
+
+    auto
+    operator=(packer const &) -> packer & = delete;
+
     packer(packer &&) = default;
-    auto operator=(packer &&) -> packer & = default;
+
+    auto
+    operator=(packer &&) -> packer & = default;
+
     ~packer() = default;
 
-    packer(Stream & stream) noexcept : stream_{ stream } {
+    packer(Stream & stream) noexcept : stream_{ stream }
+    {
     }
 
-    auto pack(std::string_view input) -> packer & {
+    auto
+    pack(std::string_view input) -> packer &
+    {
         auto const bytes = encode_bytes(bytes_view_t{ input });
         append_buffer(bytes);
         return *this;
     }
 
-    auto pack(bytes_view_t input) -> packer & {
+    auto
+    pack(bytes_view_t input) -> packer &
+    {
         auto const bytes = encode_bytes(input);
         append_buffer(bytes);
         return *this;
     }
 
-    auto pack(types::address const & address) -> packer & {
+    auto
+    pack(types::address const & address) -> packer &
+    {
         auto const bytes = encode_bytes(bytes_view_t{ address.bytes() });
         append_buffer(bytes);
         return *this;
     }
 
-    auto pack(uint128_t const value) -> packer & {
-        value.
-        auto const bytes = convert_to<bytes_be_t>::from(value).transform([](auto && bytes_be) { return bytes_be.template to<byte_numbering::none>(); }).value();
+    auto
+    pack(uint128_t const value) -> packer &
+    {
+        auto bytes = value.export_bits_compact<abc::byte_numbering::msb0>().to<abc::byte_numbering::none>();
         append_buffer(encode_bytes(bytes));
         return *this;
     }
 
     template <std::unsigned_integral T>
-    auto pack(T const value) -> packer & {
+    auto
+    pack(T const value) -> packer &
+    {
         auto const bytes = convert_to<bytes_be_t>::from(value).transform([](auto && bytes_be) { return bytes_be.template to<byte_numbering::none>(); }).value();
         append_buffer(encode_bytes(bytes));
         return *this;
     }
 
     template <std::size_t N, byte_numbering ByteNumbering>
-    auto pack(fixed_bytes<N, ByteNumbering> const & value) -> packer & {
+    auto
+    pack(fixed_bytes<N, ByteNumbering> const & value) -> packer &
+    {
         auto const bytes = encode_bytes(bytes_view_t{ value });
         append_buffer(bytes);
         return *this;
     }
 
-    template <typename T> requires is_serializable<T, packer>
-    auto pack(T const & object) -> packer & {
+    template <typename T>
+    requires is_serializable<T, packer>
+    auto
+    pack(T const & object) -> packer &
+    {
         sbuffer object_buffer{};
         packer packer{ object_buffer };
 
@@ -89,30 +113,72 @@ public:
         return *this;
     }
 
-    auto operator<<(std::string_view input) -> packer & {
+    template <typename T>
+    auto
+    pack(std::optional<T> const & object) -> packer &
+    {
+        if (object.has_value())
+        {
+            return pack(object.value());
+        }
+        else
+        {
+            pack(abc::bytes_view_t{});
+            return *this;
+        }
+    }
+
+    auto
+    operator<<(std::string_view input) -> packer &
+    {
         return pack(input);
     }
 
-    auto operator<<(bytes_view_t input) -> packer & {
+    auto
+    operator<<(bytes_view_t input) -> packer &
+    {
         return pack(input);
     }
 
-    auto operator<<(types::address const & address) -> packer & {
+    auto
+    operator<<(types::address const & address) -> packer &
+    {
         return pack(address);
     }
 
+    auto
+    operator<<(uint128_t const input) -> packer &
+    {
+        return pack(input);
+    }
+
     template <std::unsigned_integral T>
-    auto operator<<(T const input) -> packer & {
+    auto
+    operator<<(T const input) -> packer &
+    {
         return pack(input);
     }
 
     template <std::size_t N, byte_numbering ByteNumbering>
-    auto operator<<(fixed_bytes<N, ByteNumbering> const & input) -> packer & {
+    auto
+    operator<<(fixed_bytes<N, ByteNumbering> const & input) -> packer &
+    {
         return pack(input);
     }
 
-    template <typename T> requires is_serializable<T, packer>
-    auto operator<<(T const & input) -> packer & {
+    template <typename T>
+    requires is_serializable<T, packer>
+    auto
+    operator<<(T const & input) -> packer &
+    {
+        return pack(input);
+    }
+
+    template <typename T>
+    requires is_serializable<T, packer>
+    auto
+    operator<<(std::optional<T> const & input) -> packer &
+    {
         return pack(input);
     }
 
@@ -174,10 +240,15 @@ public:
 //    }
 
 private:
-    auto encode_length(uint64_t length, uint32_t offset) -> bytes_be_t {
-        if (length < 56) {
+    auto
+    encode_length(uint64_t length, uint32_t offset) -> bytes_be_t
+    {
+        if (length < 56)
+        {
             return bytes_be_t{ static_cast<byte>(length + offset) };
-        } else if (length < std::numeric_limits<uint64_t>::max()) {
+        }
+        else if (length < std::numeric_limits<uint64_t>::max())
+        {
             auto be_length = convert_to<bytes_be_t>::from(length).value();
             return static_cast<byte>(be_length.size() + offset + 55) + be_length;
         }
@@ -193,9 +264,12 @@ private:
 //        return encode_length(input.size(), 0x80).template to<byte_numbering::none>() + input;
 //    }
 
-    auto encode_bytes(bytes_view_t input) -> bytes_t {
-        if (input.size() == 1 && input[0] < 0x80) {
-            return bytes_t { input[0] };
+    auto
+    encode_bytes(bytes_view_t input) -> bytes_t
+    {
+        if (input.size() == 1 && input[0] < 0x80)
+        {
+            return bytes_t{ input[0] };
         }
 
         return encode_length(input.size(), 0x80).template to<byte_numbering::none>() + input;
@@ -220,7 +294,9 @@ private:
 //        append_buffer(encode_bytes(bytes));
 //    }
 
-    auto append_buffer(bytes_view_t const input) -> void {
+    auto
+    append_buffer(bytes_view_t const input) -> void
+    {
         stream_.append(input);
     }
 };
