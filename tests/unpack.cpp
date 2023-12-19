@@ -28,7 +28,7 @@ TEST(unpack, eth_header) {
         .timestamp = 0,
         .extra_data = abc::bytes_t{},
         .mix_hash = abc::h256_t{},
-        .nonce = abc::bytes8_t{},
+        .nonce = abc::bytes8_be_t{},
         .base_fee_per_gas = std::nullopt,
         .withdrawals_root = std::nullopt,
         .blob_gas_used = std::nullopt,

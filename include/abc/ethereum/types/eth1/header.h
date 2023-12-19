@@ -28,7 +28,7 @@ struct header {
     uint64_t timestamp;
     bytes_t extra_data;
     h256_t mix_hash;
-    bytes8_t nonce;
+    bytes8_be_t nonce;
 
     std::optional<uint128_t> base_fee_per_gas;
     std::optional<h256_t> withdrawals_root;
