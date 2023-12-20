@@ -121,11 +121,8 @@ public:
         {
             return pack(object.value());
         }
-        else
-        {
-            pack(abc::bytes_view_t{});
-            return *this;
-        }
+
+        return *this;
     }
 
     auto

@@ -9,10 +9,6 @@ auto sbuffer::append(bytes_view_t bytes) -> void {
     buffer_ += bytes;
 }
 
-auto sbuffer::bytes_view() const noexcept -> bytes_view_t {
-    return buffer_;
-}
-
 auto sbuffer::clear() noexcept -> void {
     buffer_.clear();
 }

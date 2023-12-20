@@ -20,7 +20,7 @@ struct header {
     h256_t state_root;
     h256_t transactions_root;
     h256_t receipts_root;
-    bytes32_t logs_bloom;
+    bytes256_t logs_bloom;
     uint128_t difficulty;
     uint64_t number;
     uint64_t gas_limit;

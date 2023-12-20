@@ -20,7 +20,7 @@ TEST(unpack, eth_header) {
         .state_root = abc::h256_t{},
         .transactions_root = abc::h256_t{},
         .receipts_root = abc::h256_t{},
-        .logs_bloom = abc::bytes32_t{},
+        .logs_bloom = abc::bytes256_t{},
         .difficulty = abc::uint128_t{},
         .number = 0,
         .gas_limit = 0,

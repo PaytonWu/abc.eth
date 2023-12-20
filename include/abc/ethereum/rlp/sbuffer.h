@@ -25,8 +25,13 @@ public:
     ~sbuffer() = default;
 
     auto append(bytes_view_t bytes) -> void;
-    auto bytes_view() const noexcept -> bytes_view_t;
     auto clear() noexcept -> void;
+
+    template <byte_numbering ByteNumbering = byte_numbering::none>
+    auto bytes_view() const noexcept -> bytes_view<ByteNumbering>
+    {
+        return abc::bytes_view<ByteNumbering>{ bytes_view_t{ buffer_ } };
+    }
 };
 
 }
