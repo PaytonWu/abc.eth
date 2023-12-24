@@ -128,11 +128,8 @@ add_dependencies(abc ABC)
 
 include_directories(third_party/abc/include)
 include_directories(include)
-aux_source_directory(src SRCS)
-add_library(${ABC_ETH_LIBRARY} ${SRCS})
-add_dependencies(${ABC_ETH_LIBRARY} abc)
-target_link_libraries(${ABC_ETH_LIBRARY} PRIVATE abc fmt::fmt-header-only cryptopp-static)
 
+add_subdirectory(src)
 
 if (WITH_TESTS)
     enable_testing()

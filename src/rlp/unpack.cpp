@@ -8,14 +8,23 @@
 
 #include <cassert>
 
-namespace abc::ethereum::rlp::details {
+namespace abc::ethereum::rlp
+{
 
-auto unpack_list_stack::push(object const & obj) -> void {
+namespace details
+{
+
+auto
+unpack_list_stack::push(object const & obj) -> void
+{
     list_items_.push_back(obj);
 }
 
-auto unpack_list_stack::result() -> expected<object, std::error_code> {
-    if (list_items_.empty()) {
+auto
+unpack_list_stack::result() -> expected<object, std::error_code>
+{
+    if (list_items_.empty())
+    {
         return make_unexpected(make_error_code(errc::empty_input));
     }
 
@@ -30,22 +39,29 @@ auto unpack_list_stack::result() -> expected<object, std::error_code> {
     return result;
 }
 
-auto context::to_integer(bytes_be_view_t bytes) -> expected<std::uint64_t, std::error_code> {
+auto
+context::to_integer(bytes_be_view_t bytes) -> expected<std::uint64_t, std::error_code>
+{
     auto const length = bytes.size();
 
-    if (length == 0) {
+    if (length == 0)
+    {
         return make_unexpected(make_error_code(errc::empty_input));
     }
 
-    if (length > sizeof(std::uint64_t)) {
+    if (length > sizeof(std::uint64_t))
+    {
         return make_unexpected(make_error_code(errc::invalid_encoded_data));
     }
 
     return convert_to<std::uint64_t>::from(bytes);
 }
 
-auto context::decode_raw(bytes_view_t input, std::size_t & offset) -> expected<decoded_raw, std::error_code> {
-    if (offset >= input.size()) {
+auto
+context::decode_raw(bytes_view_t input, std::size_t & offset) -> expected<decoded_raw, std::error_code>
+{
+    if (offset >= input.size())
+    {
         return make_unexpected(make_error_code(errc::empty_input));
     }
 
@@ -54,8 +70,10 @@ auto context::decode_raw(bytes_view_t input, std::size_t & offset) -> expected<d
     std::size_t const length = input.size() - offset;
     std::size_t const selector = input[offset];
 
-    do {
-        if (selector <= 0x7F) {
+    do
+    {
+        if (selector <= 0x7F)
+        {
             raw_item.offset = offset;
             raw_item.length = 1;
             raw_item.object_type = type::bytes;
@@ -63,7 +81,8 @@ auto context::decode_raw(bytes_view_t input, std::size_t & offset) -> expected<d
             break;
         }
 
-        if (selector <= 0xB7 and length > selector - 0x80) {
+        if (selector <= 0xB7 and length > selector - 0x80)
+        {
             raw_item.offset = offset + 1;
             raw_item.length = static_cast<std::size_t>(selector - 0x80);
             raw_item.object_type = type::bytes;
@@ -71,11 +90,13 @@ auto context::decode_raw(bytes_view_t input, std::size_t & offset) -> expected<d
             break;
         }
 
-        if (selector <= 0xBF and length > selector - 0xB7) {
+        if (selector <= 0xBF and length > selector - 0xB7)
+        {
             std::size_t const length_of_length = selector - 0xB7;
             std::size_t const length_of_bytes = static_cast<std::size_t>(to_integer(bytes_be_view_t::from<abc::byte_numbering::none>(input.subview(offset + 1, length_of_length))).value());
 
-            if (length > length_of_length + length_of_bytes) {
+            if (length > length_of_length + length_of_bytes)
+            {
                 raw_item.offset = offset + 1 + length_of_length;
                 raw_item.length = length_of_bytes;
                 raw_item.object_type = type::bytes;
@@ -84,7 +105,8 @@ auto context::decode_raw(bytes_view_t input, std::size_t & offset) -> expected<d
             }
         }
 
-        if (selector <= 0xF7 and length > selector - 0xC0) {
+        if (selector <= 0xF7 and length > selector - 0xC0)
+        {
             raw_item.offset = offset + 1;
             raw_item.length = static_cast<std::size_t>(selector - 0xC0);
             raw_item.object_type = type::list;
@@ -93,11 +115,13 @@ auto context::decode_raw(bytes_view_t input, std::size_t & offset) -> expected<d
         }
 
         assert(selector <= 0xFF);
-        if (length > selector - 0xF7) {
+        if (length > selector - 0xF7)
+        {
             std::size_t const length_of_length = selector - 0xF7;
             std::size_t const length_of_bytes = to_integer(bytes_be_view_t::from(input.subview(offset + 1, length_of_length))).value();
 
-            if (length > length_of_length + length_of_bytes) {
+            if (length > length_of_length + length_of_bytes)
+            {
                 raw_item.offset = offset + 1 + length_of_length;
                 raw_item.length = length_of_bytes;
                 raw_item.object_type = type::list;
@@ -113,8 +137,11 @@ auto context::decode_raw(bytes_view_t input, std::size_t & offset) -> expected<d
     return raw_item;
 }
 
-auto context::decode_single(bytes_view_t input, std::size_t & offset) -> expected<object, std::error_code> {
-    if (offset >= input.size()) {
+auto
+context::decode_single(bytes_view_t input, std::size_t & offset) -> expected<object, std::error_code>
+{
+    if (offset >= input.size())
+    {
         return make_unexpected(make_error_code(errc::empty_input));
     }
 
@@ -122,8 +149,10 @@ auto context::decode_single(bytes_view_t input, std::size_t & offset) -> expecte
         object o;
 
         o.type = decoded_item.object_type;
-        switch (decoded_item.object_type) {
-            case type::bytes: {
+        switch (decoded_item.object_type)
+        {
+            case type::bytes:
+            {
                 auto const view = input.subview(decoded_item.offset, decoded_item.length);
                 o.data.bytes.size = view.size();
                 o.data.bytes.ptr = view.data();
@@ -133,7 +162,8 @@ auto context::decode_single(bytes_view_t input, std::size_t & offset) -> expecte
                 break;
             }
 
-            case type::list: {
+            case type::list:
+            {
                 auto const view = input.subview(decoded_item.offset, decoded_item.length);
                 std::size_t sub_offset = 0;
                 o = decode_list(view, sub_offset).value_or(object{ rlp::type::list });
@@ -143,7 +173,8 @@ auto context::decode_single(bytes_view_t input, std::size_t & offset) -> expecte
                 break;
             }
 
-            default: {
+            default:
+            {
                 assert(false);
                 unreachable();
             }
@@ -153,37 +184,46 @@ auto context::decode_single(bytes_view_t input, std::size_t & offset) -> expecte
     });
 }
 
-auto context::decode_list(bytes_view_t input, size_t & offset) -> expected<object, std::error_code> {
-    if (offset >= input.size()) {
+auto
+context::decode_list(bytes_view_t input, size_t & offset) -> expected<object, std::error_code>
+{
+    if (offset >= input.size())
+    {
         return make_unexpected(make_error_code(errc::empty_input));
     }
 
-    if (stack_.size() >= 1024) {
+    if (stack_.size() >= 1024)
+    {
         return make_unexpected(make_error_code(errc::stack_overflow));
     }
 
     expected<object, std::error_code> result;
 
     stack_.emplace();
-    while (offset < input.size()) {
+    while (offset < input.size())
+    {
         std::size_t const pre_offset = offset;
 
         auto item = decode_single(input, offset);
-        if (!item.has_value()) {
+        if (!item.has_value())
+        {
             return make_unexpected(item.error());
         }
 
         auto & item_value = item.value();
-        switch (item_value.type) {
+        switch (item_value.type)
+        {
             case type::bytes:
                 stack_.top().push(item_value);
                 break;
 
-            case type::list: {
+            case type::list:
+            {
                 auto const view = input.subview(pre_offset, offset - pre_offset);
                 std::size_t sub_offset = 0;
                 auto const list_item = decode_list(view, sub_offset);
-                if (!list_item.has_value()) {
+                if (!list_item.has_value())
+                {
                     return make_unexpected(list_item.error());
                 }
                 stack_.top().push(list_item.value());
@@ -202,11 +242,30 @@ auto context::decode_list(bytes_view_t input, size_t & offset) -> expected<objec
     return result;
 }
 
-auto context::execute(abc::bytes_view_t data, std::size_t & offset) -> int {
+auto
+context::execute(abc::bytes_view_t data, std::size_t & offset) -> int
+{
     return decode_single(data, offset).transform([this, data, offset](auto const & decoded_item) {
         data_ = decoded_item;
         return static_cast<int>(!!(data.size() - offset));
     }).value_or(-1);
+}
+
+}
+
+unpacker::unpacker(unpacker && other) noexcept
+    : buffer_{ other.buffer_ }, used_{ other.used_ }, unused_{ other.unused_ }, offset_{ other.offset_ }
+    , parsed_{ other.parsed_ }, arena_{ std::move(other.arena_) }, initial_buffer_size_{ other.initial_buffer_size_ }
+    , context_{ std::move(other.context_) }
+{
+    other.buffer_ = nullptr;
+}
+
+auto unpacker::operator=(unpacker && rhs) noexcept -> unpacker &
+{
+    this->~unpacker();
+    new (this) unpacker(std::move(rhs));
+    return *this;
 }
 
 }

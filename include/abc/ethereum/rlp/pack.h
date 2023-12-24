@@ -45,7 +45,7 @@ public:
 
     ~packer() = default;
 
-    packer(Stream & stream) noexcept : stream_{ stream }
+    explicit packer(Stream & stream) noexcept : stream_{ stream }
     {
     }
 

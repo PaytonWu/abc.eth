@@ -22,67 +22,117 @@
 #include <concepts>
 #include <system_error>
 #include <stack>
+#include <memory>
 
-namespace abc::ethereum::rlp::details {
+namespace abc::ethereum::rlp
+{
 
-class unpack_user {
+namespace details
+{
+
+class unpack_user
+{
 
 };
 
-class unpack_list_stack {
+class unpack_list_stack
+{
 private:
     zone::arena<zone::allocator> arena_{};
     std::vector<object> list_items_{};
 
 public:
     unpack_list_stack() = default;
+
     unpack_list_stack(unpack_list_stack const &) = delete;
-    auto operator=(unpack_list_stack const &) -> unpack_list_stack & = delete;
+
+    auto
+    operator=(unpack_list_stack const &) -> unpack_list_stack & = delete;
+
     unpack_list_stack(unpack_list_stack &&) = default;
-    auto operator=(unpack_list_stack &&) -> unpack_list_stack & = default;
+
+    auto
+    operator=(unpack_list_stack &&) -> unpack_list_stack & = default;
+
     ~unpack_list_stack() = default;
 
-    auto push(object const & obj) -> void;
-    auto result() -> expected<object, std::error_code>;
+    auto
+    push(object const & obj) -> void;
+
+    auto
+    result() -> expected<object, std::error_code>;
 };
 
-struct [[nodiscard]] decoded_raw {
+struct [[nodiscard]] decoded_raw
+{
     std::size_t offset{ 0 };
     std::size_t length{ 0 };
     type object_type{ type::invalid };
 };
 
-class context {
+class context
+{
 private:
-    zone::arena<zone::allocator> arena_;
+    zone::arena <zone::allocator> arena_;
     object data_;
     std::stack<unpack_list_stack> stack_;
 
 public:
-    auto execute(bytes_view_t data, std::size_t & offset) -> int;
+    auto
+    execute(bytes_view_t data, std::size_t & offset) -> int;
 
 private:
-    static auto to_integer(bytes_be_view_t bytes) -> expected<std::uint64_t, std::error_code>;
-    static auto decode_raw(bytes_view_t input, std::size_t & offset) -> expected<decoded_raw, std::error_code>;
+    static auto
+    to_integer(bytes_be_view_t bytes) -> expected<std::uint64_t, std::error_code>;
 
-    auto decode_list(bytes_view_t input, std::size_t & offset) -> expected<object, std::error_code>;
-    auto decode_single(bytes_view_t input, std::size_t & offset) -> expected<object, std::error_code>;
+    static auto
+    decode_raw(bytes_view_t input, std::size_t & offset) -> expected<decoded_raw, std::error_code>;
+
+    auto
+    decode_list(bytes_view_t input, std::size_t & offset) -> expected<object, std::error_code>;
+
+    auto
+    decode_single(bytes_view_t input, std::size_t & offset) -> expected<object, std::error_code>;
 };
 
-class unpacker {
+}
+
+class unpacker
+{
+    byte * buffer_{ nullptr };
+    std::size_t used_{ 0 };
+    std::size_t unused_{ 0 };
+    std::size_t offset_{ 0 };
+    std::size_t parsed_{ 0 };
+    std::unique_ptr<zone::arena<zone::allocator>> arena_{};
+    std::size_t initial_buffer_size_{ 0 };
+    details::context context_{};
+
 public:
+    unpacker() = default;
+    unpacker(unpacker const &) = delete;
+    auto operator=(unpacker const &) -> unpacker & = delete;
+    unpacker(unpacker &&) noexcept;
+    auto operator=(unpacker &&) noexcept -> unpacker &;
+    ~unpacker() noexcept;
 
-    void reserve_buffer(std::size_t size = RLP_UNPACKER_RESERVE_SIZE);
+    void
+    reserve_buffer(std::size_t size = RLP_UNPACKER_RESERVE_SIZE);
 
-    auto buffer() -> byte *;
+    auto
+    buffer() -> byte *;
 
-    auto buffer_capacity() const -> std::size_t;
+    auto
+    buffer_capacity() const -> std::size_t;
 
-    void buffer_consumed(std::size_t size);
+    void
+    buffer_consumed(std::size_t size);
 
-    auto message_size() const -> std::size_t;
+    auto
+    message_size() const -> std::size_t;
 
-    auto execute() -> bool;
+    auto
+    execute() -> bool;
 };
 
 }
