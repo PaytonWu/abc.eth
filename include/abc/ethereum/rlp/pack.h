@@ -52,7 +52,8 @@ public:
     auto
     pack(std::string_view input) -> packer &
     {
-        auto const bytes = encode_bytes(bytes_view_t{ input });
+        bytes_t bytes;
+        encode_bytes(bytes_view_t{ input }, bytes);
         append_buffer(bytes);
         return *this;
     }
@@ -60,7 +61,8 @@ public:
     auto
     pack(bytes_view_t input) -> packer &
     {
-        auto const bytes = encode_bytes(input);
+        bytes_t bytes;
+        encode_bytes(input, bytes);
         append_buffer(bytes);
         return *this;
     }
@@ -68,7 +70,8 @@ public:
     auto
     pack(types::address const & address) -> packer &
     {
-        auto const bytes = encode_bytes(bytes_view_t{ address.bytes() });
+        bytes_t bytes;
+        encode_bytes(bytes_view_t{ address.bytes() }, bytes);
         append_buffer(bytes);
         return *this;
     }
@@ -76,8 +79,11 @@ public:
     auto
     pack(uint128_t const value) -> packer &
     {
-        auto bytes = value.export_bits_compact<abc::byte_numbering::msb0>().to<abc::byte_numbering::none>();
-        append_buffer(encode_bytes(bytes));
+        auto number = value.export_bits_compact<abc::byte_numbering::msb0>().to<abc::byte_numbering::none>();
+        bytes_t bytes;
+
+        encode_bytes(number, bytes);
+        append_buffer(bytes);
         return *this;
     }
 
@@ -85,8 +91,11 @@ public:
     auto
     pack(T const value) -> packer &
     {
-        auto const bytes = convert_to<bytes_be_t>::from(value).transform([](auto && bytes_be) { return bytes_be.template to<byte_numbering::none>(); }).value();
-        append_buffer(encode_bytes(bytes));
+        auto const number = convert_to<bytes_be_t>::from(value).transform([](auto && bytes_be) { return bytes_be.template to<byte_numbering::none>(); }).value();
+        bytes_t bytes;
+
+        encode_bytes(number, bytes);
+        append_buffer(bytes);
         return *this;
     }
 
@@ -94,7 +103,8 @@ public:
     auto
     pack(fixed_bytes<N, ByteNumbering> const & value) -> packer &
     {
-        auto const bytes = encode_bytes(bytes_view_t{ value });
+        bytes_t bytes;
+        encode_bytes(bytes_view_t{ value }, bytes);
         append_buffer(bytes);
         return *this;
     }
@@ -108,7 +118,12 @@ public:
         packer packer{ object_buffer };
 
         object.serialize(packer);
-        append_buffer(encode_length(object_buffer.bytes_view().size(), 0xc0).template to<byte_numbering::none>() + object_buffer.bytes_view());
+
+        bytes_t bytes;
+        encode_length(object_buffer.bytes_view().size(), 0xc0, bytes);
+
+        append_buffer(bytes);
+        append_buffer(object_buffer.bytes_view());
 
         return *this;
     }
@@ -179,117 +194,39 @@ public:
         return pack(input);
     }
 
-//    template <std::integral T>
-//    auto pack_integer(T value) noexcept -> packer & {
-//        pack_integer_impl(value);
-//        return *this;
-//    }
-//
-//    auto pack_string(std::string_view input) -> packer & {
-//        auto const bytes = encode_bytes(std::span{ reinterpret_cast<byte const *>(input.data()), input.size() });
-//        append_buffer(bytes);
-//        return *this;
-//    }
-//
-//    auto pack_bytes(std::span<byte const> input) -> packer & {
-//        auto const bytes = encode_bytes(input);
-//        append_buffer(bytes);
-//        return *this;
-//    }
-//
-//    auto pack_bytes(bytes_view_t input) -> packer & {
-//        auto const bytes = encode_bytes(input);
-//        append_buffer(bytes);
-//        return *this;
-//    }
-//
-//    auto pack_list(std::vector<std::string_view> const & input) -> packer & {
-//        std::vector<bytes_t> bytes;
-//        bytes.reserve(input.size());
-//        for (auto const & item : input) {
-//            bytes.push_back(encode_bytes(std::span{ reinterpret_cast<byte const *>(item.data()), item.size() }));
-//        }
-//
-//        append_buffer(encode_list(bytes));
-//        return *this;
-//    }
-//
-//    auto pack_list(std::vector<std::span<byte const>> const & input) -> packer & {
-//        std::vector<bytes_t> bytes;
-//        bytes.reserve(input.size());
-//        for (auto const & item : input) {
-//            bytes.push_back(encode_bytes(item));
-//        }
-//
-//        append_buffer(encode_list(bytes));
-//        return *this;
-//    }
-//
-//    auto pack_list(std::vector<bytes_view_t> const & input) -> packer & {
-//        std::vector<bytes_t> bytes;
-//        bytes.reserve(input.size());
-//        for (auto const & item : input) {
-//            bytes.push_back(encode_bytes(item));
-//        }
-//
-//        append_buffer(encode_list(bytes));
-//        return *this;
-//    }
-
 private:
     auto
-    encode_length(uint64_t length, uint32_t offset) -> bytes_be_t
+    encode_length(uint64_t length, uint32_t offset, bytes_t & output) -> void
     {
         if (length < 56)
         {
-            return bytes_be_t{ static_cast<byte>(length + offset) };
+            output.push_back(static_cast<byte>(length + offset));
+            return;
         }
-        else if (length < std::numeric_limits<uint64_t>::max())
+
+        if (length < std::numeric_limits<uint64_t>::max())
         {
             auto be_length = convert_to<bytes_be_t>::from(length).value();
-            return static_cast<byte>(be_length.size() + offset + 55) + be_length;
+            output.push_back(static_cast<byte>(be_length.size() + offset + 55));
+            output += be_length.to<byte_numbering::none>();
+            return;
         }
 
         unreachable();
     }
 
-//    auto encode_bytes(std::span<byte const> input) -> bytes_t {
-//        if (input.size() == 1 && input[0] < 0x80) {
-//            return bytes_t { input[0] };
-//        }
-//
-//        return encode_length(input.size(), 0x80).template to<byte_numbering::none>() + input;
-//    }
-
     auto
-    encode_bytes(bytes_view_t input) -> bytes_t
+    encode_bytes(bytes_view_t input, bytes_t & output) -> void
     {
         if (input.size() == 1 && input[0] < 0x80)
         {
-            return bytes_t{ input[0] };
+            output.push_back(input[0]);
+            return;
         }
 
-        return encode_length(input.size(), 0x80).template to<byte_numbering::none>() + input;
+        encode_length(input.size(), 0x80, output);
+        output += input;
     }
-
-//    auto encode_list(std::vector<bytes_t> const & input) -> bytes_t {
-//        bytes_t output;
-//        for (auto const & item : input) {
-//            output += encode_bytes(item);
-//        }
-//
-//        return encode_length(static_cast<uint64_t>(output.size()), 0xc0).template to<byte_numbering::none>() + output;
-//    }
-
-//    auto encode_list() -> bytes_t {
-//        return encode_length(stream_.size(), 0xc0).template to<byte_numbering::none>() + stream_.bytes();
-//    }
-
-//    template <std::integral T>
-//    auto pack_integer_impl(T d) -> void {
-//        auto const bytes = convert_to<bytes_be_t>::from(d).transform([](auto && bytes_be) { return bytes_be.template to<byte_numbering::none>(); }).value();
-//        append_buffer(encode_bytes(bytes));
-//    }
 
     auto
     append_buffer(bytes_view_t const input) -> void
