@@ -1,6 +1,7 @@
 // Copyright(c) 2023 - present, Payton Wu (payton.wu@outlook.com) & abc contributors.
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
+#include <abc/bytes_view.h>
 #include <abc/ethereum/crypto/secp256k1.h>
 #include <abc/ethereum/error.h>
 
@@ -47,24 +48,6 @@ auto private_key::from(bytes32_be_t const & bytes) -> expected<private_key, std:
     return private_key{ pkey };
 }
 
-auto private_key::from(std::span<byte const> bytes) -> expected<private_key, std::error_code> {
-    if (bytes.size() != 32zu) {
-        return make_unexpected(make_error_code(ethereum::errc::invalid_private_key_length));
-    }
-
-    ECDSA<ECP, SHA256>::PrivateKey pkey;
-    AutoSeededRandomPool rng;
-
-    Integer privateKeyInt(bytes.data(), bytes.size());
-    pkey.Initialize(rng, ASN1::secp256k1());
-    pkey.SetPrivateExponent(privateKeyInt);
-    if (!pkey.Validate(rng, 3)) {
-        return make_unexpected(make_error_code(errc::invalid_private_key));
-    }
-
-    return private_key{ pkey };
-}
-
 auto private_key::from(abc::hex_string const & hex_string) -> expected<private_key, std::error_code> {
     if (hex_string.bytes_size() != 32zu) {
         return make_unexpected(make_error_code(errc::invalid_private_key_length));
@@ -95,7 +78,7 @@ auto private_key::bytes() const -> bytes32_be_t {
     SecByteBlock private_key_bytes{key_size};
     exponent.Encode(private_key_bytes, key_size);
 
-    return bytes32_be_t::from<byte_numbering::msb0>(private_key_bytes).value();
+    return bytes32_be_t::from<byte_numbering::msb0>(bytes_be_view_t{ private_key_bytes.data(), private_key_bytes.size() }).value();
 }
 
 auto private_key::hex_string() const -> abc::hex_string {

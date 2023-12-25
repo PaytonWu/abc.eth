@@ -29,7 +29,6 @@ private:
 public:
     static auto random() -> expected<private_key, std::error_code>;
     static auto from(bytes32_be_t const & bytes) -> expected<private_key, std::error_code>;
-    static auto from(std::span<byte const> bytes) -> expected<private_key, std::error_code>;
     static auto from(hex_string const & hex_string) -> expected<private_key, std::error_code>;
     static auto from(std::string_view hex_string) -> expected<private_key, std::error_code>;
 
