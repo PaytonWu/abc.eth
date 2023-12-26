@@ -7,6 +7,7 @@
 #include <abc/converter.h>
 
 #include <cassert>
+#include <cstdlib>
 
 namespace abc::ethereum::rlp
 {
@@ -267,6 +268,16 @@ auto unpacker::operator=(unpacker && rhs) noexcept -> unpacker &
     new (this) unpacker(std::move(rhs));
     return *this;
 }
+
+unpacker::unpacker(std::size_t initial_buffer_size)
+    : buffer_{ static_cast<byte *>(std::malloc(std::max(initial_buffer_size, COUNTER_SIZE))) }
+    , used_{ COUNTER_SIZE }, unused_{ std::max(initial_buffer_size, COUNTER_SIZE) - used_ }
+    , offset_{ COUNTER_SIZE }, initial_buffer_size_{ std::max(initial_buffer_size, COUNTER_SIZE) }
+{
+
+}
+
+
 
 }
 

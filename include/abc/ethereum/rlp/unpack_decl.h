@@ -12,6 +12,8 @@ namespace abc::ethereum::rlp {
 
 using unpack_reference_func = auto (*)(void const * ptr, std::size_t size) -> bool;
 
+inline constexpr std::size_t COUNTER_SIZE = sizeof(unsigned int);
+
 inline constexpr std::size_t RLP_UNPACKER_INIT_BUFFER_SIZE{64*1024};
 inline constexpr std::size_t RLP_UNPACKER_RESERVE_SIZE{32*1024};
 

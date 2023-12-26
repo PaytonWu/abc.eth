@@ -7,7 +7,7 @@
 #pragma once
 
 #include "error.h"
-#include "object_fwd.h"
+#include "object_decl.h"
 #include "object_type.h"
 #include "unpack_decl.h"
 #include "zone/allocator.h"
@@ -73,7 +73,7 @@ struct [[nodiscard]] decoded_raw
 class context
 {
 private:
-    zone::arena <zone::allocator> arena_;
+    zone::arena<zone::allocator> arena_;
     object data_;
     std::stack<unpack_list_stack> stack_;
 
@@ -115,6 +115,8 @@ public:
     unpacker(unpacker &&) noexcept;
     auto operator=(unpacker &&) noexcept -> unpacker &;
     ~unpacker() noexcept;
+
+    explicit unpacker(std::size_t initial_buffer_size);
 
     void
     reserve_buffer(std::size_t size = RLP_UNPACKER_RESERVE_SIZE);

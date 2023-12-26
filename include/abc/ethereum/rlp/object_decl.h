@@ -1,8 +1,8 @@
 // Copyright(c) 2023 - present, Payton Wu (payton.wu@outlook.com) & the contributors.
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
-#ifndef ABC_ETH_INCLUDE_ABC_ETHEREUM_RLP_OBJECT_FWD
-#define ABC_ETH_INCLUDE_ABC_ETHEREUM_RLP_OBJECT_FWD
+#ifndef ABC_ETH_INCLUDE_ABC_ETHEREUM_RLP_OBJECT_DECL
+#define ABC_ETH_INCLUDE_ABC_ETHEREUM_RLP_OBJECT_DECL
 
 #pragma once
 
@@ -40,8 +40,11 @@ struct object {
     object() = default;
     constexpr object(rlp::type t) : type{ t } {
     }
+
+    template <typename T>
+    auto as() const -> expected<T, std::error_code>;
 };
 
 }
 
-#endif //ABC_ETH_INCLUDE_ABC_ETHEREUM_RLP_OBJECT_FWD
+#endif //ABC_ETH_INCLUDE_ABC_ETHEREUM_RLP_OBJECT_DECL

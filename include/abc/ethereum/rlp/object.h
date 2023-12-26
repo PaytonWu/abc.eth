@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "object_fwd.h"
+#include "object_decl.h"
 #include "unpack.h"
 
 #include <abc/utility.h>
@@ -20,7 +20,7 @@ namespace abc::ethereum::rlp {
 
 class object_parser {
 private:
-    enum next_ret : uint8_t {
+    enum next_ret : std::uint8_t {
         cont,
         done,
         abort,
