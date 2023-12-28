@@ -277,7 +277,17 @@ unpacker::unpacker(std::size_t initial_buffer_size)
 
 }
 
+object_handle
+unpacker(bytes_view_t bytes)
+{
+    object obj;
+    std::unique_ptr<zone::arena<zone::allocator>> z{ std::make_unique<zone::arena<zone::allocator>>() };
+    std::size_t offset{0};
 
+    details::context ctx;
+    auto r = ctx.execute(bytes, offset);
+
+}
 
 }
 

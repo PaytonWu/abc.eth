@@ -8,9 +8,11 @@
 
 namespace abc::ethereum::rlp {
 
-struct object;
+struct [[nodiscard]] object;
 struct object_array;
 struct object_bytes;
+
+class [[nodiscard]] object_handle;
 
 }
 
