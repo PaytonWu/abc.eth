@@ -30,6 +30,9 @@ auto rlp_category() -> std::error_category const & {
                 case errc::stack_overflow:
                     return "rlp decode stack overflow";
 
+                case errc::unpack_error:
+                    return "rlp unpack error";
+
                 default:
                     return "unknown error";
             }

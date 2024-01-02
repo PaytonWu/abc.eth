@@ -16,6 +16,7 @@ enum class errc {
     empty_input,
     invalid_encoded_data,
     stack_overflow,
+    unpack_error,
 };
 
 auto make_error_code(errc ec) -> std::error_code;

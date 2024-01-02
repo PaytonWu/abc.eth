@@ -6,6 +6,7 @@
 
 #pragma once
 
+#include "concepts.h"
 #include "object_fwd_decl.h"
 #include "object_type.h"
 #include "zone/allocator.h"
@@ -17,6 +18,7 @@
 #include <cstdint>
 #include <memory>
 #include <string_view>
+#include <system_error>
 #include <variant>
 #include <vector>
 
@@ -35,6 +37,12 @@ struct object_bytes
     byte const * ptr{ nullptr };
 };
 
+template <typename T>
+concept has_as = requires
+{
+    { abc::ethereum::rlp::adaptor::as<T>{}(std::declval<abc::ethereum::rlp::object>()) } -> std::same_as<T>;
+};
+
 struct object
 {
     union
@@ -48,8 +56,17 @@ struct object
     constexpr object(rlp::type t) : type{ t } {
     }
 
-    template <typename T>
+    template <typename T> requires has_as<T>
     auto as() const -> expected<T, std::error_code>;
+
+    template <typename T> requires (!has_as<T>)
+    auto as() const -> expected<T, std::error_code>;
+
+    template <typename T> requires (!std::is_array_v<T> && !std::is_pointer_v<T>)
+    auto convert(T & v) const -> void;
+
+    template <typename T, std::size_t N>
+    auto convert(T(&v)[N]) const -> void;
 };
 
 class object_handle

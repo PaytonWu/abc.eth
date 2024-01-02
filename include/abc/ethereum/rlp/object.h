@@ -7,11 +7,45 @@
 #pragma once
 
 #include "object_decl.h"
+#include "adaptor/as.h"
 
 #include <utility>
 
 namespace abc::ethereum::rlp
 {
+
+template <typename T>
+requires has_as<T>
+auto
+object::as() const -> expected<T, std::error_code>
+{
+    return adaptor::as<T>{}(*this);
+}
+
+template <typename T>
+requires (!has_as<T>)
+auto
+object::as() const -> expected<T, std::error_code>
+{
+    T v;
+    convert(v);
+    return v;
+}
+
+template <typename T>
+requires (!std::is_array_v<T> && !std::is_pointer_v<T>)
+auto
+object::convert(T & v) const -> void
+{
+    operator>>(*this, v);
+}
+
+template <typename T, std::size_t N>
+auto
+object::convert(T (& v)[N]) const -> void
+{
+    operator>>(*this, v);
+}
 
 }
 

@@ -9,10 +9,7 @@
 #include <cassert>
 #include <cstdlib>
 
-namespace abc::ethereum::rlp
-{
-
-namespace details
+namespace abc::ethereum::rlp::details
 {
 
 auto
@@ -38,6 +35,11 @@ unpack_list_stack::result() -> expected<object, std::error_code>
     list_items_.clear();
 
     return result;
+}
+
+context::context(zone::arena<zone::allocator> * arena)
+    : arena_{ arena }
+{
 }
 
 auto
@@ -252,42 +254,32 @@ context::execute(abc::bytes_view_t data, std::size_t & offset) -> int
     }).value_or(-1);
 }
 
-}
-
-unpacker::unpacker(unpacker && other) noexcept
-    : buffer_{ other.buffer_ }, used_{ other.used_ }, unused_{ other.unused_ }, offset_{ other.offset_ }
-    , parsed_{ other.parsed_ }, arena_{ std::move(other.arena_) }, initial_buffer_size_{ other.initial_buffer_size_ }
-    , context_{ std::move(other.context_) }
+auto
+context::data() const noexcept -> const object &
 {
-    other.buffer_ = nullptr;
+    return data_;
 }
 
-auto unpacker::operator=(unpacker && rhs) noexcept -> unpacker &
-{
-    this->~unpacker();
-    new (this) unpacker(std::move(rhs));
-    return *this;
 }
 
-unpacker::unpacker(std::size_t initial_buffer_size)
-    : buffer_{ static_cast<byte *>(std::malloc(std::max(initial_buffer_size, COUNTER_SIZE))) }
-    , used_{ COUNTER_SIZE }, unused_{ std::max(initial_buffer_size, COUNTER_SIZE) - used_ }
-    , offset_{ COUNTER_SIZE }, initial_buffer_size_{ std::max(initial_buffer_size, COUNTER_SIZE) }
+namespace abc::ethereum::rlp
 {
 
-}
-
-object_handle
-unpacker(bytes_view_t bytes)
+auto
+unpack(bytes_view_t const & bytes) -> expected<object_handle, std::error_code>
 {
     object obj;
     std::unique_ptr<zone::arena<zone::allocator>> z{ std::make_unique<zone::arena<zone::allocator>>() };
-    std::size_t offset{0};
+    std::size_t offset{ 0 };
 
-    details::context ctx;
+    details::context ctx{ z.get() };
     auto r = ctx.execute(bytes, offset);
+    if (r < 0)
+    {
+        return make_unexpected(make_error_code(errc::unpack_error));
+    }
 
+    return object_handle{ ctx.data(), std::move(z) };
 }
 
 }
-

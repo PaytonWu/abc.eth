@@ -6,10 +6,14 @@
 
 #pragma once
 
+#include "adaptor/as.h"
+#include "object_decl.h"
+
 #include <abc/bytes.h>
 
 #include <concepts>
 #include <string_view>
+#include <utility>
 
 namespace abc::ethereum::rlp {
 
