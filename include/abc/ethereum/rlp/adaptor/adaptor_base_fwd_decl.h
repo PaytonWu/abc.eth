@@ -15,6 +15,9 @@ struct convert;
 template <typename T, typename Enabler = void>
 struct pack;
 
+template <typename T, typename Enabler = void>
+struct object;
+
 }
 
 #endif //ABC_ETH_INCLUDE_ABC_ETHEREUM_RLP_ADAPTOR_ADAPTOR_BASE_FWD_DECL
