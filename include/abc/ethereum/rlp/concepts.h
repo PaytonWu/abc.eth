@@ -15,10 +15,12 @@
 #include <string_view>
 #include <utility>
 
-namespace abc::ethereum::rlp {
+namespace abc::ethereum::rlp
+{
 
 template <typename T>
-concept is_packer = requires(T t) {
+concept is_packer = requires(T t)
+{
     { t.pack_integer(0) } -> std::same_as<T &>;
     { t.pack_string("") } -> std::same_as<T &>;
     { t.pack_bytes(bytes_view_t{}) } -> std::same_as<T &>;
@@ -27,12 +29,14 @@ concept is_packer = requires(T t) {
 };
 
 template <typename T, typename Packer>
-concept is_serializable = requires(T const t, Packer & packer) {
+concept is_serializable = requires(T const t, Packer & packer)
+{
     { t.serialize(packer) } -> std::same_as<Packer &>;
 };
 
 template <typename T>
-concept is_packing_stream = requires(T t) {
+concept is_packing_stream = requires(T t)
+{
     { t.append(bytes_view_t{}) } -> std::same_as<void>;
     { t.bytes_view() } -> std::same_as<bytes_view_t>;
 };

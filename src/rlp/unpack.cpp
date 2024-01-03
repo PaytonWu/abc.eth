@@ -235,7 +235,7 @@ context::decode_list(bytes_view_t input, size_t & offset) -> expected<object, st
 
             default:
                 assert(false);
-                unreachable();
+                break;
         }
     }
 

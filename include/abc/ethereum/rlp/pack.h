@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "concepts.h"
+#include "pack_decl.h"
 #include "sbuffer.h"
 
 #include <abc/byte.h>
