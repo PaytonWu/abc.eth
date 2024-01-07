@@ -11,7 +11,7 @@
 namespace abc::ethereum::rlp
 {
 
-template <is_packing_stream Stream>
+template <packing_stream Stream>
 class packer;
 
 }

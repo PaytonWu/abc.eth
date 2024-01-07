@@ -24,7 +24,7 @@ struct convert {
 
 template <typename T, typename Enabler>
 struct pack {
-    template <is_packing_stream Stream>
+    template <packing_stream Stream>
     auto
     operator()(packer<Stream>& o, T const& v) const -> packer<Stream> &;
 };

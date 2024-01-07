@@ -29,13 +29,13 @@ concept is_packer = requires(T t)
 };
 
 template <typename T, typename Packer>
-concept is_serializable = requires(T const t, Packer & packer)
+concept serializable = requires(T const t, Packer & packer)
 {
     { t.serialize(packer) } -> std::same_as<Packer &>;
 };
 
 template <typename T>
-concept is_packing_stream = requires(T t)
+concept packing_stream = requires(T t)
 {
     { t.append(bytes_view_t{}) } -> std::same_as<void>;
     { t.bytes_view() } -> std::same_as<bytes_view_t>;

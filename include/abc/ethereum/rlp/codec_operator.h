@@ -12,35 +12,32 @@
 namespace abc::ethereum::rlp
 {
 
-namespace abc::ethereum::rlp
-{
-
 template <typename T>
 requires (!std::is_array_v<T> && !std::is_pointer_v<T>)
 auto
-operator>> (object const& o, T& v) -> object const &
+operator>>(object const & o, T& v) -> object const &
 {
     return adaptor::convert<T>{}(o, v);
 }
 
 template <typename T, std::size_t N>
 auto
-operator>> (object const& o, T(&v)[N]) -> object const &
+operator>>(object const & o, T(&v)[N]) -> object const &
 {
-    return adaptor::convert<T[N]>()(o, v);
+    return adaptor::convert<T[N]>{}(o, v);
 }
 
-template <typename Stream, typename T>
+template <packing_stream Stream, typename T>
 requires (!std::is_array_v<T>)
 auto
-operator<< (packer<Stream>& o, T const& v) -> packer<Stream> &
+operator<<(packer<Stream> & o, T const & v) -> packer<Stream> &
 {
     return adaptor::pack<T>{}(o, v);
 }
 
-template <is_packing_stream Stream, typename T, std::size_t N>
+template <packing_stream Stream, typename T, std::size_t N>
 auto
-operator<< (packer<Stream>& o, const T(&v)[N]) -> packer<Stream> &
+operator<<(packer<Stream>& o, const T(&v)[N]) -> packer<Stream> &
 {
     return adaptor::pack<T[N]>{}(o, v);
 }
@@ -48,18 +45,16 @@ operator<< (packer<Stream>& o, const T(&v)[N]) -> packer<Stream> &
 template <typename T>
 requires (!std::is_array_v<T>)
 auto
-operator<< (object& o, T const& v) -> void
+operator<<(object & o, T const& v) -> void
 {
     adaptor::object<T>{}(o, v);
 }
 
 template <typename T, std::size_t N>
 auto
-operator<< (object & o, const T(&v)[N]) -> void
+operator<<(object & o, const T(&v)[N]) -> void
 {
     adaptor::object<T[N]>{}(o, v);
-}
-
 }
 
 }

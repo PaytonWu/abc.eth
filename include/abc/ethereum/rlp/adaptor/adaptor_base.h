@@ -7,8 +7,5 @@
 #pragma once
 
 #include "adaptor_base_decl.h"
-#include "../pack_fwd_decl.h"
-
-
 
 #endif //ABC_ETH_INCLUDE_ABC_ETHEREUM_RLP_ADAPTOR_ADAPTOR_BASE
