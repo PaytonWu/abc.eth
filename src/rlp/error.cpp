@@ -33,6 +33,9 @@ auto rlp_category() -> std::error_category const & {
                 case errc::unpack_error:
                     return "rlp unpack error";
 
+                case errc::type_error:
+                    return "rlp type error";
+
                 default:
                     return "unknown error";
             }

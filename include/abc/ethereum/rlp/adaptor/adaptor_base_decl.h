@@ -19,7 +19,7 @@ namespace abc::ethereum::rlp::adaptor
 template <typename T, typename Enabler>
 struct convert {
     auto
-    operator()(rlp::object const& o, T& v) const -> rlp::object const &;
+    operator()(rlp::object const & o, T & v) const -> rlp::object const &;
 };
 
 template <typename T, typename Enabler>
