@@ -8,11 +8,46 @@
 
 #include "abc/ethereum/rlp/concepts.h"
 #include "abc/ethereum/rlp/pack.h"
+#include "abc/ethereum/rlp/object.h"
 
 #include <optional>
 
 namespace abc::ethereum::rlp::adaptor
 {
+
+template <typename T>
+struct as<std::optional<T>> {
+    auto
+    operator()(rlp::object const & o) const -> std::optional<T>
+    {
+        if (o.is_nil())
+        {
+            return std::nullopt;
+        }
+
+        return o.as<T>();
+    }
+};
+
+template <typename T>
+struct convert<std::optional<T>>
+{
+    auto
+    operator()(rlp::object const & o, std::optional<T> & v) const -> rlp::object const &
+    {
+        if (o.is_nil())
+        {
+            v = std::nullopt;
+        }
+        else
+        {
+            T t;
+            adaptor::convert<T>{}(o, t);
+            v = t;
+        }
+        return o;
+    }
+};
 
 template <typename T>
 struct pack<std::optional<T>>

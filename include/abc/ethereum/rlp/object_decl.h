@@ -57,16 +57,19 @@ struct object
     }
 
     template <typename T> requires has_as<T>
-    auto as() const -> expected<T, std::error_code>;
+    auto as() const -> T;
 
     template <typename T> requires (!has_as<T>)
-    auto as() const -> expected<T, std::error_code>;
+    auto as() const -> T;
 
     template <typename T> requires (!std::is_array_v<T> && !std::is_pointer_v<T>)
     auto convert(T & v) const -> void;
 
     template <typename T, std::size_t N>
     auto convert(T(&v)[N]) const -> void;
+
+    auto
+    is_nil() const noexcept -> bool;
 };
 
 class object_handle

@@ -17,6 +17,21 @@ namespace abc::ethereum::rlp::adaptor
 {
 
 template <abc::byte_numbering ByteNumbering>
+struct as<abc::bytes<ByteNumbering>>
+{
+    auto
+    operator()(rlp::object const & o) const -> abc::bytes<ByteNumbering>
+    {
+        if (o.type != rlp::type::bytes)
+        {
+            abc::throw_error(make_error_code(abc::ethereum::rlp::errc::type_error));
+        }
+
+        return abc::bytes<ByteNumbering>::template from<byte_numbering::none>(std::span{ o.data.bytes.ptr, o.data.bytes.size });
+    }
+};
+
+template <abc::byte_numbering ByteNumbering>
 struct convert<abc::bytes<ByteNumbering>>
 {
     auto

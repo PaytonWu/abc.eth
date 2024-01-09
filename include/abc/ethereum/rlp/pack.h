@@ -134,9 +134,7 @@ public:
     }
 
     template <typename T>
-    requires std::is_class_v<T> &&
-             (!std::is_fundamental_v<T>) &&
-             (!std::same_as<T, std::string_view>) &&
+    requires (!std::same_as<T, std::string_view>) &&
              (!std::same_as<T, bytes_view_t>) &&
              (!std::same_as<T, bytes_be_view_t>) &&
              (!std::same_as<T, bytes_le_view_t>) &&

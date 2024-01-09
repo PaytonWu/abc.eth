@@ -14,6 +14,52 @@ namespace abc::ethereum::rlp::adaptor
 {
 
 template <std::size_t N, byte_numbering ByteNumbering>
+struct as<abc::fixed_bytes<N, ByteNumbering>>
+{
+    auto
+    operator()(rlp::object const & o) const -> abc::fixed_bytes<N, ByteNumbering>
+    {
+        if (o.type != rlp::type::bytes)
+        {
+            abc::throw_error(make_error_code(abc::ethereum::rlp::errc::type_error));
+        }
+
+        auto r = abc::fixed_bytes<N, ByteNumbering>::template from<byte_numbering::none>(bytes_view_t{ o.data.bytes.ptr, o.data.bytes.size });
+        if (r.has_value())
+        {
+            return r.value();
+        }
+
+        abc::throw_error(r.error());
+    }
+};
+
+template <std::size_t N, byte_numbering ByteNumbering>
+struct convert<abc::fixed_bytes<N, ByteNumbering>>
+{
+    auto
+    operator()(rlp::object const & o, abc::fixed_bytes<N, ByteNumbering> & v) const -> rlp::object const &
+    {
+        if (o.type != rlp::type::bytes)
+        {
+            abc::throw_error(make_error_code(abc::ethereum::rlp::errc::type_error));
+        }
+
+        auto r = abc::fixed_bytes<N, ByteNumbering>::template from<byte_numbering::none>(bytes_view_t{ o.data.bytes.ptr, o.data.bytes.size });
+        if (r.has_value())
+        {
+            v = r.value();
+        }
+        else
+        {
+            abc::throw_error(r.error());
+        }
+
+        return o;
+    }
+};
+
+template <std::size_t N, byte_numbering ByteNumbering>
 struct pack<abc::fixed_bytes<N, ByteNumbering>>
 {
     template <packing_stream Stream>

@@ -17,7 +17,7 @@ namespace abc::ethereum::rlp
 template <typename T>
 requires has_as<T>
 auto
-object::as() const -> expected<T, std::error_code>
+object::as() const -> T
 {
     return adaptor::as<T>{}(*this);
 }
@@ -25,7 +25,7 @@ object::as() const -> expected<T, std::error_code>
 template <typename T>
 requires (!has_as<T>)
 auto
-object::as() const -> expected<T, std::error_code>
+object::as() const -> T
 {
     T v;
     convert(v);
