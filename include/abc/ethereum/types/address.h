@@ -27,20 +27,19 @@ private:
     fixed_bytes<length, byte_numbering::msb0> raw_address_{};
 
 private:
-    constexpr address() = default;
-
     explicit address(crypto::secp256k1::public_key const & public_key);
     explicit address(hex_string const & hex_string) noexcept;
     explicit address(bytes20_be_t const & address_bytes) noexcept;
 
 public:
-    // static constexpr address zero{};
+    constexpr address() = default;
 
     static auto from(crypto::secp256k1::public_key const & public_key) -> address;
     static auto from(crypto::secp256k1::private_key const & private_key) -> expected<address, std::error_code>;
     static auto from(hex_string const & hex_string) -> expected<address, std::error_code>;
     static auto from(std::string_view hex_string) -> expected<address, std::error_code>;
     static auto from(fixed_bytes<address::length, byte_numbering::msb0> address_bytes) -> address;
+    static auto from(bytes_be_view_t bytes) -> expected<address, std::error_code>;
 
     [[nodiscard]] constexpr auto bytes() const noexcept -> fixed_bytes<address::length, byte_numbering::msb0> const & {
         return raw_address_;

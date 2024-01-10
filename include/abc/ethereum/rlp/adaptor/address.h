@@ -6,12 +6,61 @@
 
 #pragma once
 
+#include "adaptor_base.h"
+#include "as_fwd_decl.h"
+
 #include "abc/ethereum/types/address.h"
 #include "abc/ethereum/rlp/concepts.h"
 #include "abc/ethereum/rlp/pack.h"
 
 namespace abc::ethereum::rlp::adaptor
 {
+
+template <>
+struct as<types::address>
+{
+    auto
+    operator()(rlp::object const & o) const -> types::address
+    {
+        if (o.type != rlp::type::bytes)
+        {
+            abc::throw_error(make_error_code(abc::ethereum::rlp::errc::type_error));
+        }
+
+        auto r = types::address::from(bytes_be_view_t::from(bytes_view_t{ o.data.bytes.ptr, o.data.bytes.size }));
+        if (r.has_value())
+        {
+            return r.value();
+        }
+
+        abc::throw_error(make_error_code(abc::ethereum::rlp::errc::unpack_error));
+    }
+};
+
+template <>
+struct convert<types::address>
+{
+    auto
+    operator()(rlp::object const & o, types::address & v) const -> rlp::object const &
+    {
+        if (o.type != rlp::type::bytes)
+        {
+            abc::throw_error(make_error_code(abc::ethereum::rlp::errc::type_error));
+        }
+
+        auto r = types::address::from(bytes_be_view_t::from(bytes_view_t{ o.data.bytes.ptr, o.data.bytes.size }));
+        if (r.has_value())
+        {
+            v = r.value();
+        }
+        else
+        {
+            abc::throw_error(make_error_code(abc::ethereum::rlp::errc::unpack_error));
+        }
+
+        return o;
+    }
+};
 
 template <>
 struct pack<types::address> {

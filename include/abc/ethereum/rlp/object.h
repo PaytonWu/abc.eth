@@ -7,7 +7,7 @@
 #pragma once
 
 #include "object_decl.h"
-#include "adaptor/as.h"
+#include "adaptor/as_fwd_decl.h"
 
 #include <utility>
 

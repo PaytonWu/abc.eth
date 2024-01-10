@@ -6,8 +6,11 @@
 
 #pragma once
 
+#include "abc/ethereum/rlp/adaptor/adaptor_base.h"
+#include "abc/ethereum/rlp/adaptor/as_fwd_decl.h"
 #include "abc/ethereum/rlp/concepts.h"
 #include "abc/ethereum/rlp/pack.h"
+
 #include <abc/fixed_bytes.h>
 
 namespace abc::ethereum::rlp::adaptor

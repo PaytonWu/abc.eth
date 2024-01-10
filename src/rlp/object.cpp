@@ -14,9 +14,9 @@ object::is_nil() const noexcept -> bool
     switch (type)
     {
         case type::bytes:
-            return static_cast<bool>(reinterpret_cast<std::uintptr_t>(data.bytes.ptr) & data.bytes.size);
+            return !static_cast<bool>(reinterpret_cast<std::uintptr_t>(data.bytes.ptr) & data.bytes.size);
         case type::list:
-            return static_cast<bool>(reinterpret_cast<std::uintptr_t>(data.array.ptr) & data.array.size);
+            return !static_cast<bool>(reinterpret_cast<std::uintptr_t>(data.array.ptr) & data.array.size);
         default:
             return true;
     }

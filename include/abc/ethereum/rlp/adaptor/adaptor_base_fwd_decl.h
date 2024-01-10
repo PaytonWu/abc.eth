@@ -9,13 +9,13 @@
 namespace abc::ethereum::rlp::adaptor
 {
 
-template <typename T, typename Enabler = void>
+template <typename T>
 struct convert;
 
-template <typename T, typename Enabler = void>
+template <typename T>
 struct pack;
 
-template <typename T, typename Enabler = void>
+template <typename T>
 struct object;
 
 }

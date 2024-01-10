@@ -16,20 +16,20 @@
 namespace abc::ethereum::rlp::adaptor
 {
 
-template <typename T, typename Enabler>
+template <typename T>
 struct convert {
     auto
     operator()(rlp::object const & o, T & v) const -> rlp::object const &;
 };
 
-template <typename T, typename Enabler>
+template <typename T>
 struct pack {
     template <packing_stream Stream>
     auto
     operator()(packer<Stream>& o, T const& v) const -> packer<Stream> &;
 };
 
-template <typename T, typename Enabler>
+template <typename T>
 struct object
 {
     auto

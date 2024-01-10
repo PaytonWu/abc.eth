@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "adaptor/as.h"
+#include "adaptor/as_fwd_decl.h"
 #include "object_decl.h"
 
 #include <abc/bytes.h>
