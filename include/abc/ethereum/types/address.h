@@ -65,6 +65,16 @@ public:
         deserialize_stream >> const_cast<bytes20_be_t &>(address.bytes());
         return deserialize_stream;
     }
+
+    constexpr
+    friend
+    auto
+    operator==(address const & lhs, address const & rhs) noexcept -> bool = default;
+
+    constexpr
+    friend
+    auto
+    operator<=>(address const & lhs, address const & rhs) noexcept -> std::strong_ordering = default;
 };
 
 }

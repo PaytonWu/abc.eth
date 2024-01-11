@@ -28,12 +28,12 @@ struct as<uint128_t>
         }
 
         auto r = uint128_t::from(bytes_be_view_t::from(bytes_view_t{ o.data.bytes.ptr, o.data.bytes.size }));
-        if (r.has_value())
+        if (!r.has_value())
         {
-            return r.value();
+            abc::throw_error(make_error_code(abc::ethereum::rlp::errc::unpack_error));
         }
 
-        abc::throw_error(make_error_code(abc::ethereum::rlp::errc::unpack_error));
+        return r.value();
     }
 };
 
@@ -51,13 +51,10 @@ struct convert<uint128_t>
         auto r = uint128_t::from(bytes_be_view_t::from(bytes_view_t{ o.data.bytes.ptr, o.data.bytes.size }));
         if (r.has_value())
         {
-            v = r.value();
-        }
-        else
-        {
             abc::throw_error(make_error_code(abc::ethereum::rlp::errc::unpack_error));
         }
 
+        v = r.value();
         return o;
     }
 };

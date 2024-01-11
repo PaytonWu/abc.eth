@@ -28,12 +28,12 @@ struct as<abc::fixed_bytes<N, ByteNumbering>>
         }
 
         auto r = abc::fixed_bytes<N, ByteNumbering>::template from<byte_numbering::none>(bytes_view_t{ o.data.bytes.ptr, o.data.bytes.size });
-        if (r.has_value())
+        if (!r.has_value())
         {
-            return r.value();
+            abc::throw_error(r.error());
         }
 
-        abc::throw_error(r.error());
+        return r.value();
     }
 };
 
@@ -49,15 +49,12 @@ struct convert<abc::fixed_bytes<N, ByteNumbering>>
         }
 
         auto r = abc::fixed_bytes<N, ByteNumbering>::template from<byte_numbering::none>(bytes_view_t{ o.data.bytes.ptr, o.data.bytes.size });
-        if (r.has_value())
-        {
-            v = r.value();
-        }
-        else
+        if (!r.has_value())
         {
             abc::throw_error(r.error());
         }
 
+        v = r.value();
         return o;
     }
 };

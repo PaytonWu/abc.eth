@@ -36,30 +36,9 @@ struct header {
     std::optional<uint64_t> excess_blob_gas;
     std::optional<h256_t> parent_beacon_block_root;
 
-//    template <typename Serializer>
-//    auto serialize(Serializer & serializer) const -> Serializer & {
-//        serializer << parent_hash;
-//        serializer << uncle_hash;
-//        serializer << coinbase;
-//        serializer << state_root;
-//        serializer << transactions_root;
-//        serializer << receipts_root;
-//        serializer << logs_bloom;
-//        serializer << difficulty;
-//        serializer << number;
-//        serializer << gas_limit;
-//        serializer << gas_used;
-//        serializer << timestamp;
-//        serializer << extra_data;
-//        serializer << mix_hash;
-//        serializer << nonce;
-//        serializer.pack(base_fee_per_gas);
-//        serializer.pack(withdrawals_root);
-//        serializer.pack(blob_gas_used);
-//        serializer.pack(excess_blob_gas);
-//        serializer.pack(parent_beacon_block_root);
-//        return serializer;
-//    }
+    friend
+    auto
+    operator==(header const & lhs, header const & rhs) noexcept -> bool = default;
 };
 
 }
