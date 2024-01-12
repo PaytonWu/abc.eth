@@ -18,23 +18,22 @@ namespace details {
 class unpack_list_stack
 {
 private:
-    zone::arena<zone::allocator> arena_{};
+    zone::arena<zone::allocator> * arena_{ nullptr };
     std::vector<object> list_items_{};
 
 public:
-    unpack_list_stack() = default;
-
     unpack_list_stack(unpack_list_stack const &) = delete;
+    unpack_list_stack(unpack_list_stack &&) = default;
 
     auto
     operator=(unpack_list_stack const &) -> unpack_list_stack & = delete;
-
-    unpack_list_stack(unpack_list_stack &&) = default;
 
     auto
     operator=(unpack_list_stack &&) -> unpack_list_stack & = default;
 
     ~unpack_list_stack() = default;
+
+    explicit unpack_list_stack(zone::arena<zone::allocator> *);
 
     auto
     push(object const & obj) -> void;
@@ -58,8 +57,6 @@ private:
     std::stack<unpack_list_stack> stack_{};
 
 public:
-    context() = default;
-
     explicit context(zone::arena<zone::allocator> * arena);
 
     /// @brief Parse the RLP encoded data from the given offset.

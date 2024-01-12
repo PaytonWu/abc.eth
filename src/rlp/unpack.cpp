@@ -12,6 +12,11 @@
 namespace abc::ethereum::rlp::details
 {
 
+unpack_list_stack::unpack_list_stack(zone::arena<zone::allocator> * arena)
+    : arena_{ arena }
+{
+}
+
 auto
 unpack_list_stack::push(object const & obj) -> void
 {
@@ -26,10 +31,10 @@ unpack_list_stack::result() -> expected<object, std::error_code>
         return make_unexpected(make_error_code(errc::empty_input));
     }
 
-    object result;
-    result.type = type::list;
+    object result{ type::list };
+
     result.data.array.size = list_items_.size();
-    result.data.array.ptr = reinterpret_cast<object *>(arena_.allocate_align(sizeof(object) * list_items_.size(), alignof(object)));
+    result.data.array.ptr = reinterpret_cast<object *>(arena_->allocate_align(sizeof(object) * list_items_.size(), alignof(object)));
     std::memcpy(result.data.array.ptr, list_items_.data(), sizeof(object) * list_items_.size());
 
     list_items_.clear();
@@ -200,9 +205,7 @@ context::decode_list(bytes_view_t input, size_t & offset) -> expected<object, st
         return make_unexpected(make_error_code(errc::stack_overflow));
     }
 
-    expected<object, std::error_code> result;
-
-    stack_.emplace();
+    stack_.emplace(arena_);
     while (offset < input.size())
     {
         std::size_t const pre_offset = offset;
@@ -239,7 +242,7 @@ context::decode_list(bytes_view_t input, size_t & offset) -> expected<object, st
         }
     }
 
-    result = stack_.top().result();
+    auto result = stack_.top().result();
     stack_.pop();
 
     return result;

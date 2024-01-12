@@ -54,18 +54,6 @@ public:
         return zero_address;
     }
 
-    template <typename SerializeStream>
-    friend auto operator<<(SerializeStream & serialize_stream, address const & address) -> SerializeStream & {
-        serialize_stream << address.bytes();
-        return serialize_stream;
-    }
-
-    template <typename DeserializeStream>
-    friend auto operator>>(DeserializeStream & deserialize_stream, address & address) -> DeserializeStream & {
-        deserialize_stream >> const_cast<bytes20_be_t &>(address.bytes());
-        return deserialize_stream;
-    }
-
     constexpr
     friend
     auto

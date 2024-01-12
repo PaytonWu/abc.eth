@@ -72,6 +72,8 @@ struct object
     is_nil() const noexcept -> bool;
 };
 
+static_assert(std::is_trivially_copyable_v<object>);
+
 class object_handle
 {
 private:

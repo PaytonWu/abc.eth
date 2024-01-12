@@ -48,5 +48,25 @@ TEST(unpack, unpack_function)
     auto const & o = r.value().get();
     ASSERT_EQ(o.type, type::list);
     auto const & header = o.as<abc::ethereum::types::eth1::header>();
+    ASSERT_EQ(expected_header.parent_hash, header.parent_hash);
+    ASSERT_EQ(expected_header.uncle_hash, header.uncle_hash);
+    ASSERT_EQ(expected_header.coinbase, header.coinbase);
+    ASSERT_EQ(expected_header.state_root, header.state_root);
+    ASSERT_EQ(expected_header.transactions_root, header.transactions_root);
+    ASSERT_EQ(expected_header.receipts_root, header.receipts_root);
+    ASSERT_EQ(expected_header.logs_bloom, header.logs_bloom);
+    ASSERT_EQ(expected_header.difficulty, header.difficulty);
+    ASSERT_EQ(expected_header.number, header.number);
+    ASSERT_EQ(expected_header.gas_limit, header.gas_limit);
+    ASSERT_EQ(expected_header.gas_used, header.gas_used);
+    ASSERT_EQ(expected_header.timestamp, header.timestamp);
+    ASSERT_EQ(expected_header.extra_data, header.extra_data);
+    ASSERT_EQ(expected_header.mix_hash, header.mix_hash);
+    ASSERT_EQ(expected_header.nonce, header.nonce);
+    ASSERT_EQ(expected_header.base_fee_per_gas, header.base_fee_per_gas);
+    ASSERT_EQ(expected_header.withdrawals_root, header.withdrawals_root);
+    ASSERT_EQ(expected_header.blob_gas_used, header.blob_gas_used);
+    ASSERT_EQ(expected_header.excess_blob_gas, header.excess_blob_gas);
+    ASSERT_EQ(expected_header.parent_beacon_block_root, header.parent_beacon_block_root);
     ASSERT_EQ(expected_header, header);
 }
