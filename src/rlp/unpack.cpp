@@ -7,12 +7,15 @@
 #include <abc/converter.h>
 
 #include <cassert>
+#include <cstdlib>
 
-namespace abc::ethereum::rlp
+namespace abc::ethereum::rlp::details
 {
 
-namespace details
+unpack_list_stack::unpack_list_stack(zone::arena<zone::allocator> * arena)
+    : arena_{ arena }
 {
+}
 
 auto
 unpack_list_stack::push(object const & obj) -> void
@@ -28,15 +31,20 @@ unpack_list_stack::result() -> expected<object, std::error_code>
         return make_unexpected(make_error_code(errc::empty_input));
     }
 
-    object result;
-    result.type = type::list;
+    object result{ type::list };
+
     result.data.array.size = list_items_.size();
-    result.data.array.ptr = reinterpret_cast<object *>(arena_.allocate_align(sizeof(object) * list_items_.size(), alignof(object)));
+    result.data.array.ptr = reinterpret_cast<object *>(arena_->allocate_align(sizeof(object) * list_items_.size(), alignof(object)));
     std::memcpy(result.data.array.ptr, list_items_.data(), sizeof(object) * list_items_.size());
 
     list_items_.clear();
 
     return result;
+}
+
+context::context(zone::arena<zone::allocator> * arena)
+    : arena_{ arena }
+{
 }
 
 auto
@@ -197,9 +205,7 @@ context::decode_list(bytes_view_t input, size_t & offset) -> expected<object, st
         return make_unexpected(make_error_code(errc::stack_overflow));
     }
 
-    expected<object, std::error_code> result;
-
-    stack_.emplace();
+    stack_.emplace(arena_);
     while (offset < input.size())
     {
         std::size_t const pre_offset = offset;
@@ -232,11 +238,11 @@ context::decode_list(bytes_view_t input, size_t & offset) -> expected<object, st
 
             default:
                 assert(false);
-                unreachable();
+                break;
         }
     }
 
-    result = stack_.top().result();
+    auto result = stack_.top().result();
     stack_.pop();
 
     return result;
@@ -251,22 +257,32 @@ context::execute(abc::bytes_view_t data, std::size_t & offset) -> int
     }).value_or(-1);
 }
 
-}
-
-unpacker::unpacker(unpacker && other) noexcept
-    : buffer_{ other.buffer_ }, used_{ other.used_ }, unused_{ other.unused_ }, offset_{ other.offset_ }
-    , parsed_{ other.parsed_ }, arena_{ std::move(other.arena_) }, initial_buffer_size_{ other.initial_buffer_size_ }
-    , context_{ std::move(other.context_) }
+auto
+context::data() const noexcept -> const object &
 {
-    other.buffer_ = nullptr;
+    return data_;
 }
 
-auto unpacker::operator=(unpacker && rhs) noexcept -> unpacker &
+}
+
+namespace abc::ethereum::rlp
 {
-    this->~unpacker();
-    new (this) unpacker(std::move(rhs));
-    return *this;
+
+auto
+unpack(bytes_view_t const & bytes) -> expected<object_handle, std::error_code>
+{
+    object obj;
+    std::unique_ptr<zone::arena<zone::allocator>> z{ std::make_unique<zone::arena<zone::allocator>>() };
+    std::size_t offset{ 0 };
+
+    details::context ctx{ z.get() };
+    auto r = ctx.execute(bytes, offset);
+    if (r < 0)
+    {
+        return make_unexpected(make_error_code(errc::unpack_error));
+    }
+
+    return object_handle{ ctx.data(), std::move(z) };
 }
 
 }
-

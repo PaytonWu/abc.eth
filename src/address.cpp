@@ -56,4 +56,9 @@ auto address::from(std::string_view hex_string) -> expected<address, std::error_
     return hex_string::from(hex_string).and_then([](auto && hex_str) { return address::from(hex_str); });
 }
 
+auto
+address::from(bytes_be_view_t const bytes) -> expected<address, std::error_code> {
+    return bytes20_be_t::from(bytes).transform([](auto && bytes) { return address::from(bytes); });
 }
+
+} // namespace abc::ethereum::types

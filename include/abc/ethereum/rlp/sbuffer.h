@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "sbuffer_decl_fwd.h"
+#include "sbuffer_fwd_decl.h"
 
 #include <abc/bytes.h>
 

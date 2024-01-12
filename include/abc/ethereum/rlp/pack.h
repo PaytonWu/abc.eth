@@ -6,8 +6,9 @@
 
 #pragma once
 
-#include "concepts.h"
+#include "pack_decl.h"
 #include "sbuffer.h"
+#include "codec_operator.h"
 
 #include <abc/byte.h>
 #include <abc/converter.h>
@@ -24,7 +25,7 @@
 namespace abc::ethereum::rlp
 {
 
-template <is_packing_stream Stream>
+template <packing_stream Stream>
 class packer
 {
 private:
@@ -50,7 +51,27 @@ public:
     }
 
     auto
-    pack(std::string_view input) -> packer &
+    pack_string_view(std::string_view input) -> packer &
+    {
+        bytes_t bytes;
+        encode_bytes(bytes_view_t{ input }, bytes);
+        append_buffer(bytes);
+        return *this;
+    }
+
+    template <byte_numbering ByteNumbering>
+    auto
+    pack_bytes_view(bytes_view<ByteNumbering> input) -> packer &
+    {
+        bytes_t bytes;
+        encode_bytes(input, bytes);
+        append_buffer(bytes);
+        return *this;
+    }
+
+    template <byte_numbering ByteNumbering>
+    auto
+    pack_bytes(bytes<ByteNumbering> const & input) -> packer &
     {
         bytes_t bytes;
         encode_bytes(bytes_view_t{ input }, bytes);
@@ -59,16 +80,7 @@ public:
     }
 
     auto
-    pack(bytes_view_t input) -> packer &
-    {
-        bytes_t bytes;
-        encode_bytes(input, bytes);
-        append_buffer(bytes);
-        return *this;
-    }
-
-    auto
-    pack(types::address const & address) -> packer &
+    pack_address(types::address const & address) -> packer &
     {
         bytes_t bytes;
         encode_bytes(bytes_view_t{ address.bytes() }, bytes);
@@ -77,7 +89,7 @@ public:
     }
 
     auto
-    pack(uint128_t const value) -> packer &
+    pack_uint128(uint128_t const value) -> packer &
     {
         auto number = value.export_bits_compact<abc::byte_numbering::msb0>().to<abc::byte_numbering::none>();
         bytes_t bytes;
@@ -89,7 +101,7 @@ public:
 
     template <std::unsigned_integral T>
     auto
-    pack(T const value) -> packer &
+    pack_unsigned_integral(T const value) -> packer &
     {
         auto const number = convert_to<bytes_be_t>::from(value).transform([](auto && bytes_be) { return bytes_be.template to<byte_numbering::none>(); }).value();
         bytes_t bytes;
@@ -101,7 +113,7 @@ public:
 
     template <std::size_t N, byte_numbering ByteNumbering>
     auto
-    pack(fixed_bytes<N, ByteNumbering> const & value) -> packer &
+    pack_fixed_bytes(fixed_bytes<N, ByteNumbering> const & value) -> packer &
     {
         bytes_t bytes;
         encode_bytes(bytes_view_t{ value }, bytes);
@@ -110,14 +122,39 @@ public:
     }
 
     template <typename T>
-    requires is_serializable<T, packer>
+    auto
+    pack_optional(std::optional<T> const & object) -> packer &
+    {
+        if (object.has_value())
+        {
+            return pack(object.value());
+        }
+
+        return *this;
+    }
+
+    template <typename T>
+    requires (!std::same_as<T, std::string_view>) &&
+             (!std::same_as<T, bytes_view_t>) &&
+             (!std::same_as<T, bytes_be_view_t>) &&
+             (!std::same_as<T, bytes_le_view_t>) &&
+             (!std::same_as<T, bytes_t>) &&
+             (!std::same_as<T, bytes_be_t>) &&
+             (!std::same_as<T, bytes_le_t>) &&
+             (!std::same_as<T, types::address>) &&
+             (!std::same_as<T, uint128_t>) &&
+             (!std::same_as<T, std::uint8_t>) &&
+             (!std::same_as<T, std::uint16_t>) &&
+             (!std::same_as<T, std::uint32_t>) &&
+             (!std::same_as<T, std::uint64_t>) &&
+             (!std::same_as<T, std::optional<T>>)
     auto
     pack(T const & object) -> packer &
     {
         sbuffer object_buffer{};
         packer packer{ object_buffer };
 
-        object.serialize(packer);
+        packer << object;
 
         bytes_t bytes;
         encode_length(object_buffer.bytes_view().size(), 0xc0, bytes);
@@ -128,70 +165,109 @@ public:
         return *this;
     }
 
-    template <typename T>
+    template <typename T> requires std::same_as<T, std::string_view>
     auto
-    pack(std::optional<T> const & object) -> packer &
+    pack(T const object) -> packer &
     {
-        if (object.has_value())
-        {
-            return pack(object.value());
-        }
-
-        return *this;
+        return pack_string_view(object);
     }
 
+    template <typename T> requires std::same_as<T, bytes_view_t>
     auto
-    operator<<(std::string_view input) -> packer &
+    pack(T const object) -> packer &
     {
-        return pack(input);
+        return pack_bytes_view(object);
     }
 
+    template <typename T> requires std::same_as<T, bytes_be_view_t>
     auto
-    operator<<(bytes_view_t input) -> packer &
+    pack(T const object) -> packer &
     {
-        return pack(input);
+        return pack_bytes_view(object);
     }
 
+    template <typename T> requires std::same_as<T, bytes_le_view_t>
     auto
-    operator<<(types::address const & address) -> packer &
+    pack(T const object) -> packer &
     {
-        return pack(address);
+        return pack_bytes_view(object);
     }
 
+    template <typename T> requires std::same_as<T, bytes_t>
     auto
-    operator<<(uint128_t const input) -> packer &
+    pack(T const & object) -> packer &
     {
-        return pack(input);
+        return pack_bytes(object);
     }
 
-    template <std::unsigned_integral T>
+    template <typename T> requires std::same_as<T, bytes_be_t>
     auto
-    operator<<(T const input) -> packer &
+    pack(T const & object) -> packer &
     {
-        return pack(input);
+        return pack_bytes(object);
+    }
+
+    template <typename T> requires std::same_as<T, bytes_le_t>
+    auto
+    pack(T const & object) -> packer &
+    {
+        return pack_bytes(object);
+    }
+
+    template <typename T> requires std::same_as<T, types::address>
+    auto
+    pack(T const & object) -> packer &
+    {
+        return pack_address(object);
+    }
+
+    template <typename T> requires std::same_as<T, uint128_t>
+    auto
+    pack(T const object) -> packer &
+    {
+        return pack_uint128(object);
+    }
+
+    template <typename T> requires std::same_as<T, std::uint8_t>
+    auto
+    pack(T const object) -> packer &
+    {
+        return pack_unsigned_integral(object);
+    }
+
+    template <typename T> requires std::same_as<T, std::uint16_t>
+    auto
+    pack(T const object) -> packer &
+    {
+        return pack_unsigned_integral(object);
+    }
+
+    template <typename T> requires std::same_as<T, std::uint32_t>
+    auto
+    pack(T const object) -> packer &
+    {
+        return pack_unsigned_integral(object);
+    }
+
+    template <typename T> requires std::same_as<T, std::uint64_t>
+    auto
+    pack(T const object) -> packer &
+    {
+        return pack_unsigned_integral(object);
     }
 
     template <std::size_t N, byte_numbering ByteNumbering>
     auto
-    operator<<(fixed_bytes<N, ByteNumbering> const & input) -> packer &
+    pack(fixed_bytes<N, ByteNumbering> const & object) -> packer &
     {
-        return pack(input);
+        return pack_fixed_bytes(object);
     }
 
     template <typename T>
-    requires is_serializable<T, packer>
     auto
-    operator<<(T const & input) -> packer &
+    pack(std::optional<T> const & object) -> packer &
     {
-        return pack(input);
-    }
-
-    template <typename T>
-    requires is_serializable<T, packer>
-    auto
-    operator<<(std::optional<T> const & input) -> packer &
-    {
-        return pack(input);
+        return pack_optional(object);
     }
 
 private:
@@ -226,6 +302,32 @@ private:
 
         encode_length(input.size(), 0x80, output);
         output += input;
+    }
+
+    auto
+    encode_bytes(bytes_be_view_t input, bytes_t & output) -> void
+    {
+        if (input.size() == 1 && input[0] < 0x80)
+        {
+            output.push_back(input[0]);
+            return;
+        }
+
+        encode_length(input.size(), 0x80, output);
+        output += bytes_view_t{input };
+    }
+
+    auto
+    encode_bytes(bytes_le_view_t input, bytes_t & output) -> void
+    {
+        if (input.size() == 1 && input[0] < 0x80)
+        {
+            output.push_back(input[0]);
+            return;
+        }
+
+        encode_length(input.size(), 0x80, output);
+        output += bytes_view_t{input };
     }
 
     auto
