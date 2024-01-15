@@ -26,10 +26,12 @@ auto rlp_category() -> std::error_category const &;
 
 }
 
-namespace std {
+namespace std
+{
 
 template <>
-struct is_error_code_enum<abc::ethereum::rlp::errc> : true_type {
+struct is_error_code_enum<abc::ethereum::rlp::errc> : true_type
+{
 };
 
 
