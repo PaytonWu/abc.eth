@@ -6,13 +6,25 @@
 
 #pragma once
 
-#include <abc/hex_string.h>
-#include <abc/bytes_view.h>
+#include <abc/bytes.h>
+#include <abc/expected.h>
+
+#include <system_error>
 
 namespace abc::ethereum::trie
 {
 
-auto key_bytes_to_hex(bytes_view_t key) -> hex_string;
+auto
+key_bytes_to_hex(bytes_view_t key) -> bytes_t;
+
+auto
+hex_to_key_bytes(bytes_view_t hex) -> expected<bytes_t, std::error_code>;
+
+auto
+decode_nibbles(bytes_view_t nibbles) -> bytes_t;
+
+auto
+has_terminator(bytes_view_t nibbles) -> bool;
 
 }
 
