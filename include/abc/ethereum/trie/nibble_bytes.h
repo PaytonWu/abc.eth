@@ -7,9 +7,12 @@
 #pragma once
 
 #include "nibble_bytes_fwd_decl.h"
+#include "nibble_bytes_view.h"
 
 #include <abc/bytes.h>
+#include <abc/error.h>
 
+#include <limits>
 #include <vector>
 
 namespace abc::ethereum::trie
@@ -17,6 +20,9 @@ namespace abc::ethereum::trie
 
 class nibble_bytes
 {
+public:
+    static constexpr std::size_t npos = std::numeric_limits<std::size_t>::max();
+
 private:
     using bytes_t = std::vector<byte>;
 
@@ -38,7 +44,7 @@ public:
 public:
     nibble_bytes() = default;
 
-    nibble_bytes(bytes_view_t bytes_view);
+    explicit nibble_bytes(bytes_view_t bytes_view);
 
     [[nodiscard]] auto
     has_terminator() const noexcept -> bool;
@@ -46,22 +52,23 @@ public:
     [[nodiscard]] auto
     size() const noexcept -> std::size_t;
 
-    [[nodiscard]] auto
-    nibbles() const noexcept -> bytes_t const &;
+    constexpr
+    operator nibble_bytes_view() const noexcept
+    {
+        return nibble_bytes_view{nibbles_.data(), nibbles_.size()};
+    }
 
-    [[nodiscard]] auto
-    nibbles() noexcept -> bytes_t &;
-
-    [[nodiscard]] auto
-    nibbles_view() const noexcept -> bytes_view_t;
-
-    [[nodiscard]] auto
-    nibbles_view(std::size_t offset) const noexcept -> bytes_view_t;
-
-    [[nodiscard]] auto
-    nibbles_view(std::size_t offset, std::size_t count) const noexcept -> bytes_view_t;
+    [[nodiscard]] constexpr auto
+    nibbles_view(std::size_t offset, std::size_t count = npos) const -> nibble_bytes_view
+    {
+        if (offset > nibbles_.size())
+        {
+            abc::throw_exception<std::out_of_range>("abc::ethereum::trie::nibble_bytes::nibbles_view: offset out of range");
+        }
+        return nibble_bytes_view{nibbles_.data() + offset, std::min(count, nibbles_.size() - offset)};
+    }
 };
 
-}
+} // namespace abc::ethereum::trie
 
-#endif //ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_NIBBLE_BYTES
+#endif // ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_NIBBLE_BYTES
