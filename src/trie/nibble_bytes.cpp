@@ -8,6 +8,8 @@
 namespace abc::ethereum::trie
 {
 
+static constexpr char terminator{static_cast<char>(0x10)};
+
 nibble_bytes::nibble_bytes(abc::bytes_view_t bytes_view)
     : nibbles_(bytes_view.size() * 2 + 1)
 {
@@ -20,7 +22,21 @@ nibble_bytes::nibble_bytes(abc::bytes_view_t bytes_view)
         nibbles_[index * 2 + 1] = low;
     }
 
-    nibbles_.back() = 0x10;
+    nibbles_.back() = terminator;
 }
+
+auto
+nibble_bytes::has_terminator() const noexcept -> bool
+{
+    return !nibbles_.empty() && nibbles_.back() == terminator;
+}
+
+auto
+nibble_bytes::size() const noexcept -> std::size_t
+{
+    return nibbles_.size() - static_cast<std::size_t>(has_terminator());
+}
+
+
 
 }

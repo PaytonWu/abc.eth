@@ -40,8 +40,6 @@ public:
 
     nibble_bytes(bytes_view_t bytes_view);
 
-    nibble_bytes(bytes_t bytes, bool has_terminator);
-
     [[nodiscard]] auto
     has_terminator() const noexcept -> bool;
 
