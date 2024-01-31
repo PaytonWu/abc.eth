@@ -9,7 +9,7 @@
 #include "nibble_bytes_fwd_decl.h"
 #include "nibble_bytes_view_fwd_decl.h"
 
-#include <abc/byte.h>
+#include <abc/bytes.h>
 
 #include <span>
 #include <string_view>
@@ -56,6 +56,9 @@ public:
     constexpr nibble_bytes_view() = default;
 
     nibble_bytes_view(std::nullptr_t) = delete;
+
+    auto
+    to_bytes() const -> expected<abc::bytes_t, std::error_code>;
 
     [[nodiscard]] constexpr auto
     has_termintor() const noexcept -> bool

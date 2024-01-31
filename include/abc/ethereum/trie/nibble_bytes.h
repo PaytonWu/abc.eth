@@ -11,6 +11,7 @@
 
 #include <abc/bytes.h>
 #include <abc/error.h>
+#include <abc/expected.h>
 
 #include <range/v3/view/enumerate.hpp>
 
@@ -45,9 +46,7 @@ public:
     using reverse_iterator = bytes_t::reverse_iterator;
     using const_reverse_iterator = bytes_t::const_reverse_iterator;
 
-public:
-    nibble_bytes() = default;
-
+private:
     explicit constexpr nibble_bytes(bytes_view_t bytes_view) : nibbles_(bytes_view.empty() ? 0zu : bytes_view.size() * 2 + 1)
     {
         for (auto [index, b] : ranges::views::enumerate(bytes_view))
@@ -81,6 +80,24 @@ public:
             nibbles_.back() = terminator;
         }
     }
+
+public:
+    nibble_bytes() = default;
+
+    static constexpr auto
+    from(bytes_view_t bytes_view) -> nibble_bytes
+    {
+        return nibble_bytes{bytes_view};
+    }
+
+    static constexpr auto
+    from(std::initializer_list<byte> il) -> nibble_bytes
+    {
+        return nibble_bytes{il};
+    }
+
+    auto
+    to_bytes() const -> expected<abc::bytes_t, std::error_code>;
 
     [[nodiscard]] constexpr auto
     has_terminator() const noexcept -> bool

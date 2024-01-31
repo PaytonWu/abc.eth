@@ -16,7 +16,7 @@ TEST(nibble_bytes, ctor)
     EXPECT_TRUE(nb1.empty());
     EXPECT_FALSE(nb1.has_terminator());
 
-    nibble_bytes nb2{ 0x12, 0x34, 0x56, 0x78 };
+    nibble_bytes nb2 = nibble_bytes::from({ 0x12, 0x34, 0x56, 0x78 });
     EXPECT_EQ(nb2.size(), 9);
     EXPECT_FALSE(nb2.empty());
     EXPECT_TRUE(nb2.has_terminator());
@@ -30,7 +30,7 @@ TEST(nibble_bytes, ctor)
     EXPECT_EQ(nb2[7], 0x08);
     EXPECT_EQ(nb2[8], 0x10);
 
-    nibble_bytes nb3{ 0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0 };
+    nibble_bytes nb3 = nibble_bytes::from({ 0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0 });
     EXPECT_EQ(nb3.size(), 17);
     EXPECT_FALSE(nb3.empty());
     EXPECT_TRUE(nb3.has_terminator());
@@ -55,7 +55,7 @@ TEST(nibble_bytes, ctor)
 
 TEST(nibble_bytes, nibble_bytes_view)
 {
-    nibble_bytes nb1{ 0x12, 0x34, 0x56, 0x78 };
+    nibble_bytes nb1 = nibble_bytes::from({ 0x12, 0x34, 0x56, 0x78 });
     nibble_bytes_view nbv1{ nb1 };
     EXPECT_EQ(nbv1.size(), 9);
     EXPECT_FALSE(nbv1.empty());
@@ -70,7 +70,7 @@ TEST(nibble_bytes, nibble_bytes_view)
     EXPECT_EQ(nbv1[7], 0x08);
     EXPECT_EQ(nbv1[8], 0x10);
 
-    nibble_bytes nb2{ 0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0 };
+    nibble_bytes nb2 = nibble_bytes::from({ 0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE, 0xF0 });
     nibble_bytes_view nbv2{ nb2 };
     EXPECT_EQ(nbv2.size(), 17);
     EXPECT_FALSE(nbv2.empty());
@@ -96,7 +96,7 @@ TEST(nibble_bytes, nibble_bytes_view)
 
 TEST(nibble_bytes_view, subview)
 {
-    nibble_bytes nb1{ 0x12, 0x34, 0x56, 0x78 };
+    nibble_bytes nb1 = nibble_bytes::from({ 0x12, 0x34, 0x56, 0x78 });
     nibble_bytes_view nbv1{ nb1 };
     auto subview1 = nbv1.subview(2);
     EXPECT_EQ(subview1.size(), 7);

@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "nibble_bytes.h"
+
 #include <abc/bytes.h>
 #include <abc/expected.h>
 
@@ -14,18 +16,15 @@
 namespace abc::ethereum::trie
 {
 
-auto
-key_bytes_to_hex(bytes_view_t key) -> bytes_t;
-
-auto
-hex_to_key_bytes(bytes_view_t hex) -> expected<bytes_t, std::error_code>;
-
-auto
-decode_nibbles(bytes_view_t nibbles) -> bytes_t;
-
-auto
-has_terminator(bytes_view_t nibbles) -> bool;
-
+constexpr auto
+key_bytes_to_nibble_bytes(bytes_view_t key) -> nibble_bytes
+{
+    return nibble_bytes::from(key);
 }
+
+auto
+nibble_bytes_to_key_bytes(nibble_bytes_view nibble_bytes_view) -> expected<abc::bytes_t, std::error_code>;
+
+} // namespace abc::ethereum::trie
 
 #endif //ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_ENCODING
