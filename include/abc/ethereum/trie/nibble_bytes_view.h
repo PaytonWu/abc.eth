@@ -13,12 +13,17 @@
 
 #include <span>
 #include <string_view>
+#include <limits>
 
 namespace abc::ethereum::trie
 {
 
 class nibble_bytes_view
 {
+public:
+    static constexpr std::size_t npos = std::numeric_limits<std::size_t>::max();
+    static constexpr char terminator{static_cast<char>(0x10)};
+
 private:
     using container_type = std::basic_string_view<byte>;
     container_type view_{};
@@ -168,7 +173,7 @@ public:
         return nibble_bytes_view{view_.substr(view_.size() - count)};
     }
 
-    template <std::size_t Offset, std::size_t Count = std::dynamic_extent>
+    template <std::size_t Offset, std::size_t Count = npos>
     constexpr auto
     subview() const -> nibble_bytes_view
     {
@@ -176,7 +181,7 @@ public:
     }
 
     constexpr auto
-    subview(size_type offset, size_type count = std::dynamic_extent) const -> nibble_bytes_view
+    subview(size_type offset, size_type count = npos) const -> nibble_bytes_view
     {
         return {view_.substr(offset, count)};
     }
