@@ -58,6 +58,12 @@ public:
     nibble_bytes_view(std::nullptr_t) = delete;
 
     [[nodiscard]] constexpr auto
+    has_termintor() const noexcept -> bool
+    {
+        return !view_.empty() && view_.back() == terminator;
+    }
+
+    [[nodiscard]] constexpr auto
     begin() const noexcept -> const_iterator
     {
         return view_.begin();
@@ -173,12 +179,12 @@ public:
         return nibble_bytes_view{view_.substr(view_.size() - count)};
     }
 
-    template <std::size_t Offset, std::size_t Count = npos>
-    constexpr auto
-    subview() const -> nibble_bytes_view
-    {
-        return {view_.substr(Offset, Count)};
-    }
+//    template <std::size_t Offset, std::size_t Count = npos>
+//    constexpr auto
+//    subview() const -> nibble_bytes_view
+//    {
+//        return {view_.substr(Offset, Count)};
+//    }
 
     constexpr auto
     subview(size_type offset, size_type count = npos) const -> nibble_bytes_view
