@@ -64,7 +64,7 @@ private:
         }
     }
 
-    explicit constexpr nibble_bytes(std::initializer_list<byte> il) : nibbles_(static_cast<bool>(il.size()) ? il.size() * 2 + 1 : 0zu)
+    explicit constexpr nibble_bytes(std::initializer_list<byte> il) : nibbles_(static_cast<bool>(il.size()) ? il.size() * 2 + 1 : 0uz)
     {
         for (auto [index, b] : ranges::views::enumerate(il))
         {

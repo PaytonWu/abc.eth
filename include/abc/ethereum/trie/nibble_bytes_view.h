@@ -21,7 +21,7 @@ namespace abc::ethereum::trie
 class nibble_bytes_view
 {
 public:
-    static constexpr std::size_t npos = std::numeric_limits<std::size_t>::max();
+    static constexpr std::size_t npos{std::numeric_limits<std::size_t>::max()};
     static constexpr char terminator{static_cast<char>(0x10)};
 
 private:
