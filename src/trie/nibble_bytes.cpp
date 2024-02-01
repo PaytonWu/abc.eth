@@ -9,7 +9,7 @@ namespace abc::ethereum::trie
 auto
 nibble_bytes::to_bytes() const -> expected<abc::bytes_t, std::error_code>
 {
-    return static_cast<nibble_bytes_view>(*this).to_bytes();
+    return static_cast<nibble_bytes_view>(*this).to_bytes<abc::bytes_t>();
 }
 
 }
