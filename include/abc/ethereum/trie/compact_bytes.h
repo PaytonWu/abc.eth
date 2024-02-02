@@ -35,7 +35,7 @@ constexpr compact_bytes::compact_bytes(nibble_bytes_view view)
     assert(view.size() % 2 == 0);
 
     std::span bytes_span{&bytes_[1], bytes_.size() - 1};
-    auto size = view.fill_bytes<std::span<byte>>(bytes_span).expect("fill_bytes failed");
+    auto size = view.in_place_fill(bytes_span).expect("fill_bytes failed");
     assert(size == bytes_span.size());
 }
 
