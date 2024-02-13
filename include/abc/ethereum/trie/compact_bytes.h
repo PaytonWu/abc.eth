@@ -7,6 +7,7 @@
 #pragma once
 
 #include "compact_bytes_decl.h"
+#include "compact_bytes_view.h"
 
 #include <cassert>
 #include <span>
@@ -34,9 +35,23 @@ constexpr compact_bytes::compact_bytes(nibble_bytes_view view)
     }
     assert(view.size() % 2 == 0);
 
-    std::span bytes_span{&bytes_[1], bytes_.size() - 1};
-    auto size = view.in_place_fill(bytes_span).expect("fill_bytes failed");
-    assert(size == bytes_span.size());
+    if (!view.empty())
+    {
+        std::span bytes_span{&bytes_[1], bytes_.size() - 1};
+        auto const size = view.in_place_fill(bytes_span).expect("fill_bytes failed");
+        assert(size == bytes_span.size());
+    }
+}
+
+constexpr auto
+compact_bytes::flag() const noexcept -> compact_flag
+{
+    return static_cast<compact_flag>((bytes_[0] & 0xF0) >> 4);
+}
+
+constexpr compact_bytes::operator compact_bytes_view() const noexcept
+{
+    return compact_bytes_view{bytes_.data(), bytes_.size()};
 }
 
 constexpr auto

@@ -2,6 +2,7 @@
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
 #include <abc/ethereum/trie/nibble_bytes.h>
+#include <abc/ethereum/trie/compact_bytes.h>
 
 #include <gtest/gtest.h>
 
@@ -131,4 +132,15 @@ TEST(nibble_bytes_view, subview)
     EXPECT_EQ(subview5.size(), 0);
     EXPECT_TRUE(subview5.empty());
     EXPECT_FALSE(subview5.has_termintor());
+}
+
+TEST(nibble_bytes, compact_bytes_view)
+{
+    nibble_bytes nb1 = nibble_bytes::from({ 0x12, 0x34, 0x56, 0x78 });
+    nibble_bytes_view nbv1{ nb1 };
+    compact_bytes cb1{ nbv1 };
+    compact_bytes_view cbv1{ cb1 };
+    nibble_bytes nb2{cbv1};
+
+    EXPECT_EQ(nb1, nb2);
 }

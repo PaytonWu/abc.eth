@@ -8,8 +8,10 @@
 
 #include "compact_bytes_fwd_decl.h"
 
-#include "nibble_bytes_view.h"
+#include "compact_bytes_view_decl.h"
+#include "compact_flag_decl.h"
 #include "nibble_bytes_fwd_decl.h"
+#include "nibble_bytes_view.h"
 
 #include <abc/byte.h>
 
@@ -43,6 +45,11 @@ private:
 
 public:
     constexpr compact_bytes(nibble_bytes_view view);
+
+    constexpr auto
+    flag() const noexcept -> compact_flag;
+
+    constexpr operator compact_bytes_view() const noexcept;
 
     constexpr auto
     size() const noexcept -> size_type;

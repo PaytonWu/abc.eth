@@ -47,8 +47,8 @@ public:
 
 private:
     explicit constexpr nibble_bytes(bytes_view_t bytes_view);
-
     explicit constexpr nibble_bytes(std::initializer_list<byte> il);
+    explicit constexpr nibble_bytes(nibble_bytes_view view);
 
 public:
     nibble_bytes() = default;
@@ -107,8 +107,8 @@ public:
     [[nodiscard]] constexpr auto
     last(size_t const count) const noexcept -> nibble_bytes_view;
 
-    [[nodiscard]] constexpr auto
-    operator==(nibble_bytes const & other) const noexcept -> bool = default;
+    [[nodiscard]] friend constexpr auto
+    operator==(nibble_bytes const & lhs, nibble_bytes const & rhs) noexcept -> bool = default;
 };
 
 } // namespace abc::ethereum::trie

@@ -8,6 +8,7 @@
 
 #include "compact_bytes_fwd_decl.h"
 #include "compact_bytes_view_fwd_decl.h"
+#include "compact_flag_decl.h"
 
 #include <abc/byte.h>
 
@@ -45,6 +46,9 @@ public:
 
     compact_bytes_view(std::nullptr_t) = delete;
 
+    constexpr auto
+    flag() const noexcept -> compact_flag;
+
     [[nodiscard]] constexpr auto
     size() const noexcept -> size_type;
 
@@ -72,6 +76,18 @@ public:
     [[nodiscard]] constexpr auto
     back() const noexcept -> const_reference;
 };
+
+[[nodiscard]] constexpr auto
+odd(compact_bytes_view view) noexcept -> bool;
+
+[[nodiscard]] constexpr auto
+even(compact_bytes_view view) noexcept -> bool;
+
+[[nodiscard]] constexpr auto
+extension(compact_bytes_view view) noexcept -> bool;
+
+[[nodiscard]] constexpr auto
+leaf(compact_bytes_view view) noexcept -> bool;
 
 } // namespace abc::ethereum::trie
 

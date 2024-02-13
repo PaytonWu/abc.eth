@@ -24,7 +24,7 @@ constexpr nibble_bytes::nibble_bytes(compact_bytes_view view)
         return;
     }
 
-    nibble_bytes temp{bytes_view_t {view}};
+    nibble_bytes temp{bytes_view_t{view}};
     nibble_bytes_view temp_view{temp};
 
     if (temp_view[0] < static_cast<byte>(2))
@@ -32,8 +32,8 @@ constexpr nibble_bytes::nibble_bytes(compact_bytes_view view)
         temp_view = temp_view.first(temp_view.size() - 1);
     }
 
-    size_type chop_index = 2u - temp_view[0] & 1;
-    nibbles_ = temp_view.last(temp_view.size() - chop_index).to<nibble_bytes::bytes_t>().expect("to_bytes failed");
+    size_type chop_index = 2u - (temp_view[0] & 1);
+    nibbles_ = std::move(nibble_bytes{temp_view.last(temp_view.size() - chop_index)}.nibbles_);
 }
 
 constexpr nibble_bytes::nibble_bytes(bytes_view_t bytes_view) : nibbles_(bytes_view.empty() ? 0zu : bytes_view.size() * 2 + 1)
@@ -68,6 +68,12 @@ constexpr nibble_bytes::nibble_bytes(std::initializer_list<byte> il) : nibbles_(
     {
         nibbles_.back() = terminator;
     }
+}
+
+constexpr nibble_bytes::nibble_bytes(abc::ethereum::trie::nibble_bytes_view view)
+{
+    nibbles_.resize(view.size());
+    std::copy(view.begin(), view.end(), nibbles_.begin());
 }
 
 constexpr auto
