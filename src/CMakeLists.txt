@@ -1,7 +1,8 @@
 aux_source_directory(./ SRCS)
 aux_source_directory(./rlp RLP_SRCS)
+aux_source_directory(./trie TRIE_SRCS)
 
-add_library(${ABC_ETH_LIBRARY} ${SRCS} ${RLP_SRCS})
+add_library(${ABC_ETH_LIBRARY} ${SRCS} ${RLP_SRCS} ${TRIE_SRCS})
 
 add_dependencies(${ABC_ETH_LIBRARY} abc)
 
