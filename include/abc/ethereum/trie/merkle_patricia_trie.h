@@ -81,4 +81,4 @@ merkle_patricia_trie<TrieDbT>::try_update(bytes_view_t key, bytes_view_t value, 
 
 }
 
-#endif //ABC_ETH_INCLUDE_ABC_ETHEREUM_STATE_TRIE_PATRICIA_TRIE
+#endif //ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_MERKLE_PATRICIA_TRIE

@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "merkle_patricia_trie_fwd_decl.h"
+
 #include <abc/bytes.h>
 #include <abc/expected.h>
 #include <abc/fixed_hash.h>
@@ -19,31 +21,48 @@ template <typename TrieDbT>
 class merkle_patricia_trie
 {
 private:
-    TrieDbT * db_{ nullptr };
-    bool committed_{ false };
+    TrieDbT * db_{nullptr};
+    bool committed_{false};
 
 public:
     merkle_patricia_trie(merkle_patricia_trie const &) = delete;
     merkle_patricia_trie(merkle_patricia_trie &&) = default;
-    auto operator=(merkle_patricia_trie const &) -> merkle_patricia_trie & = delete;
-    auto operator=(merkle_patricia_trie &&) -> merkle_patricia_trie & = default;
+
+    auto
+    operator=(merkle_patricia_trie const &) -> merkle_patricia_trie & = delete;
+
+    auto
+    operator=(merkle_patricia_trie &&) -> merkle_patricia_trie & = default;
+
     ~merkle_patricia_trie() = default;
 
-    explicit merkle_patricia_trie(TrieDbT * db);
+    explicit
+    merkle_patricia_trie(TrieDbT * db);
 
 public:
-    auto hash() const -> h256_t;
-    auto get(bytes_view_t key) const -> expected<bytes_t, std::error_code>;
-    auto update(bytes_view_t key, bytes_view_t value, std::error_code & ec) -> void;
+    auto
+    hash() const -> h256_t;
+
+    auto
+    get(bytes_view_t key) const -> expected<bytes_t, std::error_code>;
+
+    auto
+    update(bytes_view_t key, bytes_view_t value, std::error_code & ec) -> void;
 
 private:
-    auto try_get(bytes_view_t key) const -> expected<bytes_t, std::error_code>;
-    auto try_update(bytes_view_t key, bytes_view_t value, std::error_code & ec) -> void;
+    auto
+    try_get(bytes_view_t key) const -> expected<bytes_t, std::error_code>;
 
-    auto insert(bytes_view_t key, bytes_view_t value, std::error_code & ec) -> void;
-    auto remove(bytes_view_t key, std::error_code & ec) -> void;
+    auto
+    try_update(bytes_view_t key, bytes_view_t value, std::error_code & ec) -> void;
+
+    auto
+    insert(bytes_view_t key, bytes_view_t value, std::error_code & ec) -> void;
+
+    auto
+    remove(bytes_view_t key, std::error_code & ec) -> void;
 };
 
-}
+} // namespace abc::ethereum::trie
 
-#endif //ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_MERKLE_PATRICIA_TRIE_DECL
+#endif // ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_MERKLE_PATRICIA_TRIE_DECL
