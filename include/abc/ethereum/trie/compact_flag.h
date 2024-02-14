@@ -1,8 +1,8 @@
-// Copyright(c) 2023 - present, Payton Wu (payton.wu@outlook.com) & the contributors.
+// Copyright(c) 2024 - present, Payton Wu (payton.wu@outlook.com) & the contributors.
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
-#ifndef INCLUDE_ABC_ETHEREUM_TRIE_COMPACT_FLAG
-#define INCLUDE_ABC_ETHEREUM_TRIE_COMPACT_FLAG
+#ifndef ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_COMPACT_FLAG
+#define ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_COMPACT_FLAG
 
 #pragma once
 
@@ -49,4 +49,4 @@ leaf(abc::ethereum::trie::compact_flag flag) noexcept -> bool
 
 } // namespace abc::ethereum::trie
 
-#endif // INCLUDE_ABC_ETHEREUM_TRIE_COMPACT_FLAG
+#endif // ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_COMPACT_FLAG
