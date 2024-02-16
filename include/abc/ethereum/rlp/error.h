@@ -9,9 +9,11 @@
 #include <system_error>
 #include <type_traits>
 
-namespace abc::ethereum::rlp {
+namespace abc::ethereum::rlp
+{
 
-enum class errc {
+enum class errc
+{
     success,
     empty_input,
     invalid_encoded_data,
@@ -20,11 +22,13 @@ enum class errc {
     type_error,
 };
 
-auto make_error_code(errc ec) -> std::error_code;
+auto
+make_error_code(errc ec) -> std::error_code;
 
-auto rlp_category() -> std::error_category const &;
+auto
+ethereum_rlp_category() -> std::error_category const &;
 
-}
+} // namespace abc::ethereum::rlp
 
 namespace std
 {
@@ -34,7 +38,6 @@ struct is_error_code_enum<abc::ethereum::rlp::errc> : true_type
 {
 };
 
+} // namespace std
 
-}
-
-#endif //ABC_ETH_INCLUDE_ABC_ETHEREUM_RLP_ERROR
+#endif // ABC_ETH_INCLUDE_ABC_ETHEREUM_RLP_ERROR

@@ -107,7 +107,6 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 endif ()
 
 find_package(Threads REQUIRED)
-# find_package(Boost REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(range-v3 CONFIG REQUIRED)
 find_package(CryptoPP REQUIRED)
