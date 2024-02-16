@@ -18,7 +18,8 @@ enum class errc {
 
 auto make_error_code(errc ec) -> std::error_code;
 
-auto state_category() -> std::error_category const &;
+auto
+ethereum_trie_category() -> std::error_category const &;
 
 }
 

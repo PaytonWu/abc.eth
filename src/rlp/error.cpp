@@ -7,17 +7,17 @@ namespace abc::ethereum::rlp {
 
 auto make_error_code(errc const ec) -> std::error_code
 {
-    return std::error_code{ static_cast<int>(ec), rlp_category() };
+    return std::error_code{ static_cast<int>(ec), ethereum_rlp_category() };
 }
 
-auto rlp_category() -> std::error_category const &
+auto ethereum_rlp_category() -> std::error_category const &
 {
     static struct : std::error_category
     {
     public:
         [[nodiscard]] auto name() const noexcept -> char const * override
         {
-            return "rlp_category";
+            return "ethereum_rlp_category";
         }
 
         [[nodiscard]] auto message(int const code) const -> std::string override

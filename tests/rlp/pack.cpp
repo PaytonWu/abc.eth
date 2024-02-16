@@ -2,7 +2,6 @@
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
 #include <abc/converter.h>
-#include <abc/ethereum/rlp/adaptor/adaptor.h>
 #include <abc/ethereum/rlp/pack.h>
 #include <abc/ethereum/rlp/sbuffer.h>
 #include <abc/ethereum/types/eth1/header.h>

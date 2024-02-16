@@ -10,15 +10,19 @@
 
 #include <abc/converter.h>
 
-namespace abc {
+namespace abc
+{
 
 template <>
-struct converter<ethereum::types::bytes20_t, ethereum::types::address> {
-    static auto from(ethereum::types::address const & input) {
-        return input.data();
+struct converter<ethereum::types::address::value_type, ethereum::types::address>
+{
+    static auto
+    from(ethereum::types::address const & input)
+    {
+        return input.bytes();
     }
 };
 
-}
+} // namespace abc
 
-#endif //ABC_ETH_INCLUDE_ABC_ETHEREUM_TYPES_CONVERTERS
+#endif // ABC_ETH_INCLUDE_ABC_ETHEREUM_TYPES_CONVERTERS

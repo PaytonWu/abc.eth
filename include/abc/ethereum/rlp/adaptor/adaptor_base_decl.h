@@ -6,9 +6,10 @@
 
 #pragma once
 
-#include "../object_fwd_decl.h"
-#include "../pack_fwd_decl.h"
 #include "adaptor_base_fwd_decl.h"
+
+#include <abc/ethereum/rlp/object_fwd_decl.h>
+#include <abc/ethereum/rlp/pack_fwd_decl.h>
 
 #include <cstddef>
 #include <type_traits>
