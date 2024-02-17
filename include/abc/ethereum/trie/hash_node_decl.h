@@ -21,14 +21,14 @@ private:
 
 public:
     hash_node() = default;
-    hash_node(hash_node const &) = delete;
+    hash_node(hash_node const &) = default;
     hash_node(hash_node &&) = default;
     ~hash_node() override = default;
 
-    auto
-    operator=(hash_node const &) -> hash_node & = delete;
+    constexpr auto
+    operator=(hash_node const &) -> hash_node & = default;
 
-    auto
+    constexpr auto
     operator=(hash_node &&) -> hash_node & = default;
 
     auto

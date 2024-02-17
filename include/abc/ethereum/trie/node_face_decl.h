@@ -21,11 +21,11 @@ class [[nodiscard]] node_face
 {
 public:
     node_face() = default;
-    node_face(node_face const &) = delete;
+    node_face(node_face const &) = default;
     node_face(node_face &&) = default;
     virtual ~node_face() = default;
 
-    auto operator=(node_face const &) -> node_face & = delete;
+    auto operator=(node_face const &) -> node_face & = default;
     auto operator=(node_face &&) -> node_face & = default;
 
     virtual auto
