@@ -31,14 +31,17 @@ public:
     constexpr auto
     operator=(hash_node &&) -> hash_node & = default;
 
-    auto
+    [[nodiscard]] auto
     cache() const -> std::tuple<hash_node, bool> override;
 
 //    auto
 //    encode(rlp::sbuffer & buffer) const -> void override;
 
-    auto
+    [[nodiscard]] auto
     fstring(std::string_view indent) const -> std::string override;
+
+    constexpr auto
+    type() const noexcept -> node_type override;
 };
 
 } // namespace abc::ethereum::trie
