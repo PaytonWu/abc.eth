@@ -7,7 +7,6 @@
 #pragma once
 
 #include "node_flag_fwd_decl.h"
-
 #include "hash_node_decl.h"
 
 namespace abc::ethereum::trie
@@ -29,7 +28,7 @@ public:
     constexpr auto
     hash_node() const noexcept -> hash_node const &;
 
-    constexpr auto
+    [[nodiscard]] constexpr auto
     dirty() const noexcept -> bool;
 
     constexpr auto

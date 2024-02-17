@@ -8,4 +8,15 @@
 
 #include "hash_node_decl.h"
 
+namespace abc::ethereum::trie
+{
+
+constexpr auto
+hash_node::type() const noexcept -> node_type
+{
+    return node_type::hash;
+}
+
+}
+
 #endif // ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_HASH_NODE

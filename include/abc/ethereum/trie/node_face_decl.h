@@ -17,6 +17,13 @@
 namespace abc::ethereum::trie
 {
 
+enum class [[nodiscard]] node_type
+{
+    invalid,
+    full,
+    hash
+};
+
 class [[nodiscard]] node_face
 {
 public:
@@ -36,6 +43,9 @@ public:
 
     virtual auto
     fstring(std::string_view indent) const -> std::string = 0;
+
+    virtual auto
+    type() const noexcept -> node_type = 0;
 };
 
 }
