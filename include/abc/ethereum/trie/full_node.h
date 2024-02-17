@@ -14,7 +14,7 @@ namespace abc::ethereum::trie
 constexpr auto
 full_node::type() const noexcept -> node_type
 {
-    return node_type::full;
+    return node_type::full_node;
 }
 
 }

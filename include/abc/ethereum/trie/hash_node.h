@@ -14,7 +14,7 @@ namespace abc::ethereum::trie
 constexpr auto
 hash_node::type() const noexcept -> node_type
 {
-    return node_type::hash;
+    return node_type::hash_node;
 }
 
 }
