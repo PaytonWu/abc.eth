@@ -6,12 +6,20 @@
 
 #pragma once
 
+#include "full_node_fwd_decl.h"
+#include "node_face_fwd_decl.h"
+#include "node_flag_decl.h"
+
+#include <array>
+#include <memory>
+
 namespace abc::ethereum::trie
 {
 
 class full_node
 {
-
+    std::array<std::shared_ptr<node_face>, 17> children_;
+    node_flag flag_;
 };
 
 }
