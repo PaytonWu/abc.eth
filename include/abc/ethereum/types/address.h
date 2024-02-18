@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "address_fwd_decl.h"
+
 #include <abc/byte.h>
 #include <abc/ethereum/crypto/secp256k1.h>
 #include <abc/expected.h>
