@@ -67,7 +67,7 @@ struct pack<abc::fixed_bytes<N, ByteNumbering>>
     auto
     operator()(packer<Stream> & o, abc::fixed_bytes<N, ByteNumbering> const & v) const -> packer<Stream> &
     {
-        o.pack_fixed_bytes(v);
+        o.pack_bytes(v);
         return o;
     }
 };

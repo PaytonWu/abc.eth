@@ -142,7 +142,7 @@ struct pack<types::address>
     auto
     operator()(packer<Stream> & o, types::address const & v) const -> packer<Stream> &
     {
-        o.pack_address(v);
+        o.pack_bytes(v.bytes());
         return o;
     }
 };

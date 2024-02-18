@@ -60,15 +60,15 @@ packer<Stream>::pack_bytes(bytes<ByteNumbering> const & input) -> packer &
     return *this;
 }
 
-template <packing_stream Stream>
-auto
-packer<Stream>::pack_address(types::address const & address) -> packer &
-{
-    bytes_t bytes;
-    encode_bytes(bytes_view_t{address.bytes()}, bytes);
-    append_buffer(bytes);
-    return *this;
-}
+//template <packing_stream Stream>
+//auto
+//packer<Stream>::pack_address(types::address const & address) -> packer &
+//{
+//    bytes_t bytes;
+//    encode_bytes(bytes_view_t{address.bytes()}, bytes);
+//    append_buffer(bytes);
+//    return *this;
+//}
 
 template <packing_stream Stream>
 auto
@@ -98,7 +98,7 @@ packer<Stream>::pack_unsigned_integral(T const value) -> packer &
 template <packing_stream Stream>
 template <std::size_t N, byte_numbering ByteNumbering>
 auto
-packer<Stream>::pack_fixed_bytes(fixed_bytes<N, ByteNumbering> const & value) -> packer &
+packer<Stream>::pack_bytes(fixed_bytes<N, ByteNumbering> const & value) -> packer &
 {
     bytes_t bytes;
     encode_bytes(bytes_view_t{value}, bytes);
@@ -122,7 +122,7 @@ packer<Stream>::pack_optional(std::optional<T> const & object) -> packer &
 template <packing_stream Stream>
 template <typename T>
     requires(!std::same_as<T, std::string_view>) && (!std::same_as<T, bytes_view_t>) && (!std::same_as<T, bytes_be_view_t>) && (!std::same_as<T, bytes_le_view_t>) &&
-            (!std::same_as<T, bytes_t>) && (!std::same_as<T, bytes_be_t>) && (!std::same_as<T, bytes_le_t>) && (!std::same_as<T, types::address>) &&
+            (!std::same_as<T, bytes_t>) && (!std::same_as<T, bytes_be_t>) && (!std::same_as<T, bytes_le_t>) && // (!std::same_as<T, types::address>) &&
             (!std::same_as<T, uint128_t>) && (!std::same_as<T, std::uint8_t>) && (!std::same_as<T, std::uint16_t>) && (!std::same_as<T, std::uint32_t>) &&
             (!std::same_as<T, std::uint64_t>) && (!std::same_as<T, std::optional<T>>)
 auto
@@ -178,14 +178,14 @@ packer<Stream>::pack(T const object) -> packer &
     return pack_bytes_view(object);
 }
 
-template <packing_stream Stream>
-template <typename T>
-    requires std::same_as<T, bytes_t>
-auto
-packer<Stream>::pack(T const & object) -> packer &
-{
-    return pack_bytes(object);
-}
+//template <packing_stream Stream>
+//template <typename T>
+//    requires std::same_as<T, bytes_t>
+//auto
+//packer<Stream>::pack(T const & object) -> packer &
+//{
+//    return pack_bytes(object);
+//}
 
 template <packing_stream Stream>
 template <typename T>
@@ -205,23 +205,23 @@ packer<Stream>::pack(T const & object) -> packer &
     return pack_bytes(object);
 }
 
-template <packing_stream Stream>
-template <typename T>
-    requires std::same_as<T, types::address>
-auto
-packer<Stream>::pack(T const & object) -> packer &
-{
-    return pack_address(object);
-}
+//template <packing_stream Stream>
+//template <typename T>
+//    requires std::same_as<T, types::address>
+//auto
+//packer<Stream>::pack(T const & object) -> packer &
+//{
+//    return pack_address(object);
+//}
 
-template <packing_stream Stream>
-template <typename T>
-    requires std::same_as<T, uint128_t>
-auto
-packer<Stream>::pack(T const object) -> packer &
-{
-    return pack_uint128(object);
-}
+//template <packing_stream Stream>
+//template <typename T>
+//    requires std::same_as<T, uint128_t>
+//auto
+//packer<Stream>::pack(T const object) -> packer &
+//{
+//    return pack_uint128(object);
+//}
 
 template <packing_stream Stream>
 template <typename T>
@@ -259,13 +259,13 @@ packer<Stream>::pack(T const object) -> packer &
     return pack_unsigned_integral(object);
 }
 
-template <packing_stream Stream>
-template <std::size_t N, byte_numbering ByteNumbering>
-auto
-packer<Stream>::pack(fixed_bytes<N, ByteNumbering> const & object) -> packer &
-{
-    return pack_fixed_bytes(object);
-}
+//template <packing_stream Stream>
+//template <std::size_t N, byte_numbering ByteNumbering>
+//auto
+//packer<Stream>::pack(fixed_bytes<N, ByteNumbering> const & object) -> packer &
+//{
+//    return pack_fixed_bytes(object);
+//}
 
 template <packing_stream Stream>
 template <typename T>

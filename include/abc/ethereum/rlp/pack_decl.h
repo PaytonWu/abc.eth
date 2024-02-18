@@ -9,7 +9,7 @@
 #include "pack_fwd_decl.h"
 #include "simple_buffer.h"
 
-#include <abc/ethereum/types/address_fwd_decl.h>
+// #include <abc/ethereum/types/address_fwd_decl.h>
 
 #include <abc/uint128.h>
 
@@ -50,8 +50,8 @@ public:
     auto
     pack_bytes(bytes<ByteNumbering> const & input) -> packer &;
 
-    auto
-    pack_address(types::address const & address) -> packer &;
+//    auto
+//    pack_address(types::address const & address) -> packer &;
 
     auto
     pack_uint128(uint128_t const value) -> packer &;
@@ -62,7 +62,7 @@ public:
 
     template <std::size_t N, byte_numbering ByteNumbering>
     auto
-    pack_fixed_bytes(fixed_bytes<N, ByteNumbering> const & value) -> packer &;
+    pack_bytes(fixed_bytes<N, ByteNumbering> const & value) -> packer &;
 
     template <typename T>
     auto
@@ -76,7 +76,7 @@ public:
                 (!std::same_as<T, bytes_t>) &&
                 (!std::same_as<T, bytes_be_t>) &&
                 (!std::same_as<T, bytes_le_t>) &&
-                (!std::same_as<T, types::address>) &&
+                // (!std::same_as<T, types::address>) &&
                 (!std::same_as<T, uint128_t>) &&
                 (!std::same_as<T, std::uint8_t>) &&
                 (!std::same_as<T, std::uint16_t>) &&
@@ -102,9 +102,9 @@ public:
     auto
     pack(T const object) -> packer &;
 
-    template <typename T> requires std::same_as<T, bytes_t>
-    auto
-    pack(T const & object) -> packer &;
+//    template <typename T> requires std::same_as<T, bytes_t>
+//    auto
+//    pack(T const & object) -> packer &;
 
     template <typename T> requires std::same_as<T, bytes_be_t>
     auto
@@ -114,13 +114,13 @@ public:
     auto
     pack(T const & object) -> packer &;
 
-    template <typename T> requires std::same_as<T, types::address>
-    auto
-    pack(T const & object) -> packer &;
+//    template <typename T> requires std::same_as<T, types::address>
+//    auto
+//    pack(T const & object) -> packer &;
 
-    template <typename T> requires std::same_as<T, uint128_t>
-    auto
-    pack(T const object) -> packer &;
+//    template <typename T> requires std::same_as<T, uint128_t>
+//    auto
+//    pack(T const object) -> packer &;
 
     template <typename T> requires std::same_as<T, std::uint8_t>
     auto
@@ -138,9 +138,9 @@ public:
     auto
     pack(T const object) -> packer &;
 
-    template <std::size_t N, byte_numbering ByteNumbering>
-    auto
-    pack(fixed_bytes<N, ByteNumbering> const & object) -> packer &;
+//    template <std::size_t N, byte_numbering ByteNumbering>
+//    auto
+//    pack(fixed_bytes<N, ByteNumbering> const & object) -> packer &;
 
     template <typename T>
     auto

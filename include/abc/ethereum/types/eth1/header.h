@@ -132,21 +132,21 @@ struct pack<types::eth1::header> {
     auto
     operator()(packer<Stream> & o, types::eth1::header const & v) const -> packer<Stream> &
     {
-        o.pack(v.parent_hash);
-        o.pack(v.uncle_hash);
-        o.pack(v.coinbase);
-        o.pack(v.state_root);
-        o.pack(v.transactions_root);
-        o.pack(v.receipts_root);
-        o.pack(v.logs_bloom);
-        o.pack(v.difficulty);
+        o.pack_bytes(v.parent_hash);
+        o.pack_bytes(v.uncle_hash);
+        o.pack_bytes(v.coinbase.bytes());
+        o.pack_bytes(v.state_root);
+        o.pack_bytes(v.transactions_root);
+        o.pack_bytes(v.receipts_root);
+        o.pack_bytes(v.logs_bloom);
+        o.pack_uint128(v.difficulty);
         o.pack(v.number);
         o.pack(v.gas_limit);
         o.pack(v.gas_used);
         o.pack(v.timestamp);
-        o.pack(v.extra_data);
-        o.pack(v.mix_hash);
-        o.pack(v.nonce);
+        o.pack_bytes(v.extra_data);
+        o.pack_bytes(v.mix_hash);
+        o.pack_bytes(v.nonce);
         o.pack(v.base_fee_per_gas);
         o.pack(v.withdrawals_root);
         o.pack(v.blob_gas_used);
