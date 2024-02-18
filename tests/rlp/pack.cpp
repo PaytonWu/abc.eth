@@ -3,7 +3,7 @@
 
 #include <abc/converter.h>
 #include <abc/ethereum/rlp/pack.h>
-#include <abc/ethereum/rlp/sbuffer.h>
+#include <abc/ethereum/rlp/simple_buffer.h>
 #include <abc/ethereum/types/eth1/header.h>
 
 #include <gtest/gtest.h>
@@ -39,8 +39,8 @@ TEST(pack, eth_header) {
         .parent_beacon_block_root = std::nullopt
     };
 
-    sbuffer buffer{};
-    packer<sbuffer> packer{ buffer };
+    simple_buffer buffer{};
+    packer<simple_buffer> packer{ buffer };
 
     packer.pack(header);
     auto const hex_str = abc::hex_string::from(buffer.bytes_view<abc::byte_numbering::msb0>());

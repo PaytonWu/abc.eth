@@ -10,8 +10,6 @@
 
 #include "hash_node_fwd_decl.h"
 
-#include <abc/ethereum/rlp/sbuffer.h>
-
 #include <string_view>
 #include <tuple>
 
@@ -39,9 +37,6 @@ public:
 
     [[nodiscard]] virtual auto
     cache() const -> std::tuple<trie::hash_node, bool> = 0;
-
-//    virtual auto
-//    encode(rlp::sbuffer & buffer) const -> void = 0;
 
     [[nodiscard]] virtual auto
     fstring(std::string_view indent) const -> std::string = 0;

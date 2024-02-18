@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <abc/ethereum/rlp/sbuffer.h>
+#include <abc/ethereum/rlp/simple_buffer_decl.h>
 
 #include <abc/bytes.h>
 #include <abc/fixed_hash.h>
@@ -18,7 +18,7 @@ namespace abc::ethereum::trie
 {
 
 template <typename T>
-concept trie_node = requires(T const t, rlp::sbuffer & buffer, std::string_view indent)
+concept trie_node = requires(T const t, rlp::simple_buffer & buffer, std::string_view indent)
 {
     { t.cache() } -> std::same_as<std::tuple<h256_t, bool>>;
     { t.encode(buffer) } -> std::same_as<void>;
