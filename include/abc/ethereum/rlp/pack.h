@@ -121,10 +121,10 @@ packer<Stream>::pack_optional(std::optional<T> const & object) -> packer &
 
 template <packing_stream Stream>
 template <typename T>
-    requires(!std::same_as<T, std::string_view>) && (!std::same_as<T, bytes_view_t>) && (!std::same_as<T, bytes_be_view_t>) && (!std::same_as<T, bytes_le_view_t>) &&
-            (!std::same_as<T, bytes_t>) && (!std::same_as<T, bytes_be_t>) && (!std::same_as<T, bytes_le_t>) && // (!std::same_as<T, types::address>) &&
-            (!std::same_as<T, uint128_t>) && (!std::same_as<T, std::uint8_t>) && (!std::same_as<T, std::uint16_t>) && (!std::same_as<T, std::uint32_t>) &&
-            (!std::same_as<T, std::uint64_t>) && (!std::same_as<T, std::optional<T>>)
+//    requires(!std::same_as<T, std::string_view>) && (!std::same_as<T, bytes_view_t>) && (!std::same_as<T, bytes_be_view_t>) && (!std::same_as<T, bytes_le_view_t>) &&
+//            (!std::same_as<T, bytes_t>) && (!std::same_as<T, bytes_be_t>) && (!std::same_as<T, bytes_le_t>) && // (!std::same_as<T, types::address>) &&
+//            (!std::same_as<T, uint128_t>) && (!std::same_as<T, std::uint8_t>) && (!std::same_as<T, std::uint16_t>) && (!std::same_as<T, std::uint32_t>) &&
+//            (!std::same_as<T, std::uint64_t>) && (!std::same_as<T, std::optional<T>>)
 auto
 packer<Stream>::pack(T const & object) -> packer &
 {
