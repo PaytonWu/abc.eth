@@ -5,6 +5,7 @@
 #include <abc/ethereum/rlp/pack.h>
 #include <abc/ethereum/rlp/simple_buffer.h>
 #include <abc/ethereum/types/eth1/header.h>
+#include <abc/ethereum/types/rlp/eth1/header.h>
 
 #include <gtest/gtest.h>
 

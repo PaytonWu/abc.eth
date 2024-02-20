@@ -9,8 +9,6 @@
 #include "pack_fwd_decl.h"
 #include "simple_buffer.h"
 
-#include <abc/ethereum/types/address_fwd_decl.h>
-
 #include <abc/uint128.h>
 
 namespace abc::ethereum::rlp
@@ -51,9 +49,6 @@ public:
     pack_bytes(bytes<ByteNumbering> const & input) -> packer &;
 
     auto
-    pack_address(types::address const & address) -> packer &;
-
-    auto
     pack_uint128(uint128_t const value) -> packer &;
 
     template <std::unsigned_integral T>
@@ -62,89 +57,15 @@ public:
 
     template <std::size_t N, byte_numbering ByteNumbering>
     auto
-    pack_fixed_bytes(fixed_bytes<N, ByteNumbering> const & value) -> packer &;
+    pack_bytes(fixed_bytes<N, ByteNumbering> const & value) -> packer &;
 
     template <typename T>
     auto
     pack_optional(std::optional<T> const & object) -> packer &;
 
     template <typename T>
-        requires (!std::same_as<T, std::string_view>) &&
-                (!std::same_as<T, bytes_view_t>) &&
-                (!std::same_as<T, bytes_be_view_t>) &&
-                (!std::same_as<T, bytes_le_view_t>) &&
-                (!std::same_as<T, bytes_t>) &&
-                (!std::same_as<T, bytes_be_t>) &&
-                (!std::same_as<T, bytes_le_t>) &&
-                (!std::same_as<T, types::address>) &&
-                (!std::same_as<T, uint128_t>) &&
-                (!std::same_as<T, std::uint8_t>) &&
-                (!std::same_as<T, std::uint16_t>) &&
-                (!std::same_as<T, std::uint32_t>) &&
-                (!std::same_as<T, std::uint64_t>) &&
-                (!std::same_as<T, std::optional<T>>)
     auto
     pack(T const & object) -> packer &;
-
-    template <typename T> requires std::same_as<T, std::string_view>
-    auto
-    pack(T const object) -> packer &;
-
-    template <typename T> requires std::same_as<T, bytes_view_t>
-    auto
-    pack(T const object) -> packer &;
-
-    template <typename T> requires std::same_as<T, bytes_be_view_t>
-    auto
-    pack(T const object) -> packer &;
-
-    template <typename T> requires std::same_as<T, bytes_le_view_t>
-    auto
-    pack(T const object) -> packer &;
-
-    template <typename T> requires std::same_as<T, bytes_t>
-    auto
-    pack(T const & object) -> packer &;
-
-    template <typename T> requires std::same_as<T, bytes_be_t>
-    auto
-    pack(T const & object) -> packer &;
-
-    template <typename T> requires std::same_as<T, bytes_le_t>
-    auto
-    pack(T const & object) -> packer &;
-
-    template <typename T> requires std::same_as<T, types::address>
-    auto
-    pack(T const & object) -> packer &;
-
-    template <typename T> requires std::same_as<T, uint128_t>
-    auto
-    pack(T const object) -> packer &;
-
-    template <typename T> requires std::same_as<T, std::uint8_t>
-    auto
-    pack(T const object) -> packer &;
-
-    template <typename T> requires std::same_as<T, std::uint16_t>
-    auto
-    pack(T const object) -> packer &;
-
-    template <typename T> requires std::same_as<T, std::uint32_t>
-    auto
-    pack(T const object) -> packer &;
-
-    template <typename T> requires std::same_as<T, std::uint64_t>
-    auto
-    pack(T const object) -> packer &;
-
-    template <std::size_t N, byte_numbering ByteNumbering>
-    auto
-    pack(fixed_bytes<N, ByteNumbering> const & object) -> packer &;
-
-    template <typename T>
-    auto
-    pack(std::optional<T> const & object) -> packer &;
 
 private:
     auto
