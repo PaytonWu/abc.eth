@@ -27,21 +27,6 @@ operator>>(object const & o, T(&v)[N]) -> object const &
     return adaptor::convert<T[N]>{}(o, v);
 }
 
-template <packing_stream Stream, typename T>
-requires (!std::is_array_v<T>)
-auto
-operator<<(packer<Stream> & o, T const & v) -> packer<Stream> &
-{
-    return adaptor::pack<T>{}(o, v);
-}
-
-template <packing_stream Stream, typename T, std::size_t N>
-auto
-operator<<(packer<Stream>& o, const T(&v)[N]) -> packer<Stream> &
-{
-    return adaptor::pack<T[N]>{}(o, v);
-}
-
 template <typename T>
 requires (!std::is_array_v<T>)
 auto

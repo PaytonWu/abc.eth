@@ -7,7 +7,10 @@
 #pragma once
 
 #include "pack_decl.h"
+
 #include "codec_operator.h"
+#include "serde.h"
+#include "type_traits.h"
 
 #include <abc/byte.h>
 #include <abc/converter.h>
@@ -60,16 +63,6 @@ packer<Stream>::pack_bytes(bytes<ByteNumbering> const & input) -> packer &
     return *this;
 }
 
-//template <packing_stream Stream>
-//auto
-//packer<Stream>::pack_address(types::address const & address) -> packer &
-//{
-//    bytes_t bytes;
-//    encode_bytes(bytes_view_t{address.bytes()}, bytes);
-//    append_buffer(bytes);
-//    return *this;
-//}
-
 template <packing_stream Stream>
 auto
 packer<Stream>::pack_uint128(uint128_t const value) -> packer &
@@ -121,158 +114,28 @@ packer<Stream>::pack_optional(std::optional<T> const & object) -> packer &
 
 template <packing_stream Stream>
 template <typename T>
-//    requires(!std::same_as<T, std::string_view>) && (!std::same_as<T, bytes_view_t>) && (!std::same_as<T, bytes_be_view_t>) && (!std::same_as<T, bytes_le_view_t>) &&
-//            (!std::same_as<T, bytes_t>) && (!std::same_as<T, bytes_be_t>) && (!std::same_as<T, bytes_le_t>) && // (!std::same_as<T, types::address>) &&
-//            (!std::same_as<T, uint128_t>) && (!std::same_as<T, std::uint8_t>) && (!std::same_as<T, std::uint16_t>) && (!std::same_as<T, std::uint32_t>) &&
-//            (!std::same_as<T, std::uint64_t>) && (!std::same_as<T, std::optional<T>>)
 auto
 packer<Stream>::pack(T const & object) -> packer &
 {
-    simple_buffer object_buffer{};
-    packer packer{object_buffer};
+    if constexpr (is_list_v<T>)
+    {
+        Stream object_buffer{};
+        packer<Stream> packer{object_buffer};
 
-    packer << object;
+        serialize_to(packer, object);
 
-    bytes_t bytes;
-    encode_length(object_buffer.bytes_view().size(), 0xc0, bytes);
+        bytes_t bytes;
+        encode_length(object_buffer.bytes_view().size(), 0xc0, bytes);
 
-    append_buffer(bytes);
-    append_buffer(object_buffer.bytes_view());
+        append_buffer(bytes);
+        append_buffer(object_buffer.bytes_view());
+    }
+    else
+    {
+        serialize_to(*this, object);
+    }
 
     return *this;
-}
-
-template <packing_stream Stream>
-template <typename T>
-    requires std::same_as<T, std::string_view>
-auto
-packer<Stream>::pack(T const object) -> packer &
-{
-    return pack_string_view(object);
-}
-
-template <packing_stream Stream>
-template <typename T>
-    requires std::same_as<T, bytes_view_t>
-auto
-packer<Stream>::pack(T const object) -> packer &
-{
-    return pack_bytes_view(object);
-}
-
-template <packing_stream Stream>
-template <typename T>
-    requires std::same_as<T, bytes_be_view_t>
-auto
-packer<Stream>::pack(T const object) -> packer &
-{
-    return pack_bytes_view(object);
-}
-
-template <packing_stream Stream>
-template <typename T>
-    requires std::same_as<T, bytes_le_view_t>
-auto
-packer<Stream>::pack(T const object) -> packer &
-{
-    return pack_bytes_view(object);
-}
-
-//template <packing_stream Stream>
-//template <typename T>
-//    requires std::same_as<T, bytes_t>
-//auto
-//packer<Stream>::pack(T const & object) -> packer &
-//{
-//    return pack_bytes(object);
-//}
-
-template <packing_stream Stream>
-template <typename T>
-    requires std::same_as<T, bytes_be_t>
-auto
-packer<Stream>::pack(T const & object) -> packer &
-{
-    return pack_bytes(object);
-}
-
-template <packing_stream Stream>
-template <typename T>
-    requires std::same_as<T, bytes_le_t>
-auto
-packer<Stream>::pack(T const & object) -> packer &
-{
-    return pack_bytes(object);
-}
-
-//template <packing_stream Stream>
-//template <typename T>
-//    requires std::same_as<T, types::address>
-//auto
-//packer<Stream>::pack(T const & object) -> packer &
-//{
-//    return pack_address(object);
-//}
-
-//template <packing_stream Stream>
-//template <typename T>
-//    requires std::same_as<T, uint128_t>
-//auto
-//packer<Stream>::pack(T const object) -> packer &
-//{
-//    return pack_uint128(object);
-//}
-
-template <packing_stream Stream>
-template <typename T>
-    requires std::same_as<T, std::uint8_t>
-auto
-packer<Stream>::pack(T const object) -> packer &
-{
-    return pack_unsigned_integral(object);
-}
-
-template <packing_stream Stream>
-template <typename T>
-    requires std::same_as<T, std::uint16_t>
-auto
-packer<Stream>::pack(T const object) -> packer &
-{
-    return pack_unsigned_integral(object);
-}
-
-template <packing_stream Stream>
-template <typename T>
-    requires std::same_as<T, std::uint32_t>
-auto
-packer<Stream>::pack(T const object) -> packer &
-{
-    return pack_unsigned_integral(object);
-}
-
-template <packing_stream Stream>
-template <typename T>
-    requires std::same_as<T, std::uint64_t>
-auto
-packer<Stream>::pack(T const object) -> packer &
-{
-    return pack_unsigned_integral(object);
-}
-
-//template <packing_stream Stream>
-//template <std::size_t N, byte_numbering ByteNumbering>
-//auto
-//packer<Stream>::pack(fixed_bytes<N, ByteNumbering> const & object) -> packer &
-//{
-//    return pack_fixed_bytes(object);
-//}
-
-template <packing_stream Stream>
-template <typename T>
-auto
-packer<Stream>::pack(std::optional<T> const & object) -> packer &
-{
-    return pack_optional(object);
 }
 
 template <packing_stream Stream>

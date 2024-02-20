@@ -6,11 +6,6 @@
 
 #pragma once
 
-namespace abc::ethereum::rlp
-{
-
-
-
-}
+#include "serde_fwd_decl.h"
 
 #endif // ABC_ETH_INCLUDE_ABC_ETHEREUM_RLP_SERDE_DECL

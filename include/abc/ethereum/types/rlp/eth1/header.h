@@ -32,18 +32,18 @@ pack<types::eth1::header>::operator()(packer<Stream> & o, types::eth1::header co
     o.pack_bytes(v.receipts_root);
     o.pack_bytes(v.logs_bloom);
     o.pack_uint128(v.difficulty);
-    o.pack(v.number);
-    o.pack(v.gas_limit);
-    o.pack(v.gas_used);
-    o.pack(v.timestamp);
+    o.pack_unsigned_integral(v.number);
+    o.pack_unsigned_integral(v.gas_limit);
+    o.pack_unsigned_integral(v.gas_used);
+    o.pack_unsigned_integral(v.timestamp);
     o.pack_bytes(v.extra_data);
     o.pack_bytes(v.mix_hash);
     o.pack_bytes(v.nonce);
-    o.pack(v.base_fee_per_gas);
-    o.pack(v.withdrawals_root);
-    o.pack(v.blob_gas_used);
-    o.pack(v.excess_blob_gas);
-    o.pack(v.parent_beacon_block_root);
+    o.pack_optional(v.base_fee_per_gas);
+    o.pack_optional(v.withdrawals_root);
+    o.pack_optional(v.blob_gas_used);
+    o.pack_optional(v.excess_blob_gas);
+    o.pack_optional(v.parent_beacon_block_root);
     return o;
 }
 

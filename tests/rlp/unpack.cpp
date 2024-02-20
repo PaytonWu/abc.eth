@@ -5,6 +5,7 @@
 #include <abc/ethereum/rlp/object.h>
 #include <abc/ethereum/rlp/unpack.h>
 #include <abc/ethereum/types/eth1/header.h>
+#include <abc/ethereum/types/rlp/eth1/header.h>
 #include <abc/expected.h>
 #include <abc/hex_string.h>
 
