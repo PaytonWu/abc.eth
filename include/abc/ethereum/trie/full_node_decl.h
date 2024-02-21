@@ -21,8 +21,11 @@ namespace abc::ethereum::trie
 
 class full_node : public node_face
 {
-    std::array<std::shared_ptr<node_face>, 17> children_{};
-    std::array<std::unique_ptr<node_face>, 17> children2_{};
+public:
+    static constexpr std::size_t children_size = 17;
+private:
+    std::array<std::shared_ptr<node_face>, children_size> children_{};
+    std::array<std::unique_ptr<node_face>, children_size> children2_{};
     node_flag flag_{};
 
 public:
@@ -38,19 +41,22 @@ public:
     operator=(full_node &&) -> full_node & = default;
 
 public:
-    auto
+    [[nodiscard]] auto
     cache() const -> std::tuple<hash_node, bool> override;
 
-    auto
+    [[nodiscard]] auto
     fstring(std::string_view indent) const -> std::string override;
 
     constexpr auto
     type() const noexcept -> node_type override;
 
-    auto
-    children(std::size_t index) -> observer_ptr<node_face>;
+    [[nodiscard]] auto
+    children(std::size_t index) const noexcept -> observer_ptr<node_face>;
 
-    auto
+    [[nodiscard]] auto
+    children(std::size_t index) noexcept -> std::shared_ptr<node_face> &;
+
+    [[nodiscard]] auto
     clone() const -> std::unique_ptr<node_face>;
 };
 

@@ -19,4 +19,16 @@ full_node::fstring(std::string_view /*indent*/) const -> std::string
     return {};
 }
 
+auto
+full_node::children(std::size_t index) const noexcept -> observer_ptr<node_face>
+{
+    return make_observer(children_[index].get());
+}
+
+auto
+full_node::children(std::size_t index) noexcept -> std::shared_ptr<node_face> &
+{
+    return children_[index];
+}
+
 } // namespace abc::ethereum::trie

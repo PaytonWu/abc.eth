@@ -34,6 +34,9 @@ public:
     append(bytes_view_t bytes) -> void;
 
     auto
+    append(byte b) -> void;
+
+    auto
     clear() noexcept -> void;
 
     template <byte_numbering ByteNumbering = byte_numbering::none>

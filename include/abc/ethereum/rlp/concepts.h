@@ -35,9 +35,10 @@ concept serializable = requires(T const t, Packer & packer)
 };
 
 template <typename T>
-concept packing_stream = requires(T t)
+concept packing_stream = requires(T t, bytes_view_t bv, byte b)
 {
-    { t.append(bytes_view_t{}) } -> std::same_as<void>;
+    { t.append(bv) } -> std::same_as<void>;
+    { t.append(b) } -> std::same_as<void>;
     { t.bytes_view() } -> std::same_as<bytes_view_t>;
 };
 

@@ -11,6 +11,7 @@
 #include "abc/fixed_bytes.h"
 #include "abc/uint128.h"
 #include "cpp/optional.h"
+#include "cpp/shared_ptr.h"
 #include "unsigned_integral.h"
 
 #endif //ABC_ETH_INCLUDE_ABC_ETHEREUM_RLP_ADAPTOR_ADAPTOR

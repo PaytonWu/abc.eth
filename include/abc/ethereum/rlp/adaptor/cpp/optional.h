@@ -57,7 +57,11 @@ struct pack<std::optional<T>>
     auto
     operator()(packer<Stream>& o, std::optional<T> const & v) const -> packer<Stream> &
     {
-        o.pack_optional(v);
+        if (v.has_value())
+        {
+            o.pack(v.value());
+        }
+
         return o;
     }
 };

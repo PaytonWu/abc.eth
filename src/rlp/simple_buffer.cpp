@@ -13,6 +13,12 @@ simple_buffer::append(bytes_view_t bytes) -> void
 }
 
 auto
+simple_buffer::append(byte const b) -> void
+{
+    buffer_ += b;
+}
+
+auto
 simple_buffer::clear() noexcept -> void
 {
     buffer_.clear();
