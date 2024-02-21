@@ -24,18 +24,15 @@ private:
 
 public:
     packer() = delete;
-
     packer(packer const &) = delete;
+    packer(packer &&) = default;
+    ~packer() = default;
 
     auto
     operator=(packer const &) -> packer & = delete;
 
-    packer(packer &&) = default;
-
     auto
     operator=(packer &&) -> packer & = default;
-
-    ~packer() = default;
 
     explicit packer(Stream & stream) noexcept;
 
@@ -61,9 +58,11 @@ public:
     auto
     pack_bytes(fixed_bytes<N, ByteNumbering> const & value) -> packer &;
 
-    template <typename T>
     auto
-    pack_optional(std::optional<T> const & object) -> packer &;
+    pack_empty_bytes() -> packer &;
+
+    auto
+    pack_empty_list() -> packer &;
 
     template <typename T>
     auto
@@ -84,6 +83,12 @@ private:
 
     auto
     append_buffer(bytes_view_t const input) -> void;
+
+    auto
+    append_empty_bytes() -> void;
+
+    auto
+    append_empty_list() -> void;
 };
 
 }

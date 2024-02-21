@@ -99,15 +99,18 @@ packer<Stream>::pack_bytes(fixed_bytes<N, ByteNumbering> const & value) -> packe
 }
 
 template <packing_stream Stream>
-template <typename T>
 auto
-packer<Stream>::pack_optional(std::optional<T> const & object) -> packer &
+packer<Stream>::pack_empty_bytes() -> packer &
 {
-    if (object.has_value())
-    {
-        return pack(object.value());
-    }
+    append_empty_bytes();
+    return *this;
+}
 
+template <packing_stream Stream>
+auto
+packer<Stream>::pack_empty_list() -> packer &
+{
+    append_empty_list();
     return *this;
 }
 
@@ -205,6 +208,20 @@ auto
 packer<Stream>::append_buffer(bytes_view_t const input) -> void
 {
     stream_.append(input);
+}
+
+template <packing_stream Stream>
+auto
+packer<Stream>::append_empty_bytes() -> void
+{
+    stream_.append(0x80);
+}
+
+template <packing_stream Stream>
+auto
+packer<Stream>::append_empty_list() -> void
+{
+    stream_.append(0xc0);
 }
 
 } // namespace abc::ethereum::rlp
