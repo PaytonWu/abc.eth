@@ -49,7 +49,6 @@ pack<trie::full_node>::operator()(packer<Stream> & o, trie::full_node const & v)
                 default:
                 {
                     assert(false);
-                    unreachable();
                     break;
                 }
             }
