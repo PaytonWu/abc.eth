@@ -25,7 +25,7 @@ public:
     static constexpr std::size_t children_size = 17;
 private:
     std::array<std::shared_ptr<node_face>, children_size> children_{};
-    std::array<std::unique_ptr<node_face>, children_size> children2_{};
+    // std::array<std::unique_ptr<node_face>, children_size> children2_{};
     node_flag flag_{};
 
 public:
