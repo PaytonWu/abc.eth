@@ -18,7 +18,7 @@ template <packing_stream Stream>
 auto
 pack<types::address>::operator()(packer<Stream> & o, types::address const & v) const -> packer<Stream> &
 {
-    o.pack_bytes(v.bytes());
+    o.pack(v.bytes());
     return o;
 }
 
