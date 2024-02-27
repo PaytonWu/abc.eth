@@ -8,6 +8,8 @@
 
 #include "error.h"
 #include "merkle_patricia_trie_decl.h"
+#include "nibble_bytes.h"
+#include "nibble_bytes_view.h"
 
 #include <cassert>
 
@@ -15,8 +17,7 @@ namespace abc::ethereum::trie
 {
 
 template <typename TrieDbT>
-merkle_patricia_trie<TrieDbT>::merkle_patricia_trie(TrieDbT * db)
-    : db_(db)
+merkle_patricia_trie<TrieDbT>::merkle_patricia_trie(TrieDbT * db) : db_(db)
 {
     assert(db_ != nullptr);
 }
@@ -43,22 +44,20 @@ merkle_patricia_trie<TrieDbT>::get(bytes_view_t key) const -> expected<bytes_t, 
 
 template <typename TrieDbT>
 auto
-merkle_patricia_trie<TrieDbT>::update(bytes_view_t key, bytes_view_t value, std::error_code & ec) -> void
+merkle_patricia_trie<TrieDbT>::update(bytes_view_t key, bytes_view_t value) -> expected<void, std::error_code>
 {
     if (committed_)
     {
-        ec = make_error_code(errc::trie_already_committed);
-        return;
+        return make_unexpected(make_error_code(errc::trie_already_committed));
     }
 
+    auto nibble_key = nibble_bytes::from(key);
     if (value.empty())
     {
-        remove(key, ec);
+        return remove(key);
     }
-    else
-    {
-        insert(key, value, ec);
-    }
+
+    return insert(this->root_, nibble_bytes_view{}, nibble_key, value);
 }
 
 template <typename TrieDbT>
@@ -67,7 +66,6 @@ merkle_patricia_trie<TrieDbT>::try_get(bytes_view_t key) const -> expected<bytes
 {
     // return db_->try_get(key);
     return {};
-
 }
 
 template <typename TrieDbT>
@@ -77,7 +75,13 @@ merkle_patricia_trie<TrieDbT>::try_update(bytes_view_t key, bytes_view_t value, 
     // db_->try_update(key, value, ec);
 }
 
-
+template <typename TrieDbT>
+auto
+merkle_patricia_trie<TrieDbT>::insert(std::shared_ptr<node_face> node, nibble_bytes_view prefix, nibble_bytes_view key, bytes_view_t value) -> expected<void, std::error_code>
+{
+    // db_->insert(key, value, ec);
+    return {};
+}
 
 }
 
