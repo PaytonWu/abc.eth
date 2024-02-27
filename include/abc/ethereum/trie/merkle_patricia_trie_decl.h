@@ -7,6 +7,8 @@
 #pragma once
 
 #include "merkle_patricia_trie_fwd_decl.h"
+#include "node_face_decl.h"
+#include "nibble_bytes_view_decl.h"
 
 #include <abc/bytes.h>
 #include <abc/expected.h>
@@ -23,6 +25,7 @@ class merkle_patricia_trie
 private:
     TrieDbT * db_{nullptr};
     bool committed_{false};
+    std::shared_ptr<node_face> root_{nullptr};
 
 public:
     merkle_patricia_trie(merkle_patricia_trie const &) = delete;
@@ -47,7 +50,7 @@ public:
     get(bytes_view_t key) const -> expected<bytes_t, std::error_code>;
 
     auto
-    update(bytes_view_t key, bytes_view_t value, std::error_code & ec) -> void;
+    update(bytes_view_t key, bytes_view_t value) -> expected<void, std::error_code>;
 
 private:
     auto
@@ -57,10 +60,10 @@ private:
     try_update(bytes_view_t key, bytes_view_t value, std::error_code & ec) -> void;
 
     auto
-    insert(bytes_view_t key, bytes_view_t value, std::error_code & ec) -> void;
+    insert(std::shared_ptr<node_face> node, nibble_bytes_view prefix, nibble_bytes_view key, bytes_view_t value) -> expected<void, std::error_code>;
 
     auto
-    remove(bytes_view_t key, std::error_code & ec) -> void;
+    remove(bytes_view_t key) -> expected<void, std::error_code>;
 };
 
 } // namespace abc::ethereum::trie
