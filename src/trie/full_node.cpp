@@ -2,15 +2,15 @@
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
 #include <abc/ethereum/trie/full_node.h>
-#include <abc/ethereum/trie/node_flag.h>
+#include <abc/ethereum/trie/hash_flag.h>
 
 namespace abc::ethereum::trie
 {
 
 auto
-full_node::cache() const -> std::tuple<hash_node, bool>
+full_node::cache() const -> hash_flag
 {
-    return {flag_.hash_node(), flag_.dirty()};
+    return flag_;
 }
 
 auto

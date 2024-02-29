@@ -31,8 +31,8 @@ public:
     constexpr auto
     operator=(hash_node &&) -> hash_node & = default;
 
-    [[nodiscard]] auto
-    cache() const -> std::tuple<hash_node, bool> override;
+    [[nodiscard]] constexpr auto
+    cache() const -> hash_flag override;
 
 //    auto
 //    encode(rlp::sbuffer & buffer) const -> void override;

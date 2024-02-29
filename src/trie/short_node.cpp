@@ -1,16 +1,16 @@
 // Copyright(c) 2024 - present, Payton Wu (payton.wu@outlook.com) & the contributors.
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
+#include <abc/ethereum/trie/hash_flag.h>
 #include <abc/ethereum/trie/short_node.h>
-#include <abc/ethereum/trie/node_flag.h>
 
 namespace abc::ethereum::trie
 {
 
 auto
-short_node::cache() const -> std::tuple<hash_node, bool>
+short_node::cache() const -> hash_flag
 {
-    return {flag_.hash_node(), flag_.dirty()};
+    return flag_;
 }
 
 auto
