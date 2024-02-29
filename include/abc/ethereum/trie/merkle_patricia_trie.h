@@ -10,6 +10,7 @@
 #include "merkle_patricia_trie_decl.h"
 #include "nibble_bytes.h"
 #include "nibble_bytes_view.h"
+#include "value_node.h"
 
 #include <cassert>
 
@@ -77,8 +78,15 @@ merkle_patricia_trie<TrieDbT>::try_update(bytes_view_t key, bytes_view_t value, 
 
 template <typename TrieDbT>
 auto
-merkle_patricia_trie<TrieDbT>::insert(std::shared_ptr<node_face> node, nibble_bytes_view prefix, nibble_bytes_view key, bytes_view_t value) -> expected<void, std::error_code>
+merkle_patricia_trie<TrieDbT>::insert(std::shared_ptr<node_face> & node, nibble_bytes_view prefix, nibble_bytes_view key, bytes_view_t value) -> expected<void, std::error_code>
 {
+    if (key.empty())
+    {
+        if (node->type() == node_type::value_node && std::static_pointer_cast<value_node>(node)->value() == value)
+        {
+            return {};
+        }
+    }
     // db_->insert(key, value, ec);
     return {};
 }

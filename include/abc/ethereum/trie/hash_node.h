@@ -8,8 +8,16 @@
 
 #include "hash_node_decl.h"
 
+#include "hash_flag.h"
+
 namespace abc::ethereum::trie
 {
+
+constexpr auto
+hash_node::cache() const -> hash_flag
+{
+    return hash_flag{true};
+}
 
 constexpr auto
 hash_node::type() const noexcept -> node_type

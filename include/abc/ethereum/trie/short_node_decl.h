@@ -9,9 +9,9 @@
 #include "short_node_fwd_decl.h"
 
 #include "compact_bytes_decl.h"
+#include "hash_flag_decl.h"
 #include "nibble_bytes_decl.h"
 #include "node_face_decl.h"
-#include "node_flag_decl.h"
 
 #include <abc/bytes.h>
 
@@ -28,7 +28,7 @@ class short_node : public node_face
     std::optional<nibble_bytes> nibble_bytes_key_{};
 
     std::unique_ptr<node_face> value_{};
-    node_flag flag_{};
+    hash_flag flag_{};
 
 public:
     short_node() = default;
@@ -44,7 +44,7 @@ public:
 
 public:
     [[nodiscard]] auto
-    cache() const -> std::tuple<trie::hash_node, bool> override;
+    cache() const -> hash_flag override;
 
     [[nodiscard]] auto
     fstring(std::string_view indent) const -> std::string override;

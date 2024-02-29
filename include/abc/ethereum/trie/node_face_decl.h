@@ -8,10 +8,9 @@
 
 #include "node_face_fwd_decl.h"
 
-#include "hash_node_fwd_decl.h"
+#include "hash_flag_decl.h"
 
 #include <string_view>
-#include <tuple>
 
 namespace abc::ethereum::trie
 {
@@ -22,6 +21,7 @@ enum class [[nodiscard]] node_type
     full_node,
     hash_node,
     short_node,
+    value_node,
 };
 
 class [[nodiscard]] node_face
@@ -36,7 +36,7 @@ public:
     auto operator=(node_face &&) -> node_face & = default;
 
     [[nodiscard]] virtual auto
-    cache() const -> std::tuple<trie::hash_node, bool> = 0;
+    cache() const -> hash_flag = 0;
 
     [[nodiscard]] virtual auto
     fstring(std::string_view indent) const -> std::string = 0;

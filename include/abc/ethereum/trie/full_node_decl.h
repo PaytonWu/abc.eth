@@ -7,9 +7,9 @@
 #pragma once
 
 #include "full_node_fwd_decl.h"
-#include "node_face_fwd_decl.h"
-#include "node_flag_decl.h"
-// #include "node_variant_decl.h"
+
+#include "hash_flag_decl.h"
+#include "node_face_decl.h"
 
 #include <abc/memory.h>
 
@@ -25,8 +25,7 @@ public:
     static constexpr std::size_t children_size = 17;
 private:
     std::array<std::shared_ptr<node_face>, children_size> children_{};
-    // std::array<std::unique_ptr<node_face>, children_size> children2_{};
-    node_flag flag_{};
+    hash_flag flag_{};
 
 public:
     full_node() = default;
@@ -42,7 +41,7 @@ public:
 
 public:
     [[nodiscard]] auto
-    cache() const -> std::tuple<hash_node, bool> override;
+    cache() const -> hash_flag override;
 
     [[nodiscard]] auto
     fstring(std::string_view indent) const -> std::string override;
