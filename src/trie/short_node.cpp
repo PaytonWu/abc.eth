@@ -4,6 +4,8 @@
 #include <abc/ethereum/trie/hash_flag.h>
 #include <abc/ethereum/trie/short_node.h>
 
+#include <cassert>
+
 namespace abc::ethereum::trie
 {
 
@@ -17,6 +19,27 @@ auto
 short_node::fstring(std::string_view /*indent*/) const -> std::string
 {
     return {};
+}
+
+auto
+short_node::raw_keys() const -> bytes_t const &
+{
+    assert(std::holds_alternative<bytes_t>(key_));
+    return std::get<bytes_t>(key_);
+}
+
+auto
+short_node::nibble_keys() const -> nibble_bytes const &
+{
+    assert(std::holds_alternative<nibble_bytes>(key_));
+    return std::get<nibble_bytes>(key_);
+}
+
+auto
+short_node::compact_keys() const -> compact_bytes const &
+{
+    assert(std::holds_alternative<compact_bytes>(key_));
+    return std::get<compact_bytes>(key_);
 }
 
 } // namespace abc::ethereum::trie

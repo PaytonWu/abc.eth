@@ -17,6 +17,7 @@
 
 #include <memory>
 #include <optional>
+#include <variant>
 
 namespace abc::ethereum::trie
 {
@@ -26,6 +27,8 @@ class short_node : public node_face
     std::optional<bytes_t> bytes_key_{};
     std::optional<compact_bytes> compact_bytes_key_{};
     std::optional<nibble_bytes> nibble_bytes_key_{};
+
+    std::variant<bytes_t, nibble_bytes, compact_bytes> key_{};
 
     std::unique_ptr<node_face> value_{};
     hash_flag flag_{};
@@ -51,6 +54,15 @@ public:
 
     constexpr auto
     type() const noexcept -> node_type override;
+
+    auto
+    raw_keys() const -> bytes_t const &;
+
+    auto
+    nibble_keys() const -> nibble_bytes const &;
+
+    auto
+    compact_keys() const -> compact_bytes const &;
 };
 
 }

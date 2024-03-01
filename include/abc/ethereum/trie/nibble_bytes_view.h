@@ -27,7 +27,7 @@ auto
 nibble_bytes_view::in_place_fill(BytesT & bytes) const -> expected<std::size_t, std::error_code>
 {
     auto view_copy = view_;
-    if (has_termintor())
+    if (has_terminator())
     {
         view_copy = view_copy.substr(0, view_copy.size() - 1);
     }
@@ -64,7 +64,7 @@ auto
 nibble_bytes_view::to() const -> expected<BytesT, std::error_code>
 {
     auto view_copy = view_;
-    if (has_termintor())
+    if (has_terminator())
     {
         view_copy = view_copy.substr(0, view_copy.size() - 1);
     }
@@ -97,7 +97,7 @@ nibble_bytes_view::to() const -> expected<BytesT, std::error_code>
 }
 
 constexpr auto
-nibble_bytes_view::has_termintor() const noexcept -> bool
+nibble_bytes_view::has_terminator() const noexcept -> bool
 {
     return !view_.empty() && view_.back() == terminator;
 }
@@ -222,6 +222,22 @@ constexpr auto
 nibble_bytes_view::subview(size_type offset, size_type count) const -> nibble_bytes_view
 {
     return {view_.substr(offset, count)};
+}
+
+constexpr auto
+common_prefix_length(nibble_bytes_view lhs, nibble_bytes_view rhs) noexcept -> std::size_t
+{
+    auto const min_size = std::min(lhs.size(), rhs.size());
+    auto i = 0u;
+    for (; i < min_size; ++i)
+    {
+        if (lhs[i] != rhs[i])
+        {
+            break;
+        }
+    }
+
+    return i;
 }
 
 } // namespace abc::ethereum::trie

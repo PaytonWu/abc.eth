@@ -11,6 +11,7 @@
 #include "nibble_bytes.h"
 #include "nibble_bytes_view.h"
 #include "value_node.h"
+#include "short_node.h"
 
 #include <cassert>
 
@@ -78,19 +79,47 @@ merkle_patricia_trie<TrieDbT>::try_update(bytes_view_t key, bytes_view_t value, 
 
 template <typename TrieDbT>
 auto
-merkle_patricia_trie<TrieDbT>::insert(std::shared_ptr<node_face> & node, nibble_bytes_view prefix, nibble_bytes_view key, bytes_view_t value) -> expected<void, std::error_code>
+merkle_patricia_trie<TrieDbT>::insert(std::shared_ptr<node_face> & node, nibble_bytes_view prefix, nibble_bytes_view key, bytes_view_t value)
+    -> expected<std::shared_ptr<node_face>, std::error_code>
 {
     if (key.empty())
     {
         if (node->type() == node_type::value_node && std::static_pointer_cast<value_node>(node)->value() == value)
         {
-            return {};
+            return node;
+        }
+
+        return std::make_shared<value_node>(value);
+    }
+
+    switch (node->type())
+    {
+        case node_type::short_node:
+        {
+            auto short_node = std::static_pointer_cast<trie::short_node>(node);
+            auto cpl = common_prefix_length(key, short_node->nibble_keys());
+
+            break;
+        }
+
+        case node_type::full_node:
+        {
+            break;
+        }
+
+        case node_type::hash_node:
+        {
+            break;
+        }
+
+        default:
+        {
+            break;
         }
     }
-    // db_->insert(key, value, ec);
     return {};
 }
 
-}
+} // namespace abc::ethereum::trie
 
-#endif //ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_MERKLE_PATRICIA_TRIE
+#endif // ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_MERKLE_PATRICIA_TRIE
