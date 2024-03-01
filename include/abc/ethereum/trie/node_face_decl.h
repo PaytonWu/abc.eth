@@ -1,8 +1,8 @@
 // Copyright(c) 2024 - present, Payton Wu (payton.wu@outlook.com) & the contributors.
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
-#if !defined(ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_NODE_FACE)
-#define ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_NODE_FACE
+#if !defined(ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_NODE_FACE_DECL)
+#define ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_NODE_FACE_DECL
 
 #pragma once
 
@@ -32,8 +32,10 @@ public:
     node_face(node_face &&) = default;
     virtual ~node_face() = default;
 
-    auto operator=(node_face const &) -> node_face & = default;
-    auto operator=(node_face &&) -> node_face & = default;
+    auto
+    operator=(node_face const &) -> node_face & = default;
+    auto
+    operator=(node_face &&) -> node_face & = default;
 
     [[nodiscard]] virtual auto
     cache() const -> hash_flag = 0;
@@ -42,9 +44,9 @@ public:
     fstring(std::string_view indent) const -> std::string = 0;
 
     virtual auto
-    type() const noexcept -> node_type = 0;
+    type() const noexcept -> node_type;
 };
 
-}
+} // namespace abc::ethereum::trie
 
-#endif // ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_NODE_FACE
+#endif // ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_NODE_FACE_DECL

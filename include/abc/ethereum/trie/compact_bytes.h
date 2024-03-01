@@ -18,7 +18,7 @@ namespace abc::ethereum::trie
 constexpr compact_bytes::compact_bytes(nibble_bytes_view view)
 {
     byte terminator{static_cast<byte>(0)};
-    if (view.has_termintor())
+    if (view.has_terminator())
     {
         terminator = static_cast<byte>(1);
         view = view.first(view.size() - 1);
