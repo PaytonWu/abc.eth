@@ -30,7 +30,7 @@ class short_node : public node_face
 
     std::variant<bytes_t, nibble_bytes, compact_bytes> key_{};
 
-    std::unique_ptr<node_face> value_{};
+    std::shared_ptr<node_face> value_{};
     hash_flag flag_{};
 
 public:
@@ -38,6 +38,10 @@ public:
     short_node(short_node const &) = delete;
     short_node(short_node &&) = default;
     ~short_node() override = default;
+
+    short_node(bytes_t const & raw_key, std::shared_ptr<node_face> value, hash_flag flag);
+    short_node(nibble_bytes const & nibble_key, std::shared_ptr<node_face> value, hash_flag flag);
+    short_node(compact_bytes const & compact_key, std::shared_ptr<node_face> value, hash_flag flag);
 
     auto
     operator=(short_node const &) -> short_node & = delete;
@@ -63,6 +67,9 @@ public:
 
     auto
     compact_keys() const -> compact_bytes const &;
+
+    [[nodiscard]] constexpr auto
+    value() const noexcept -> std::shared_ptr<node_face> const &;
 };
 
 }

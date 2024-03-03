@@ -80,16 +80,16 @@ merkle_patricia_trie<TrieDbT>::try_update(bytes_view_t key, bytes_view_t value, 
 template <typename TrieDbT>
 auto
 merkle_patricia_trie<TrieDbT>::insert(std::shared_ptr<node_face> & node, nibble_bytes_view prefix, nibble_bytes_view key, bytes_view_t value)
-    -> expected<std::shared_ptr<node_face>, std::error_code>
+    -> expected<update_result, std::error_code>
 {
     if (key.empty())
     {
         if (node->type() == node_type::value_node && std::static_pointer_cast<value_node>(node)->value() == value)
         {
-            return node;
+            return update_result{.node = node, .dirty = false};
         }
 
-        return std::make_shared<value_node>(value);
+        return update_result{.node = std::make_shared<value_node>(value), .dirty = true};
     }
 
     switch (node->type())
@@ -98,6 +98,27 @@ merkle_patricia_trie<TrieDbT>::insert(std::shared_ptr<node_face> & node, nibble_
         {
             auto short_node = std::static_pointer_cast<trie::short_node>(node);
             auto cpl = common_prefix_length(key, short_node->nibble_keys());
+
+            // If the whole key matches, keep this short node as is
+            // and only update the value.
+            if (cpl == short_node->nibble_keys().size())
+            {
+                auto new_key = key.subview(cpl);
+                auto insert_result = insert(short_node->value(), prefix + key.first(cpl), new_key, value);
+
+                if (insert_result.is_err())
+                {
+                    return insert_result;
+                }
+
+                if (!insert_result.value().dirty)
+                {
+                    return update_result{.node = short_node, .dirty = false};
+                }
+
+                return update_result{.node = std::make_shared<trie::short_node>(short_node->nibble_keys(), insert_result.value(), hash_flag{}), .dirty = true};
+            }
+            // Otherwise branch out at the index where they differ.
 
             break;
         }

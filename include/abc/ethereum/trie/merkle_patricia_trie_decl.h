@@ -19,6 +19,12 @@
 namespace abc::ethereum::trie
 {
 
+struct update_result
+{
+    std::shared_ptr<node_face> node{nullptr};
+    bool dirty{false};
+};
+
 template <typename TrieDbT>
 class merkle_patricia_trie
 {
@@ -60,7 +66,7 @@ private:
     try_update(bytes_view_t key, bytes_view_t value, std::error_code & ec) -> void;
 
     auto
-    insert(std::shared_ptr<node_face> & node, nibble_bytes_view prefix, nibble_bytes_view key, bytes_view_t value) -> expected<std::shared_ptr<node_face>, std::error_code>;
+    insert(std::shared_ptr<node_face> & node, nibble_bytes_view prefix, nibble_bytes_view key, bytes_view_t value) -> expected<update_result, std::error_code>;
 
     auto
     remove(bytes_view_t key) -> expected<void, std::error_code>;
