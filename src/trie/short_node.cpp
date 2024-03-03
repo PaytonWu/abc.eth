@@ -9,6 +9,21 @@
 namespace abc::ethereum::trie
 {
 
+short_node::short_node(bytes_t const & raw_key, std::shared_ptr<node_face> value, hash_flag flag)
+    : key_{raw_key}, value_{std::move(value)}, flag_{flag}
+{
+}
+
+short_node::short_node(nibble_bytes const & nibble_key, std::shared_ptr<node_face> value, hash_flag flag)
+    : key_{nibble_key}, value_{std::move(value)}, flag_{flag}
+{
+}
+
+short_node::short_node(compact_bytes const & compact_key, std::shared_ptr<node_face> value, hash_flag flag)
+    : key_{compact_key}, value_{std::move(value)}, flag_{flag}
+{
+}
+
 auto
 short_node::cache() const -> hash_flag
 {

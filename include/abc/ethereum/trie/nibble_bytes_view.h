@@ -225,6 +225,13 @@ nibble_bytes_view::subview(size_type offset, size_type count) const -> nibble_by
 }
 
 constexpr auto
+operator+(nibble_bytes_view lhs, nibble_bytes_view rhs) -> nibble_bytes_view
+{
+    assert(std::next(std::addressof(lhs.back())) == std::addressof(rhs.front()));
+    return {lhs.view_.data(), lhs.view_.size() + rhs.view_.size()};
+}
+
+constexpr auto
 common_prefix_length(nibble_bytes_view lhs, nibble_bytes_view rhs) noexcept -> std::size_t
 {
     auto const min_size = std::min(lhs.size(), rhs.size());

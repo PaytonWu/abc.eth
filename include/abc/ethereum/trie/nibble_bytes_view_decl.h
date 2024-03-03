@@ -129,6 +129,9 @@ public:
 
     constexpr auto
     subview(size_type offset, size_type count = npos) const -> nibble_bytes_view;
+
+    friend constexpr auto
+    operator+(nibble_bytes_view lhs, nibble_bytes_view rhs) -> nibble_bytes_view;
 };
 
 [[nodiscard]] constexpr auto

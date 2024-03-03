@@ -17,7 +17,7 @@ class hash_flag
 {
 private:
     h256_t hash_{};
-    bool dirty_{false};
+    bool dirty_{true};
 
 public:
     hash_flag() = default;

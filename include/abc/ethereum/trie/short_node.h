@@ -17,6 +17,12 @@ short_node::type() const noexcept -> node_type
     return node_type::short_node;
 }
 
+constexpr auto
+short_node::value() const noexcept -> std::shared_ptr<node_face> const &
+{
+    return value_;
+}
+
 } // namespace abc::ethereum::trie
 
 #endif // ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_SHORT_NODE
