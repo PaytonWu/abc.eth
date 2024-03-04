@@ -32,6 +32,7 @@ public:
 
     full_node(full_node const &) = delete;
     full_node(full_node &&) = default;
+    ~full_node() override = default;
 
     auto
     operator=(full_node const &) -> full_node & = delete;
