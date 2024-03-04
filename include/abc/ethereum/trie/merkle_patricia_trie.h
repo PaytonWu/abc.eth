@@ -6,12 +6,14 @@
 
 #pragma once
 
-#include "error.h"
 #include "merkle_patricia_trie_decl.h"
+
+#include "error.h"
+#include "full_node.h"
 #include "nibble_bytes.h"
 #include "nibble_bytes_view.h"
-#include "value_node.h"
 #include "short_node.h"
+#include "value_node.h"
 
 #include <cassert>
 
@@ -79,7 +81,7 @@ merkle_patricia_trie<TrieDbT>::try_update(bytes_view_t key, bytes_view_t value, 
 
 template <typename TrieDbT>
 auto
-merkle_patricia_trie<TrieDbT>::insert(std::shared_ptr<node_face> & node, nibble_bytes_view prefix, nibble_bytes_view key, bytes_view_t value)
+merkle_patricia_trie<TrieDbT>::insert(std::shared_ptr<node_face> const & node, nibble_bytes_view prefix, nibble_bytes_view key, bytes_view_t value)
     -> expected<update_result, std::error_code>
 {
     if (key.empty())
@@ -106,21 +108,44 @@ merkle_patricia_trie<TrieDbT>::insert(std::shared_ptr<node_face> & node, nibble_
                 auto new_key = key.subview(cpl);
                 auto insert_result = insert(short_node->value(), prefix + key.first(cpl), new_key, value);
 
-                if (insert_result.is_err())
-                {
-                    return insert_result;
-                }
+                return insert_result.and_then([&](update_result & result) {
+                    if (!result.dirty)
+                    {
+                        return update_result{.node = short_node, .dirty = false};
+                    }
 
-                if (!insert_result.value().dirty)
-                {
-                    return update_result{.node = short_node, .dirty = false};
-                }
-
-                return update_result{.node = std::make_shared<trie::short_node>(short_node->nibble_keys(), insert_result.value(), hash_flag{}), .dirty = true};
+                    return update_result{.node = std::make_shared<trie::short_node>(short_node->nibble_keys(), result.node, hash_flag{}), .dirty = true};
+                });
             }
             // Otherwise branch out at the index where they differ.
+            auto branch_node = std::make_shared<trie::full_node>();
+            auto insert_result = insert(nullptr, prefix + short_node->nibble_keys().first(cpl + 1), short_node->nibble_keys().subview(cpl + 1), short_node->value());
+            if (insert_result.is_err())
+            {
+                return insert_result;
+            }
+            branch_node->children(short_node->nibble_keys()[cpl]) = insert_result.node;
 
-            break;
+            insert_result = insert(nullptr, prefix + key.first(cpl + 1), key.subview(cpl + 1), value);
+            if (insert_result.is_err())
+            {
+                return insert_result;
+            }
+            branch_node->children(key[cpl]) = insert_result.node;
+
+            // Replace this shortNode with the branch if it occurs at index 0.
+            if (cpl == 0)
+            {
+                return update_result{.node = branch_node, .dirty = true};
+            }
+
+            // New branch node is created as a child of the original short node.
+            // Track the newly inserted node in the tracer. The node identifier
+            // passed is the path from the root node.
+            // t.tracer.onInsert(append(prefix, key[:matchlen]...))
+
+            // Replace it with a short node leading up to the branch.
+            return update_result{.node = std::make_shared<trie::short_node>(key.first(cpl), branch_node, hash_flag{}), .dirty = true};
         }
 
         case node_type::full_node:
