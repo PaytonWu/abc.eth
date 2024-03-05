@@ -14,6 +14,7 @@ namespace abc::ethereum::trie
 enum class errc {
     success,
     trie_already_committed,
+    unexpected_eof,
 };
 
 auto make_error_code(errc ec) -> std::error_code;

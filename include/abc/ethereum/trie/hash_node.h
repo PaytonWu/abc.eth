@@ -25,6 +25,12 @@ hash_node::type() const noexcept -> node_type
     return node_type::hash_node;
 }
 
+constexpr auto
+hash_node::hash() const noexcept -> h256_t const &
+{
+    return hash_;
+}
+
 }
 
 #endif // ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_HASH_NODE

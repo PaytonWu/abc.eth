@@ -30,6 +30,9 @@ auto ethereum_trie_category() -> std::error_category const &
                 case errc::trie_already_committed:
                     return "trie already committed";
 
+                case errc::unexpected_eof:
+                    return "unexpected EOF";
+
                 default:
                     return "unknown error";
             }

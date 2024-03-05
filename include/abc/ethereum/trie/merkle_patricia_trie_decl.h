@@ -9,6 +9,7 @@
 #include "merkle_patricia_trie_fwd_decl.h"
 #include "node_face_decl.h"
 #include "nibble_bytes_view_decl.h"
+#include "hash_node_fwd_decl.h"
 
 #include <abc/bytes.h>
 #include <abc/expected.h>
@@ -25,11 +26,11 @@ struct update_result
     bool dirty{false};
 };
 
-template <typename TrieDbT>
+template <typename DbReaderT>
 class merkle_patricia_trie
 {
 private:
-    TrieDbT * db_{nullptr};
+    DbReaderT * dbReader_{nullptr};
     bool committed_{false};
     std::shared_ptr<node_face> root_{nullptr};
 
@@ -46,7 +47,7 @@ public:
     ~merkle_patricia_trie() = default;
 
     explicit
-    merkle_patricia_trie(TrieDbT * db);
+    merkle_patricia_trie(DbReaderT * dbReader);
 
 public:
     auto
@@ -70,6 +71,9 @@ private:
 
     auto
     remove(bytes_view_t key) -> expected<void, std::error_code>;
+
+    auto
+    resolve(trie::hash_node * hash_node, nibble_bytes_view prefix) -> expected<std::shared_ptr<node_face>, std::error_code>;
 };
 
 } // namespace abc::ethereum::trie
