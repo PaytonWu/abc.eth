@@ -42,6 +42,9 @@ public:
 
     constexpr auto
     type() const noexcept -> node_type override;
+
+    constexpr auto
+    hash() const noexcept -> h256_t const &;
 };
 
 } // namespace abc::ethereum::trie
