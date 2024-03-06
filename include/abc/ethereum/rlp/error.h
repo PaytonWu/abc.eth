@@ -20,6 +20,8 @@ enum class errc
     stack_overflow,
     unpack_error,
     type_error,
+    unexpected_eof,
+    non_canonical_size,
 };
 
 auto

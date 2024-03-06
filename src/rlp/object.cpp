@@ -13,6 +13,8 @@ object::is_nil() const noexcept -> bool
 {
     switch (type)
     {
+        case type::byte:
+            [[fallthrough]];
         case type::bytes:
             return !static_cast<bool>(reinterpret_cast<std::uintptr_t>(data.bytes.ptr) & data.bytes.size);
         case type::list:
