@@ -44,8 +44,14 @@ list_size(std::uint64_t content_size) noexcept -> std::uint64_t;
 [[nodiscard]] auto
 read_kind(bytes_view_t buf) -> expected<decoded_type_and_size, std::error_code>;
 
-constexpr auto
+auto
 split(bytes_view_t buf) -> expected<decoded_item, std::error_code>;
+
+auto
+split_bytes(bytes_view_t buf) -> expected<decoded_item, std::error_code>;
+
+//template <std::unsigned_integral T>
+//split_integer(bytes_view_t buf) -> expected<decoded_item, std::error_code>;
 
 }
 

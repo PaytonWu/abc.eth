@@ -22,6 +22,7 @@ enum class errc
     type_error,
     unexpected_eof,
     non_canonical_size,
+    expected_bytes,
 };
 
 auto

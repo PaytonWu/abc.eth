@@ -53,6 +53,9 @@ ethereum_rlp_category() -> std::error_category const &
                 case errc::non_canonical_size:
                     return "rlp: non-canonical size";
 
+                case errc::expected_bytes:
+                    return "rlp: expected bytes";
+
                 default:
                     return "unknown error";
             }
