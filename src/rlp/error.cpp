@@ -62,6 +62,9 @@ ethereum_rlp_category() -> std::error_category const &
                 case errc::uint_overflow:
                     return "rlp: uint overflow";
 
+                case errc::value_too_large:
+                    return "rlp: value size exceeds available input length";
+
                 default:
                     return "unknown error";
             }

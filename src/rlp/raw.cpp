@@ -116,6 +116,11 @@ read_kind(bytes_view_t buf) -> expected<decoded_type_and_size, std::error_code>
         result.content_size = sr.value();
     }
 
+    if (result.content_size > static_cast<std::uint64_t>(sz) - result.tag_size)
+    {
+        return make_unexpected(make_error_code(errc::value_too_large));
+    }
+
     return result;
 }
 

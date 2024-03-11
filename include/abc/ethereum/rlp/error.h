@@ -25,6 +25,7 @@ enum class errc
     expected_bytes,
     non_canonical_integral,
     uint_overflow,
+    value_too_large,
 };
 
 auto

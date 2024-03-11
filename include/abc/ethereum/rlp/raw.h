@@ -120,7 +120,7 @@ split_unsigned_integral(bytes_view_t buf) -> expected<decoded_unsigned_integral_
     });
 }
 
-auto
+constexpr auto
 append_unsigned_integral(abc::bytes_t & buffer, std::uint64_t value) -> void
 {
     if (value == 0)

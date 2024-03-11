@@ -70,7 +70,7 @@ split_list(bytes_view_t buf) -> expected<decoded_item, std::error_code>;
 auto
 count_value(bytes_view_t buf) -> expected<std::uint64_t, std::error_code>;
 
-auto
+constexpr auto
 append_unsigned_integral(abc::bytes_t & buffer, std::uint64_t value) -> void;
 
 }
