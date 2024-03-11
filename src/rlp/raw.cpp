@@ -144,4 +144,33 @@ split_bytes(bytes_view_t buf) -> expected<decoded_item, std::error_code>
     return split_result;
 }
 
+auto
+split_list(bytes_view_t buf) -> expected<decoded_item, std::error_code>
+{
+    return split(buf).and_then([](auto && decoded_item) -> expected<rlp::decoded_item, std::error_code> {
+        if (decoded_item.type != type::list)
+        {
+            return make_unexpected(make_error_code(errc::type_error));
+        }
+        return decoded_item;
+    });
+}
+
+auto
+count_value(bytes_view_t buf) -> expected<uint64_t, std::error_code>
+{
+    uint64_t i{0};
+    for (; !buf.empty(); ++i)
+    {
+        auto result = read_kind(buf).transform([&i, &buf](decoded_type_and_size const & dts) {
+            buf = buf.subview(dts.tag_size + dts.content_size);
+            return i;
+        });
+        if (result.is_err()) {
+            return result;
+        }
+    }
+    return i;
+}
+
 } // namespace abc::ethereum::rlp

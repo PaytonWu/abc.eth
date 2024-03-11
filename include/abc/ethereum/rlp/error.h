@@ -23,6 +23,8 @@ enum class errc
     unexpected_eof,
     non_canonical_size,
     expected_bytes,
+    non_canonical_integral,
+    uint_overflow,
 };
 
 auto

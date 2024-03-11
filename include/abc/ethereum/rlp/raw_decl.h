@@ -8,7 +8,7 @@
 
 #include "object_type.h"
 
-#include <abc/bytes_view.h>
+#include <abc/bytes.h>
 #include <abc/expected.h>
 
 #include <cstdint>
@@ -22,6 +22,13 @@ struct decoded_item
 {
     type type{type::invalid};
     bytes_view_t content{};
+    bytes_view_t rest{};
+};
+
+template <std::unsigned_integral T>
+struct decoded_unsigned_integral_item
+{
+    T value{0};
     bytes_view_t rest{};
 };
 
@@ -42,6 +49,9 @@ string_size(std::string_view str) noexcept -> std::uint64_t;
 list_size(std::uint64_t content_size) noexcept -> std::uint64_t;
 
 [[nodiscard]] auto
+read_size(bytes_view_t buf, byte size_of_length) -> expected<std::uint64_t, std::error_code>;
+
+[[nodiscard]] auto
 read_kind(bytes_view_t buf) -> expected<decoded_type_and_size, std::error_code>;
 
 auto
@@ -50,8 +60,18 @@ split(bytes_view_t buf) -> expected<decoded_item, std::error_code>;
 auto
 split_bytes(bytes_view_t buf) -> expected<decoded_item, std::error_code>;
 
-//template <std::unsigned_integral T>
-//split_integer(bytes_view_t buf) -> expected<decoded_item, std::error_code>;
+template <std::unsigned_integral T>
+auto
+split_unsigned_integral(bytes_view_t buf) -> expected<decoded_unsigned_integral_item<T>, std::error_code>;
+
+auto
+split_list(bytes_view_t buf) -> expected<decoded_item, std::error_code>;
+
+auto
+count_value(bytes_view_t buf) -> expected<std::uint64_t, std::error_code>;
+
+auto
+append_unsigned_integral(abc::bytes_t & buffer, std::uint64_t value) -> void;
 
 }
 

@@ -6,11 +6,16 @@
 
 #pragma once
 
+#include <concepts>
+
 namespace abc::ethereum::rlp
 {
 
 struct [[nodiscard]] decoded_item;
 struct [[nodiscard]] decoded_type_and_size;
+
+template <std::unsigned_integral T>
+struct [[nodiscard]] decoded_unsigned_integral_item;
 
 } // namespace abc::ethereum::rlp
 
