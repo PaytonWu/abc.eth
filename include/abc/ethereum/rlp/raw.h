@@ -93,31 +93,36 @@ template <std::unsigned_integral T>
 auto
 split_unsigned_integral(bytes_view_t buf) -> expected<decoded_unsigned_integral_item<T>, std::error_code>
 {
-    return split_bytes(buf).transform([](decoded_item const & decoded_item) -> decoded_unsigned_integral_item<T> {
-        if (decoded_item.content.empty())
+    auto const & tmp_result = split_bytes(buf);
+    if (tmp_result.is_err())
+    {
+        return make_unexpected(tmp_result.error());
+    }
+
+    auto const & decoded_item = tmp_result.value();
+    if (decoded_item.content.empty())
+    {
+        return decoded_unsigned_integral_item<T>{.value = 0, .rest = decoded_item.rest};
+    }
+
+    if (decoded_item.content.size() == 1)
+    {
+        if (decoded_item.content[0] == 0)
         {
-            return decoded_unsigned_integral_item<T>{.value = 0, .rest = decoded_item.rest};
+            return make_unexpected(make_error_code(errc::non_canonical_integral));
         }
 
-        if (decoded_item.content.size() == 1)
-        {
-            if (decoded_item.content[0] == 0)
-            {
-                return make_unexpected(make_error_code(errc::non_canonical_integral));
-            }
+        return decoded_unsigned_integral_item<T>{.value = static_cast<T>(decoded_item.content[0]), .rest = decoded_item.rest};
+    }
 
-            return decoded_unsigned_integral_item<T>{.value = static_cast<T>(decoded_item.content[0]), .rest = decoded_item.rest};
-        }
+    if (decoded_item.content.size() > 8)
+    {
+        return make_unexpected(make_error_code(errc::uint_overflow));
+    }
 
-        if (decoded_item.content.size() > 8)
-        {
-            return make_unexpected(make_error_code(errc::uint_overflow));
-        }
-
-        return read_size(decoded_item.content, static_cast<byte>(decoded_item.content.size()))
-            .transform_error([](auto && error) { return make_error_code(errc::non_canonical_integral); })
-            .transform([&decoded_item](std::uint64_t const size) { return decoded_unsigned_integral_item<T>{.value = size, .rest = decoded_item.rest}; });
-    });
+    return read_size(decoded_item.content, static_cast<byte>(decoded_item.content.size()))
+        .transform_error([](auto && /*error*/) { return make_error_code(errc::non_canonical_integral); })
+        .transform([&decoded_item](std::uint64_t const size) { return decoded_unsigned_integral_item<T>{.value = size, .rest = decoded_item.rest}; });
 }
 
 constexpr auto

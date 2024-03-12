@@ -56,6 +56,9 @@ ethereum_rlp_category() -> std::error_category const &
                 case errc::expected_bytes:
                     return "rlp: expected bytes";
 
+                case errc::expected_list:
+                    return "rlp: expected list";
+
                 case errc::non_canonical_integral:
                     return "rlp: non-canonical integral";
 

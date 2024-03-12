@@ -67,7 +67,102 @@ TEST(rlp_raw, count_value)
         else
         {
             ASSERT_TRUE(result.is_err());
-            ASSERT_EQ(result.error(), test.ec);
+            ASSERT_EQ(test.ec, result.error());
+        }
+    }
+}
+
+TEST(rlp_raw, split_bytes)
+{
+    std::string_view input[]{
+        "C0",
+        "C100",
+        "C3010203",
+        "C88363617483646F67",
+        "F8384C6F72656D20697073756D20646F6C6F722073697420616D65742C20636F6E7365637465747572206164697069736963696E6720656C6974",
+    };
+
+    for (auto [i, test] : ranges::view::enumerate(input))
+    {
+        auto result = split_bytes(unhex(test));
+        ASSERT_TRUE(result.is_err());
+        ASSERT_EQ(make_error_code(errc::expected_bytes), result.error());
+    }
+}
+
+TEST(rlp_raw, split_list)
+{
+    std::string_view input[]{
+        "80",
+        "00",
+        "01",
+        "8180",
+        "81FF",
+        "820400",
+        "83636174",
+        "83646F67",
+        "B8384C6F72656D20697073756D20646F6C6F722073697420616D65742C20636F6E7365637465747572206164697069736963696E6720656C6974",
+    };
+
+    for (auto [i, test] : ranges::view::enumerate(input))
+    {
+        auto result = split_list(unhex(test));
+        ASSERT_TRUE(result.is_err());
+        ASSERT_EQ(make_error_code(errc::expected_list), result.error());
+    }
+}
+
+TEST(rlp_raw, split_unsigned_integral)
+{
+    struct
+    {
+        std::string_view input;
+        std::uint64_t value;
+        std::string_view rest;
+        std::error_code ec;
+    } tests[]{
+        {"01", 1, "", {}},
+        {"7FFF", 0x7F, "FF", {}},
+        {"80FF", 0, "FF", {}},
+        {"81FAFF", 0xFA, "FF", {}},
+        {"82FAFAFF", 0xFAFA, "FF", {}},
+        {"83FAFAFAFF", 0xFAFAFA, "FF", {}},
+        {"84FAFAFAFAFF", 0xFAFAFAFA, "FF", {}},
+        {"85FAFAFAFAFAFF", 0xFAFAFAFAFA, "FF", {}},
+        {"86FAFAFAFAFAFAFF", 0xFAFAFAFAFAFA, "FF", {}},
+        {"87FAFAFAFAFAFAFAFF", 0xFAFAFAFAFAFAFA, "FF", {}},
+        {"88FAFAFAFAFAFAFAFAFF", 0xFAFAFAFAFAFAFAFA, "FF", {}},
+
+        // errors
+        {"", 0, "", make_error_code(errc::unexpected_eof)},
+        {"00", 0, "00", make_error_code(errc::non_canonical_integral)},
+        {"81", 0, "81", make_error_code(errc::value_too_large)},
+        {"8100", 0, "8100", make_error_code(errc::non_canonical_size)},
+        {"8200FF", 0, "8200FF", make_error_code(errc::non_canonical_integral)},
+        {"8103FF", 0, "8103FF", make_error_code(errc::non_canonical_size)},
+        {"89FAFAFAFAFAFAFAFAFAFF", 0, "89FAFAFAFAFAFAFAFAFAFF", make_error_code(errc::uint_overflow)},
+    };
+
+    for (auto [i, test] : ranges::view::enumerate(tests))
+    {
+        auto result = split_unsigned_integral<std::uint64_t>(unhex(test.input));
+        if (!test.ec)
+        {
+            ASSERT_FALSE(result.is_err());
+            auto const & value = result.value();
+
+            ASSERT_EQ(test.value, value.value);
+            ASSERT_EQ(test.rest.size(), value.rest.size());
+            for (auto j = 0u; j < test.rest.size(); ++j)
+            {
+                ASSERT_EQ(test.rest[j], value.rest[j]);
+            }
+            // ASSERT_EQ(static_cast<void const *>(test.rest.data()), static_cast<void const *>(value.rest.data()));
+        }
+        else
+        {
+            ASSERT_TRUE(result.is_err());
+            ASSERT_EQ(test.ec, result.error());
         }
     }
 }

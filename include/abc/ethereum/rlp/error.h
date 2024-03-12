@@ -21,9 +21,10 @@ enum class errc
     unpack_error,
     type_error,
     unexpected_eof,
-    non_canonical_size,
     expected_bytes,
+    expected_list,
     non_canonical_integral,
+    non_canonical_size,
     uint_overflow,
     value_too_large,
 };

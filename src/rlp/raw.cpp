@@ -90,7 +90,7 @@ read_kind(bytes_view_t buf) -> expected<decoded_type_and_size, std::error_code>
     else if (b < 0xC0)
     {
         result.type = type::bytes;
-        result.tag_size = b - 0xB7;
+        result.tag_size = b - 0xB7 + 1;
         auto const sr = read_size(buf.subview(1), b - 0xB7);
         if (sr.is_err())
         {
@@ -107,7 +107,7 @@ read_kind(bytes_view_t buf) -> expected<decoded_type_and_size, std::error_code>
     else
     {
         result.type = type::list;
-        result.tag_size = b - 0xF7;
+        result.tag_size = b - 0xF7 + 1;
         auto const sr = read_size(buf.subview(1), b - 0xF7);
         if (sr.is_err())
         {
@@ -155,7 +155,7 @@ split_list(bytes_view_t buf) -> expected<decoded_item, std::error_code>
     return split(buf).and_then([](auto && decoded_item) -> expected<rlp::decoded_item, std::error_code> {
         if (decoded_item.type != type::list)
         {
-            return make_unexpected(make_error_code(errc::type_error));
+            return make_unexpected(make_error_code(errc::expected_list));
         }
         return decoded_item;
     });
