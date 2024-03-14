@@ -145,19 +145,126 @@ TEST(rlp_raw, split_unsigned_integral)
 
     for (auto [i, test] : ranges::view::enumerate(tests))
     {
-        auto result = split_unsigned_integral<std::uint64_t>(unhex(test.input));
+        auto const test_input = unhex(test.input);
+        auto result = split_unsigned_integral<std::uint64_t>(test_input);
         if (!test.ec)
         {
             ASSERT_FALSE(result.is_err());
             auto const & value = result.value();
 
             ASSERT_EQ(test.value, value.value);
-            ASSERT_EQ(test.rest.size(), value.rest.size());
-            for (auto j = 0u; j < test.rest.size(); ++j)
+            auto test_rest = unhex(test.rest);
+            ASSERT_EQ(test_rest.size(), value.rest.size());
+            for (auto j = 0u; j < test_rest.size(); ++j)
             {
-                ASSERT_EQ(test.rest[j], value.rest[j]);
+                ASSERT_EQ(test_rest[j], value.rest[j]);
             }
-            // ASSERT_EQ(static_cast<void const *>(test.rest.data()), static_cast<void const *>(value.rest.data()));
+        }
+        else
+        {
+            ASSERT_TRUE(result.is_err());
+            ASSERT_EQ(test.ec, result.error());
+        }
+    }
+}
+
+TEST(rlp_raw, split)
+{
+    struct
+    {
+        std::string_view input;
+        type type;
+        std::string_view content;
+        std::string_view rest;
+        std::error_code ec;
+    } tests[] {
+        {"00FFFF", abc::ethereum::rlp::type::byte, "00", "FFFF", {}},
+            {"01FFFF", abc::ethereum::rlp::type::byte, "01", "FFFF", {}},
+            {"7FFFFF", abc::ethereum::rlp::type::byte, "7F", "FFFF", {}},
+            {"80FFFF", abc::ethereum::rlp::type::bytes, "", "FFFF", {}},
+            {"C3010203", abc::ethereum::rlp::type::list, "010203", {}, {}},
+            
+            // errors
+            {"", abc::ethereum::rlp::type::invalid, {}, {}, make_error_code(errc::unexpected_eof)},
+
+            {"8141", abc::ethereum::rlp::type::invalid, {}, "8141", make_error_code(errc::non_canonical_size)},
+            {"B800", abc::ethereum::rlp::type::invalid, {}, "B800", make_error_code(errc::non_canonical_size)},
+            {"B802FFFF", abc::ethereum::rlp::type::invalid, {}, "B802FFFF", make_error_code(errc::non_canonical_size)},
+            {"B90000", abc::ethereum::rlp::type::invalid, {}, "B90000", make_error_code(errc::non_canonical_size)},
+            {"B90055", abc::ethereum::rlp::type::invalid, {}, "B90055", make_error_code(errc::non_canonical_size)},
+            {"BA0002FFFF", abc::ethereum::rlp::type::invalid, {}, "BA0002FFFF", make_error_code(errc::non_canonical_size)},
+            {"F800", abc::ethereum::rlp::type::invalid, {}, "F800", make_error_code(errc::non_canonical_size)},
+            {"F90000", abc::ethereum::rlp::type::invalid, {}, "F90000", make_error_code(errc::non_canonical_size)},
+            {"F90055", abc::ethereum::rlp::type::invalid, {}, "F90055", make_error_code(errc::non_canonical_size)},
+            {"FA0002FFFF", abc::ethereum::rlp::type::invalid, {}, "FA0002FFFF", make_error_code(errc::non_canonical_size)},
+
+            {"81", abc::ethereum::rlp::type::invalid, {}, "81", make_error_code(errc::value_too_large)},
+            {"8501010101", abc::ethereum::rlp::type::invalid, {}, "8501010101", make_error_code(errc::value_too_large)},
+            {"C60607080902", abc::ethereum::rlp::type::invalid, {}, "C60607080902", make_error_code(errc::value_too_large)},
+
+            // size check overflow
+            {"BFFFFFFFFFFFFFFFFF", abc::ethereum::rlp::type::invalid, {}, "BFFFFFFFFFFFFFFFFF", make_error_code(errc::value_too_large)},
+            {"FFFFFFFFFFFFFFFFFF", abc::ethereum::rlp::type::invalid, {}, "FFFFFFFFFFFFFFFFFF", make_error_code(errc::value_too_large)},
+
+            {
+                "B838FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+            abc::ethereum::rlp::type::invalid, {},
+                 "B838FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+            make_error_code(errc::value_too_large)
+            },
+            {
+                "F838FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+            abc::ethereum::rlp::type::invalid, {},
+                 "F838FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+            make_error_code(errc::value_too_large)
+            },
+
+            // a few bigger values, just for kicks
+            {
+                "F839FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+                abc::ethereum::rlp::type::list,
+                  "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF",
+                 "",
+            {}
+            },
+            {
+                "F90211A060EF29F20CC1007AE6E9530AEE16F4B31F8F1769A2D1264EC995C6D1241868D6A07C62AB8AC9838F5F5877B20BB37B387BC2106E97A3D52172CBEDB5EE17C36008A00EAB6B7324AADC0F6047C6AFC8229F09F7CF451B51D67C8DFB08D49BA8C3C626A04453343B2F3A6E42FCF87948F88AF7C8FC16D0C2735CBA7F026836239AB2C15FA024635C7291C882CE4C0763760C1A362DFC3FFCD802A55722236DE058D74202ACA0A220C808DE10F55E40AB25255201CFF009EA181D3906638E944EE2BF34049984A08D325AB26796F1CCB470F69C0F842501DC35D368A0C2575B2D243CFD1E8AB0FDA0B5298FF60DA5069463D610513C9F04F24051348391A143AFFAB7197DFACDEA72A02D2A7058A4463F8FB69378369E11EF33AE3252E2DB86CB545B36D3C26DDECE5AA0888F97BCA8E0BD83DC5B3B91CFF5FAF2F66F9501010682D67EF4A3B4E66115FBA0E8175A60C93BE9ED02921958F0EA55DA0FB5E4802AF5846147BAD92BC2D8AF26A08B3376FF433F3A4250FA64B7F804004CAC5807877D91C4427BD1CD05CF912ED8A09B32EF0F03BD13C37FF950C0CCCEFCCDD6669F2E7F2AA5CB859928E84E29763EA09BBA5E46610C8C8B1F8E921E5691BF8C7E40D75825D5EA3217AA9C3A8A355F39A0EEB95BC78251CCCEC54A97F19755C4A59A293544EEE6119AFA50531211E53C4FA00B6E86FE150BF4A9E0FEEE9C90F5465E617A861BB5E357F942881EE762212E2580",
+            abc::ethereum::rlp::type::list,
+                  "A060EF29F20CC1007AE6E9530AEE16F4B31F8F1769A2D1264EC995C6D1241868D6A07C62AB8AC9838F5F5877B20BB37B387BC2106E97A3D52172CBEDB5EE17C36008A00EAB6B7324AADC0F6047C6AFC8229F09F7CF451B51D67C8DFB08D49BA8C3C626A04453343B2F3A6E42FCF87948F88AF7C8FC16D0C2735CBA7F026836239AB2C15FA024635C7291C882CE4C0763760C1A362DFC3FFCD802A55722236DE058D74202ACA0A220C808DE10F55E40AB25255201CFF009EA181D3906638E944EE2BF34049984A08D325AB26796F1CCB470F69C0F842501DC35D368A0C2575B2D243CFD1E8AB0FDA0B5298FF60DA5069463D610513C9F04F24051348391A143AFFAB7197DFACDEA72A02D2A7058A4463F8FB69378369E11EF33AE3252E2DB86CB545B36D3C26DDECE5AA0888F97BCA8E0BD83DC5B3B91CFF5FAF2F66F9501010682D67EF4A3B4E66115FBA0E8175A60C93BE9ED02921958F0EA55DA0FB5E4802AF5846147BAD92BC2D8AF26A08B3376FF433F3A4250FA64B7F804004CAC5807877D91C4427BD1CD05CF912ED8A09B32EF0F03BD13C37FF950C0CCCEFCCDD6669F2E7F2AA5CB859928E84E29763EA09BBA5E46610C8C8B1F8E921E5691BF8C7E40D75825D5EA3217AA9C3A8A355F39A0EEB95BC78251CCCEC54A97F19755C4A59A293544EEE6119AFA50531211E53C4FA00B6E86FE150BF4A9E0FEEE9C90F5465E617A861BB5E357F942881EE762212E2580",
+                 "",
+            {}
+            },
+            {
+                "F877A12000BF49F440A1CD0527E4D06E2765654C0F56452257516D793A9B8D604DCFDF2AB853F851808D10000000000000000000000000A056E81F171BCC55A6FF8345E692C0F86E5B48E01B996CADC001622FB5E363B421A0C5D2460186F7233C927E7DB2DCC703C0E500B653CA82273B7BFAD8045D85A470",
+            abc::ethereum::rlp::type::list,
+                  "A12000BF49F440A1CD0527E4D06E2765654C0F56452257516D793A9B8D604DCFDF2AB853F851808D10000000000000000000000000A056E81F171BCC55A6FF8345E692C0F86E5B48E01B996CADC001622FB5E363B421A0C5D2460186F7233C927E7DB2DCC703C0E500B653CA82273B7BFAD8045D85A470",
+                 "",
+            {}
+            },
+    };
+
+    for (auto [i, test] : ranges::view::enumerate(tests))
+    {
+        auto const test_input = unhex(test.input);
+        auto result = split(test_input);
+        if (!test.ec)
+        {
+            ASSERT_FALSE(result.is_err());
+            auto const & value = result.value();
+
+            auto const test_content = unhex(test.content);
+            ASSERT_EQ(test_content.size(), value.content.size());
+            for (auto j = 0u; j < test_content.size(); ++j)
+            {
+                ASSERT_EQ(test_content[j], value.content[j]);
+            }
+
+            auto const test_rest = unhex(test.rest);
+            ASSERT_EQ(test_rest.size(), value.rest.size());
+            for (auto j = 0u; j < test_rest.size(); ++j)
+            {
+                ASSERT_EQ(test_rest[j], value.rest[j]);
+            }
         }
         else
         {
