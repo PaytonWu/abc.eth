@@ -84,7 +84,7 @@ context::decode_raw(bytes_view_t input, std::size_t & offset) -> expected<decode
         {
             raw_item.offset = offset;
             raw_item.length = 1;
-            raw_item.object_type = type::bytes;
+            raw_item.object_type = type::byte;
 
             break;
         }

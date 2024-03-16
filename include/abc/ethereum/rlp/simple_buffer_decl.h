@@ -39,6 +39,9 @@ public:
     template <byte_numbering ByteNumbering = byte_numbering::none>
     auto
     bytes_view() const noexcept -> bytes_view<ByteNumbering>;
+
+    [[nodiscard]] auto
+    size() const noexcept -> std::size_t;
 };
 
 } // namespace abc::ethereum::rlp

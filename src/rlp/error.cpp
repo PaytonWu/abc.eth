@@ -3,26 +3,32 @@
 
 #include <abc/ethereum/rlp/error.h>
 
-namespace abc::ethereum::rlp {
-
-auto make_error_code(errc const ec) -> std::error_code
+namespace abc::ethereum::rlp
 {
-    return std::error_code{ static_cast<int>(ec), ethereum_rlp_category() };
+
+auto
+make_error_code(errc const ec) -> std::error_code
+{
+    return std::error_code{static_cast<int>(ec), ethereum_rlp_category()};
 }
 
-auto ethereum_rlp_category() -> std::error_category const &
+auto
+ethereum_rlp_category() -> std::error_category const &
 {
     static struct : std::error_category
     {
     public:
-        [[nodiscard]] auto name() const noexcept -> char const * override
+        [[nodiscard]] auto
+        name() const noexcept -> char const * override
         {
             return "ethereum_rlp_category";
         }
 
-        [[nodiscard]] auto message(int const code) const -> std::string override
+        [[nodiscard]] auto
+        message(int const code) const -> std::string override
         {
-            switch (static_cast<errc>(code)) {
+            switch (static_cast<errc>(code))
+            {
                 case errc::success:
                     return "success";
 
@@ -41,6 +47,27 @@ auto ethereum_rlp_category() -> std::error_category const &
                 case errc::type_error:
                     return "rlp type error";
 
+                case errc::unexpected_eof:
+                    return "unexpected EOF";
+
+                case errc::non_canonical_size:
+                    return "rlp: non-canonical size";
+
+                case errc::expected_bytes:
+                    return "rlp: expected bytes";
+
+                case errc::expected_list:
+                    return "rlp: expected list";
+
+                case errc::non_canonical_integral:
+                    return "rlp: non-canonical integral";
+
+                case errc::uint_overflow:
+                    return "rlp: uint overflow";
+
+                case errc::value_too_large:
+                    return "rlp: value size exceeds available input length";
+
                 default:
                     return "unknown error";
             }
@@ -50,4 +77,4 @@ auto ethereum_rlp_category() -> std::error_category const &
     return category;
 }
 
-}
+} // namespace abc::ethereum::rlp

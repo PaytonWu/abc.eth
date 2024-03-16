@@ -10,8 +10,9 @@ namespace abc::ethereum::rlp {
 
 enum class type {
     invalid = 0,
-    bytes = 1,
-    list = 2,
+    byte,
+    bytes,
+    list,
 };
 
 }

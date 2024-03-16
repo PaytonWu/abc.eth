@@ -15,7 +15,6 @@
 #include <abc/byte.h>
 #include <abc/converter.h>
 #include <abc/ethereum/types/address.h>
-#include <abc/fixed_bytes.h>
 #include <abc/fixed_hash.h>
 
 #include <concepts>
