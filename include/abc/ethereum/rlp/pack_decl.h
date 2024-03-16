@@ -9,6 +9,8 @@
 #include "pack_fwd_decl.h"
 #include "simple_buffer.h"
 
+#include <abc/bytes.h>
+#include <abc/fixed_bytes.h>
 #include <abc/uint128.h>
 
 namespace abc::ethereum::rlp

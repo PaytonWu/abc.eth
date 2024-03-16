@@ -17,16 +17,29 @@ namespace
 {
 
 [[nodiscard]] constexpr auto
-int_size(std::uint64_t i) -> int
+size_of_value(std::uint64_t i) -> std::uint32_t
 {
     int size = 1;
     for (;; ++size)
     {
         if (i >>= 8; i == 0)
         {
-            return size;
+            break;
         }
     }
+
+    return size;
+}
+
+[[nodiscard]] constexpr auto
+encoded_size_of_value(std::uint64_t i) -> std::uint32_t
+{
+    if (i < 0x80)
+    {
+        return 1;
+    }
+
+    return size_of_value(i) + 1;
 }
 
 [[nodiscard]] constexpr auto
@@ -36,7 +49,7 @@ head_size(std::uint64_t size) -> int
     {
         return 1;
     }
-    return 1 + int_size(size);
+    return 1 + size_of_value(size);
 }
 
 } // namespace

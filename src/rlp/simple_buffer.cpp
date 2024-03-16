@@ -18,4 +18,10 @@ simple_buffer::clear() noexcept -> void
     buffer_.clear();
 }
 
+auto
+simple_buffer::size() const noexcept -> std::size_t
+{
+    return buffer_.size();
+}
+
 } // namespace abc::ethereum::rlp

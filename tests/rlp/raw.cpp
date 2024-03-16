@@ -3,11 +3,16 @@
 
 #include <abc/ethereum/rlp/raw.h>
 
+#include <abc/ethereum/rlp/pack.h>
+#include <abc/ethereum/rlp/simple_buffer.h>
+
 #include <abc/hex_string.h>
 
 #include <gtest/gtest.h>
 #include <range/v3/view/enumerate.hpp>
 #include <range/v3/view/remove_if.hpp>
+
+
 
 #include <cctype>
 #include <string>
@@ -272,4 +277,143 @@ TEST(rlp_raw, split)
             ASSERT_EQ(test.ec, result.error());
         }
     }
+}
+
+TEST(rlp_raw, read_size)
+{
+    struct
+    {
+        std::string_view input;
+        std::uint8_t size_of_length;
+        std::uint64_t size;
+        std::error_code ec;
+    } tests[] {
+        {.input = "", .size_of_length = 1, .size = 0, .ec = make_error_code(errc::unexpected_eof) },
+        {.input = "FF", .size_of_length = 2, .size = 0, .ec = make_error_code(errc::unexpected_eof) },
+        {.input = "00", .size_of_length = 1, .size = 0, .ec = make_error_code(errc::non_canonical_size) },
+        {.input = "36", .size_of_length = 1, .size = 0, .ec = make_error_code(errc::non_canonical_size) },
+        {.input = "37", .size_of_length = 1, .size = 0, .ec = make_error_code(errc::non_canonical_size) },
+        {.input = "38", .size_of_length = 1, .size = 0x38, .ec = {}},
+        {.input = "FF", .size_of_length = 1, .size = 0xFF, .ec = {}},
+        {.input = "FFFF", .size_of_length = 2, .size = 0xFFFF, .ec = {}},
+        {.input = "FFFFFF", .size_of_length = 3, .size = 0xFFFFFF, .ec = {}},
+        {.input = "FFFFFFFF", .size_of_length = 4, .size = 0xFFFFFFFF, .ec = {}},
+        {.input = "FFFFFFFFFF", .size_of_length = 5, .size = 0xFFFFFFFFFF, .ec = {}},
+        {.input = "FFFFFFFFFFFF", .size_of_length = 6, .size = 0xFFFFFFFFFFFF, .ec = {}},
+        {.input = "FFFFFFFFFFFFFF", .size_of_length = 7, .size = 0xFFFFFFFFFFFFFF, .ec = {}},
+        {.input = "FFFFFFFFFFFFFFFF", .size_of_length = 8, .size = 0xFFFFFFFFFFFFFFFF, .ec = {}},
+        {.input = "0102", .size_of_length = 2, .size = 0x0102, .ec = {}},
+        {.input = "010203", .size_of_length = 3, .size = 0x010203, .ec = {}},
+        {.input = "01020304", .size_of_length = 4, .size = 0x01020304, .ec = {}},
+        {.input = "0102030405", .size_of_length = 5, .size = 0x0102030405, .ec = {}},
+        {.input = "010203040506", .size_of_length = 6, .size = 0x010203040506, .ec = {}},
+        {.input = "01020304050607", .size_of_length = 7, .size = 0x01020304050607, .ec = {}},
+        {.input = "0102030405060708", .size_of_length = 8, .size = 0x0102030405060708, .ec = {}},
+    };
+
+    for (auto [i, test] : ranges::view::enumerate(tests))
+    {
+        auto const test_input = unhex(test.input);
+        auto result = read_size(test_input, test.size_of_length);
+        if (!test.ec)
+        {
+            ASSERT_FALSE(result.is_err());
+            ASSERT_EQ(test.size, result.value());
+        }
+        else
+        {
+            ASSERT_TRUE(result.is_err());
+            ASSERT_EQ(test.ec, result.error());
+        }
+    }
+}
+
+TEST(rlp_raw, append_unsigned_integral)
+{
+    struct
+    {
+        std::uint64_t input;
+        abc::bytes_t buffer;
+        std::string_view output;
+    } tests[] {
+        {0, {}, "80"},
+        {1, {}, "01"},
+        {2, {}, "02"},
+        {127, {}, "7F"},
+        {128, {}, "8180"},
+        {129, {}, "8181"},
+        {0xFFFFFF, {}, "83FFFFFF"},
+        {127, abc::bytes_t{1, 2, 3}, "0102037F"},
+        {0xFFFFFF, abc::bytes_t{1, 2, 3}, "01020383FFFFFF"},
+    };
+
+    for (auto [i, test] : ranges::view::enumerate(tests))
+    {
+        auto const origin_test_buffer = test.buffer;
+        auto const expected_buffer = unhex(test.output);
+
+        append_unsigned_integral(test.buffer, test.input);
+        ASSERT_EQ(expected_buffer, test.buffer);
+
+        // Check that IntSize returns the appended size.
+        auto const length = test.buffer.size() - origin_test_buffer.size();
+        auto const sz = encoded_size_of_value(test.input);
+        ASSERT_EQ(sz, length);
+    }
+}
+
+TEST(rlp_raw, bytes_size)
+{
+    struct
+    {
+        abc::bytes_t v;
+        std::uint64_t size;
+    } tests[] {
+        {.v = {}, .size = 1},
+        {.v = {0x1}, .size = 1},
+        {.v = {0x7E}, .size = 1},
+        {.v = {0x7F}, .size = 1},
+        {.v = {0x80}, .size = 2},
+        {.v = {0xFF}, .size = 2},
+        {.v = {0xFF, 0xF0}, .size = 3},
+        // {.v = make([]byte, 55), .size = 56},
+        // {.v = make([]byte, 56), .size = 58},
+    };
+
+    for (auto const & test : tests)
+    {
+        auto const result = bytes_size(test.v);
+        ASSERT_EQ(test.size, result);
+
+        simple_buffer buffer;
+        packer<simple_buffer> packer{buffer};
+        packer.pack(test.v);
+        ASSERT_EQ(test.size, buffer.size());
+    }
+
+    {
+        auto bytes = abc::bytes_t{};
+        bytes.resize(55);
+        auto const result = bytes_size(bytes);
+        ASSERT_EQ(56, result);
+
+        simple_buffer buffer;
+        packer<simple_buffer> packer{buffer};
+        packer.pack(bytes);
+        ASSERT_EQ(56, buffer.size());
+    }
+
+    {
+        auto bytes = abc::bytes_t{};
+        bytes.resize(56);
+        auto const result = bytes_size(bytes);
+        ASSERT_EQ(58, result);
+
+        simple_buffer buffer;
+        packer<simple_buffer> packer{buffer};
+        packer.pack(bytes);
+        ASSERT_EQ(58, buffer.size());
+    }
+
+
 }
