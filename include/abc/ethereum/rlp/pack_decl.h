@@ -48,11 +48,11 @@ public:
     pack_bytes(bytes<ByteNumbering> const & input) -> packer &;
 
     auto
-    pack_uint128(uint128_t const value) -> packer &;
+    pack_uint128(uint128_t value) -> packer &;
 
     template <std::unsigned_integral T>
     auto
-    pack_unsigned_integral(T const value) -> packer &;
+    pack_unsigned_integral(T value) -> packer &;
 
     template <std::size_t N, byte_numbering ByteNumbering>
     auto
@@ -82,7 +82,7 @@ private:
     encode_bytes(bytes_le_view_t input, bytes_t & output) -> void;
 
     auto
-    append_buffer(bytes_view_t const input) -> void;
+    append_buffer(bytes_view_t input) -> void;
 
     auto
     append_empty_bytes() -> void;
