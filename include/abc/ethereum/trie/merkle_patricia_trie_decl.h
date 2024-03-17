@@ -16,6 +16,7 @@
 #include <abc/fixed_hash.h>
 
 #include <system_error>
+#include <memory>
 
 namespace abc::ethereum::trie
 {

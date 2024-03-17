@@ -5,6 +5,8 @@
 
 #include <abc/ethereum/trie/error.h>
 
+#include <system_error>
+
 namespace abc::ethereum::trie
 {
 
@@ -29,11 +31,10 @@ decode_node(h256_t const & hash, bytes_view_t buf) -> expected<std::shared_ptr<n
         case 0xe0:
             return must_decode_node(hash, buf);
         case 0xf0:
-            return std::make_error_code(std::errc::protocol_error);
+            return make_unexpected(std::make_error_code(std::errc::protocol_error));
         default:
-            return std::make_error_code(std::errc::protocol_error);
+            return make_unexpected(std::make_error_code(std::errc::protocol_error));
     }
-
 }
 
 }
