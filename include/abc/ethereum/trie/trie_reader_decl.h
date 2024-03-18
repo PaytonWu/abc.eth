@@ -8,7 +8,7 @@
 
 #include "trie_reader_fwd_decl.h"
 
-#include "database_reader_decl.h"
+#include "triedb/database_reader_decl.h"
 
 #include <abc/fixed_hash.h>
 
