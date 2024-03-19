@@ -41,8 +41,15 @@ public:
 
     database(std::unique_ptr<DatabaseT> database);
 
+public:
+    auto
+    insert(h256_t const & hash, bytes_t node) -> void;
+
     auto
     node(h256_t const & hash) const -> expected<bytes_t, std::error_code>;
+
+    auto
+    commit(h256_t const & root) -> expected<void, std::error_code>;
 };
 
 }
