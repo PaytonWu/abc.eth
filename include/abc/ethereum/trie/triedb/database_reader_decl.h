@@ -36,7 +36,7 @@ public:
     // When looking up nodes in the account trie, 'owner' is the zero hash. For contract
     // storage trie nodes, 'owner' is the hash of the account address that containing the
     // storage.
-    [[nodiscard]] virtual auto
+    virtual auto
     node(h256_t const & owner, h256_t const & hash, bytes_view_t path) const -> expected<bytes_t, std::error_code> = 0;
 };
 
