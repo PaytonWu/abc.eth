@@ -13,6 +13,11 @@
 namespace abc::ethereum::trie
 {
 
+constexpr
+value_node::value_node(abc::bytes_view_t value) : value_{value}
+{
+}
+
 constexpr auto
 value_node::cache() const -> hash_flag
 {

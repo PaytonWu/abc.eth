@@ -12,6 +12,7 @@
 
 #include <abc/bytes_view.h>
 
+#include <range/v3/algorithm/copy.hpp>
 #include <range/v3/view/enumerate.hpp>
 
 namespace abc::ethereum::trie
@@ -36,7 +37,7 @@ constexpr nibble_bytes::nibble_bytes(compact_bytes_view view)
     nibbles_ = std::move(nibble_bytes{temp_view.last(temp_view.size() - chop_index)}.nibbles_);
 }
 
-constexpr nibble_bytes::nibble_bytes(bytes_view_t bytes_view) : nibbles_(bytes_view.empty() ? 0zu : bytes_view.size() * 2 + 1)
+constexpr nibble_bytes::nibble_bytes(bytes_view_t bytes_view) : nibbles_(bytes_view.empty() ? 0uz : bytes_view.size() * 2 + 1)
 {
     for (auto [index, b] : ranges::views::enumerate(bytes_view))
     {
@@ -93,6 +94,13 @@ auto
 nibble_bytes::to() const -> expected<BytesT, std::error_code>
 {
     return static_cast<nibble_bytes_view>(*this).to<abc::bytes_t>();
+}
+
+constexpr auto
+nibble_bytes::append(nibble_bytes_view view) -> nibble_bytes &
+{
+    ranges::copy(view, std::back_inserter(nibbles_));
+    return *this;
 }
 
 constexpr auto
@@ -182,6 +190,12 @@ nibble_bytes::last(size_t const count) const noexcept -> nibble_bytes_view
 {
     assert(count <= nibbles_.size());
     return nibble_bytes_view{std::addressof(nibbles_[size() - count]), count};
+}
+
+constexpr auto
+operator+(nibble_bytes_view lhs, nibble_bytes_view rhs) -> nibble_bytes
+{
+    return nibble_bytes{lhs}.append(rhs);
 }
 
 } // namespace abc::ethereum::trie

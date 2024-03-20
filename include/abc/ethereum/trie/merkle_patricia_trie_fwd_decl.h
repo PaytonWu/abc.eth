@@ -9,7 +9,7 @@
 namespace abc::ethereum::trie
 {
 
-template <typename TrieDbT>
+// template <typename TrieDbT>
 class [[nodiscard]] merkle_patricia_trie;
 
 }

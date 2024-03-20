@@ -26,6 +26,8 @@ public:
     value_node(value_node &&) = default;
     ~value_node() override = default;
 
+    constexpr explicit value_node(bytes_view_t value);
+
     auto operator=(value_node const &) -> value_node & = default;
     auto operator=(value_node &&) -> value_node & = default;
 

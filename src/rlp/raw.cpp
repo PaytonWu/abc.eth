@@ -128,7 +128,7 @@ auto
 split(bytes_view_t buf) -> expected<decoded_item, std::error_code>
 {
     return read_kind(buf).transform([buf](decoded_type_and_size const & dts) -> decoded_item {
-        return decoded_item{.type = dts.type, .content = buf.subview(dts.tag_size, dts.content_size),  .rest = buf.subview(dts.tag_size + dts.content_size)};
+        return decoded_item{.type = dts.type, .content = buf.subview(dts.tag_size, dts.content_size), .rest = buf.subview(dts.tag_size + dts.content_size)};
     });
 }
 
@@ -171,7 +171,8 @@ count_value(bytes_view_t buf) -> expected<uint64_t, std::error_code>
             buf = buf.subview(dts.tag_size + dts.content_size);
             return i;
         });
-        if (result.is_err()) {
+        if (result.is_err())
+        {
             return result;
         }
     }
