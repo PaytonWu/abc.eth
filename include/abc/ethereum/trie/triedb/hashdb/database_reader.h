@@ -13,7 +13,7 @@ namespace abc::ethereum::trie::triedb::hashdb
 
 template <typename PersistentDBT>
 auto
-database_reader<PersistentDBT>::node(h256_t const & owner, h256_t const & hash, bytes_view_t path) const -> expected<bytes_t, std::error_code>
+database_reader<PersistentDBT>::node(h256_t const & owner, h256_t const & hash, nibble_bytes_view path) const -> expected<bytes_t, std::error_code>
 {
     return database_.node(hash);
 }

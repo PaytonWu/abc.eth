@@ -33,6 +33,9 @@ auto ethereum_trie_category() -> std::error_category const &
                 case errc::unexpected_eof:
                     return "unexpected EOF";
 
+                case errc::missing_node:
+                    return "missing node";
+
                 default:
                     return "unknown error";
             }

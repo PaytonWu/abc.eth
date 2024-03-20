@@ -15,6 +15,7 @@ enum class errc {
     success,
     trie_already_committed,
     unexpected_eof,
+    missing_node,
 };
 
 auto make_error_code(errc ec) -> std::error_code;

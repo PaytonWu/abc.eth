@@ -43,6 +43,10 @@ constexpr compact_bytes::compact_bytes(nibble_bytes_view view)
     }
 }
 
+constexpr compact_bytes::compact_bytes(bytes_view_t view) : bytes_{view.begin(), view.end()}
+{
+}
+
 constexpr auto
 compact_bytes::flag() const noexcept -> compact_flag
 {

@@ -45,6 +45,7 @@ private:
 
 public:
     constexpr compact_bytes(nibble_bytes_view view);
+    constexpr compact_bytes(bytes_view_t view);
 
     constexpr auto
     flag() const noexcept -> compact_flag;
