@@ -60,7 +60,8 @@ merkle_patricia_trie::insert(std::shared_ptr<node_face> const & node, nibble_byt
 {
     if (key.empty())
     {
-        if (node->type() == node_type::value_node && value->type() == node_type::value_node && std::static_pointer_cast<value_node>(node)->value() == std::static_pointer_cast<value_node>(value)->value())
+        if (node->type() == node_type::value_node && value->type() == node_type::value_node &&
+            std::static_pointer_cast<value_node>(node)->value() == std::static_pointer_cast<value_node>(value)->value())
         {
             return update_result{.node = node, .dirty = false};
         }
@@ -80,32 +81,28 @@ merkle_patricia_trie::insert(std::shared_ptr<node_face> const & node, nibble_byt
             if (cpl == short_node->nibble_keys().size())
             {
                 auto new_key = key.subview(cpl);
-                auto insert_result = insert(short_node->value(), prefix + key.first(cpl), new_key, value);
-
-                return insert_result.and_then([&](update_result & result) {
+                return insert(short_node->value(), prefix + key.first(cpl), new_key, value).transform([&short_node, new_key](auto && result) {
                     if (!result.dirty)
                     {
                         return update_result{.node = short_node, .dirty = false};
                     }
 
-                    return update_result{.node = std::make_shared<trie::short_node>(short_node->nibble_keys(), result.node, hash_flag{}), .dirty = true};
+                    return update_result{.node = std::make_shared<trie::short_node>(new_key, result.node, hash_flag{}), .dirty = true};
                 });
             }
             // Otherwise branch out at the index where they differ.
             auto branch_node = std::make_shared<trie::full_node>();
-            auto insert_result = insert(nullptr, prefix + short_node->nibble_keys().first(cpl + 1), short_node->nibble_keys().nibbles_view(cpl + 1), short_node->value());
-            if (insert_result.is_err())
+            auto result = insert(nullptr, prefix + short_node->nibble_keys().first(cpl + 1), short_node->nibble_keys().nibbles_view(cpl + 1), short_node->value())
+                              .transform([&short_node, &branch_node, cpl](auto && result) { branch_node->children(short_node->nibble_keys()[cpl]) = result.node; })
+                              .transform([this, prefix, key, &value, &branch_node, cpl]() {
+                                  insert(nullptr, prefix + key.first(cpl + 1), key.subview(cpl + 1), value).transform([&branch_node, &key, cpl](auto && result) {
+                                      branch_node->children(key[cpl]) = result.node;
+                                  });
+                              });
+            if (result.is_err())
             {
-                return insert_result;
+                return make_unexpected(result.error());
             }
-            branch_node->children(short_node->nibble_keys()[cpl]) = insert_result->node;
-
-            insert_result = insert(nullptr, prefix + key.first(cpl + 1), key.subview(cpl + 1), value);
-            if (insert_result.is_err())
-            {
-                return insert_result;
-            }
-            branch_node->children(key[cpl]) = insert_result->node;
 
             // Replace this shortNode with the branch if it occurs at index 0.
             if (cpl == 0)
@@ -125,21 +122,17 @@ merkle_patricia_trie::insert(std::shared_ptr<node_face> const & node, nibble_byt
         case node_type::full_node:
         {
             auto full_node = std::static_pointer_cast<trie::full_node>(node);
-            auto insert_result = insert(full_node->children(key.front()), prefix + key.first(1), key.subview(1), value);
-            insert_result
-                .and_then([&full_node, key](update_result & result) {
-                    if (!result.dirty)
-                    {
-                        return update_result{.node = full_node, .dirty = false};
-                    }
+            return insert(full_node->children(key.front()), prefix + key.first(1), key.subview(1), value).transform([this, &node, &full_node, key](auto && result) {
+                if (!result.dirty)
+                {
+                    return update_result{.node = node, .dirty = false};
+                }
 
-                    auto new_full_node = std::make_shared<trie::full_node>(*full_node);
-                    new_full_node->children(key.front()) = result.node;
+                auto new_full_node = full_node->clone();
+                new_full_node->children(key.front()) = result.node;
 
-                    return update_result{.node = new_full_node, .dirty = true};
-                })
-                .or_else([&full_node](std::error_code const & ec) { return update_result{.node = full_node, .dirty = false}; });
-            break;
+                return update_result{.node = new_full_node, .dirty = true};
+            });
         }
 
         case node_type::invalid:
@@ -161,6 +154,8 @@ merkle_patricia_trie::insert(std::shared_ptr<node_face> const & node, nibble_byt
             return resolve(hash_node.get(), prefix).and_then([this, prefix, key, &value](auto && node) { return insert(node, prefix, key, value); });
         }
 
+        case node_type::value_node:
+            [[fallthrough]];
         default:
         {
             assert(false);
@@ -170,13 +165,11 @@ merkle_patricia_trie::insert(std::shared_ptr<node_face> const & node, nibble_byt
     }
 }
 
-
 auto
 merkle_patricia_trie::resolve(trie::hash_node * hash_node, abc::ethereum::trie::nibble_bytes_view prefix) -> expected<std::shared_ptr<node_face>, std::error_code>
 {
     assert(db_reader_ != nullptr);
     auto result = db_reader_->node(prefix, hash_node->hash());
-
 }
 
-}
+} // namespace abc::ethereum::trie
