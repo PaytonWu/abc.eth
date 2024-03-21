@@ -8,6 +8,12 @@ namespace abc::ethereum::trie
 {
 
 auto
+full_node::clone() const -> std::shared_ptr<full_node>
+{
+    return std::make_shared<full_node>(*this);
+}
+
+auto
 full_node::cache() const -> hash_flag
 {
     return flag_;

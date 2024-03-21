@@ -11,6 +11,7 @@
 #include "hash_flag_decl.h"
 #include "node_face_decl.h"
 
+#include <abc/clonable.h>
 #include <abc/memory.h>
 
 #include <array>
@@ -19,10 +20,13 @@
 namespace abc::ethereum::trie
 {
 
-class full_node : public node_face
+class full_node
+    : public node_face
+    , public clonable<full_node, std::shared_ptr<full_node>>
 {
 public:
     static constexpr std::size_t children_size = 17;
+
 private:
     std::array<std::shared_ptr<node_face>, children_size> children_{};
     hash_flag flag_{};
@@ -30,17 +34,22 @@ private:
 public:
     full_node() = default;
 
-    full_node(full_node const &) = delete;
     full_node(full_node &&) = default;
     ~full_node() override = default;
 
     auto
-    operator=(full_node const &) -> full_node & = delete;
-
-    auto
     operator=(full_node &&) -> full_node & = default;
 
+private:
+    full_node(full_node const &) = default;
+
+    auto
+    operator=(full_node const &) -> full_node & = default;
+
 public:
+    [[nodiscard]] auto
+    clone() const -> std::shared_ptr<full_node> override;
+
     [[nodiscard]] auto
     cache() const -> hash_flag override;
 
@@ -55,11 +64,8 @@ public:
 
     [[nodiscard]] auto
     children(std::size_t index) noexcept -> std::shared_ptr<node_face> &;
-
-    [[nodiscard]] auto
-    clone() const -> std::unique_ptr<node_face>;
 };
 
-}
+} // namespace abc::ethereum::trie
 
 #endif // ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_FULL_NODE_DECL
