@@ -14,9 +14,13 @@
 
 #include <memory>
 #include <system_error>
+#include <utility>
 
 namespace abc::ethereum::trie
 {
+
+auto
+decode_ref(bytes_view_t buf) -> expected<std::pair<std::shared_ptr<node_face>, bytes_view_t>, std::error_code>;
 
 auto
 decode_short_node(h256_t const & hash, bytes_view_t data) -> expected<std::shared_ptr<node_face>, std::error_code>;
