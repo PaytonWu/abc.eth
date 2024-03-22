@@ -11,18 +11,21 @@
 namespace abc::ethereum::trie
 {
 
-enum class errc {
+enum class errc
+{
     success,
     trie_already_committed,
     unexpected_eof,
     missing_node,
+    over_sized_embedded_node,
 };
 
-auto make_error_code(errc ec) -> std::error_code;
+auto
+make_error_code(errc ec) -> std::error_code;
 
 auto
 ethereum_trie_category() -> std::error_category const &;
 
-}
+} // namespace abc::ethereum::trie
 
-#endif //ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_ERROR
+#endif // ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_ERROR

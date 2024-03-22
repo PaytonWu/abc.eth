@@ -38,7 +38,7 @@ merkle_patricia_trie::update(bytes_view_t key, bytes_view_t value) -> expected<v
         return remove(key);
     }
 
-    return insert(this->root_, nibble_bytes_view{}, nibble_key, value).transform([](auto &&) { return; });
+    return insert(this->root_, nibble_bytes_view{}, nibble_key, std::make_shared<value_node>(value)).transform([](auto &&) { return; });
 }
 
 auto
@@ -122,7 +122,7 @@ merkle_patricia_trie::insert(std::shared_ptr<node_face> const & node, nibble_byt
         case node_type::full_node:
         {
             auto full_node = std::static_pointer_cast<trie::full_node>(node);
-            return insert(full_node->children(key.front()), prefix + key.first(1), key.subview(1), value).transform([this, &node, &full_node, key](auto && result) {
+            return insert(full_node->children(key.front()), prefix + key.first(1), key.subview(1), value).transform([&node, &full_node, key](auto && result) {
                 if (!result.dirty)
                 {
                     return update_result{.node = node, .dirty = false};
