@@ -34,6 +34,7 @@ public:
 
     auto
     operator=(node_face const &) -> node_face & = default;
+
     auto
     operator=(node_face &&) -> node_face & = default;
 
