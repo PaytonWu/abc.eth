@@ -37,6 +37,8 @@ public:
     full_node(full_node &&) = default;
     ~full_node() override = default;
 
+    explicit full_node(h256_t const & hash);
+
     auto
     operator=(full_node &&) -> full_node & = default;
 

@@ -7,10 +7,16 @@
 namespace abc::ethereum::trie
 {
 
+full_node::full_node(h256_t const & hash) : flag_{hash}
+{
+}
+
 auto
 full_node::clone() const -> std::shared_ptr<full_node>
 {
-    return std::make_shared<full_node>(*this);
+    auto cloned = std::make_shared_for_overwrite<full_node>();
+    *cloned = *this;
+    return cloned;
 }
 
 auto

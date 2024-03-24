@@ -27,7 +27,7 @@ decode_ref(bytes_view_t buf) -> expected<std::pair<std::shared_ptr<node_face>, b
                 }
 
                 return decode_node_unsafe(h256_t{}, buf).transform([&decoded_item](auto && node) -> std::pair<std::shared_ptr<node_face>, bytes_view_t> {
-                    return std::make_pair(node, decoded_item.rest);
+                    return std::make_pair(static_cast<std::shared_ptr<trie::node_face>>(node), decoded_item.rest);
                 });
             }
 
@@ -40,7 +40,7 @@ decode_ref(bytes_view_t buf) -> expected<std::pair<std::shared_ptr<node_face>, b
 
                 if (decoded_item.content.size() == h256_t{}.size())
                 {
-                    return std::make_pair(std::make_shared<trie::hash_node>(h256_t::from(decoded_item.content)), decoded_item.rest);
+                    return std::make_pair(static_cast<std::shared_ptr<trie::node_face>>(std::make_shared<trie::hash_node>(h256_t::from(decoded_item.content))), decoded_item.rest);
                 }
 
                 [[fallthrough]];
@@ -56,18 +56,50 @@ decode_ref(bytes_view_t buf) -> expected<std::pair<std::shared_ptr<node_face>, b
     });
 }
 
-
 auto
-decode_short_node(h256_t const & hash, bytes_view_t encoded_data) -> expected<std::shared_ptr<node_face>, std::error_code>
+decode_short_node(h256_t const & hash, bytes_view_t encoded_data) -> expected<std::shared_ptr<short_node>, std::error_code>
 {
-    auto result = rlp::split_bytes(encoded_data).transform([&hash](auto && decoded_item) {
+    return rlp::split_bytes(encoded_data).and_then([&hash](auto && decoded_item) {
         hash_flag hf{hash};
         auto key = nibble_bytes{compact_bytes{decoded_item.content}};
         if (key.has_terminator())
         {
-            return rlp::split_bytes(decoded_item.rest).transform([&key, &hf](auto && value_item) { return std::make_shared<value_node>(key, value_item.content, hf); });
+            return rlp::split_bytes(decoded_item.rest).transform([&key, &hf](auto && value_item) {
+                return std::make_shared<trie::short_node>(key, std::make_shared<trie::value_node>(value_item.content), hf);
+            });
+        }
+        return decode_ref(decoded_item.rest).transform([&key, &hf](auto && value) { return std::make_shared<trie::short_node>(key, value.first, hf); });
+    });
+}
+
+auto
+decode_full_node(h256_t const & hash, bytes_view_t encoded_data) -> expected<std::shared_ptr<full_node>, std::error_code>
+{
+    auto full_node = std::make_shared<trie::full_node>(hash);
+    for (auto i = 0u; i < 16; ++i)
+    {
+        auto result = decode_ref(encoded_data).transform([&full_node, i, &encoded_data](auto && decoded_item) {
+            full_node->children(i) = decoded_item.first;
+            encoded_data = decoded_item.second;
+        });
+        if (result.is_err())
+        {
+            return make_unexpected(result.error());
+        }
+    }
+
+    auto result = rlp::split_bytes(encoded_data).transform([&full_node](auto && decoded_item) {
+        if (!decoded_item.content.empty())
+        {
+            full_node->children(16) = std::make_shared<trie::value_node>(decoded_item.content);
         }
     });
+    if (result.is_err())
+    {
+        return make_unexpected(result.error());
+    }
+
+    return full_node;
 }
 
 auto
