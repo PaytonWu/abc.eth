@@ -25,6 +25,8 @@ public:
     hash_node(hash_node &&) = default;
     ~hash_node() override = default;
 
+    constexpr hash_node(h256_t const & hash);
+
     constexpr auto
     operator=(hash_node const &) -> hash_node & = default;
 

@@ -13,6 +13,11 @@
 namespace abc::ethereum::trie
 {
 
+constexpr
+hash_node::hash_node(h256_t const & hash) : hash_{hash}
+{
+}
+
 constexpr auto
 hash_node::cache() const -> hash_flag
 {

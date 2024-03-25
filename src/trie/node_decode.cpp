@@ -27,7 +27,7 @@ decode_ref(bytes_view_t buf) -> expected<std::pair<std::shared_ptr<node_face>, b
                 }
 
                 return decode_node_unsafe(h256_t{}, buf).transform([&decoded_item](auto && node) -> std::pair<std::shared_ptr<node_face>, bytes_view_t> {
-                    return std::make_pair(static_cast<std::shared_ptr<trie::node_face>>(node), decoded_item.rest);
+                    return std::make_pair(std::static_pointer_cast<trie::node_face>(std::move(node)), decoded_item.rest);
                 });
             }
 
@@ -40,7 +40,8 @@ decode_ref(bytes_view_t buf) -> expected<std::pair<std::shared_ptr<node_face>, b
 
                 if (decoded_item.content.size() == h256_t{}.size())
                 {
-                    return std::make_pair(static_cast<std::shared_ptr<trie::node_face>>(std::make_shared<trie::hash_node>(h256_t::from(decoded_item.content))), decoded_item.rest);
+                    auto hash = h256_t::from(decoded_item.content);
+                    return std::make_pair(std::static_pointer_cast<trie::node_face>(std::make_shared<trie::hash_node>(hash)), decoded_item.rest);
                 }
 
                 [[fallthrough]];
@@ -110,27 +111,25 @@ decode_node_unsafe(h256_t const & hash, bytes_view_t data) -> expected<std::shar
         return make_unexpected(make_error_code(errc::unexpected_eof));
     }
 
-    rlp::split_list(data).transform([](auto && decoded_item) {
-        rlp::count_value(decoded_item.content).transform([](std::uint64_t const count) {
+    return rlp::split_list(data).and_then([&hash](auto const & decoded_item) {
+        return rlp::count_value(decoded_item.content).and_then([&decoded_item, &hash](std::uint64_t const count) -> expected<std::shared_ptr<node_face>, std::error_code> {
             switch (count)
             {
                 case 2:
                 {
-                    break;
+                    return decode_short_node(hash, decoded_item.content);
                 }
                 case 17:
                 {
-                    // branch node
-                    break;
+                    return decode_full_node(hash, decoded_item.content);
                 }
                 default:
                 {
-                    return make_unexpected(make_error_code(errc::invalid_node));
+                    return make_unexpected(make_error_code(trie::errc::invalid_number_of_list_elements));
                 }
             }
-        }
+        });
     });
-    return std::make_shared<node_face>(hash, data);
 }
 
 } // namespace abc::ethereum::trie

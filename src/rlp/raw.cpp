@@ -127,7 +127,7 @@ read_kind(bytes_view_t buf) -> expected<decoded_type_and_size, std::error_code>
 auto
 split(bytes_view_t buf) -> expected<decoded_item, std::error_code>
 {
-    return read_kind(buf).transform([buf](decoded_type_and_size const & dts) -> decoded_item {
+    return read_kind(buf).transform([buf](decoded_type_and_size const & dts) {
         return decoded_item{.type = dts.type, .content = buf.subview(dts.tag_size, dts.content_size), .rest = buf.subview(dts.tag_size + dts.content_size)};
     });
 }

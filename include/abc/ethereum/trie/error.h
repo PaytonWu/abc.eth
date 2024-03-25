@@ -18,6 +18,7 @@ enum class errc
     unexpected_eof,
     missing_node,
     over_sized_embedded_node,
+    invalid_number_of_list_elements,
 };
 
 auto
