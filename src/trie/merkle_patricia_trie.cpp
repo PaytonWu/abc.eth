@@ -42,14 +42,14 @@ merkle_patricia_trie::update(bytes_view_t key, bytes_view_t value) -> expected<v
 }
 
 auto
-merkle_patricia_trie::try_get(bytes_view_t key) const -> expected<bytes_t, std::error_code>
+merkle_patricia_trie::try_get(bytes_view_t /*key*/) const -> expected<bytes_t, std::error_code>
 {
     // return db_->try_get(key);
     return {};
 }
 
 auto
-merkle_patricia_trie::try_update(bytes_view_t key, bytes_view_t value, std::error_code & ec) -> void
+merkle_patricia_trie::try_update(bytes_view_t /*key*/, bytes_view_t /*value*/, std::error_code & /*ec*/) -> void
 {
     // db_->try_update(key, value, ec);
 }
@@ -170,6 +170,7 @@ merkle_patricia_trie::resolve(trie::hash_node * hash_node, abc::ethereum::trie::
 {
     assert(db_reader_ != nullptr);
     auto result = db_reader_->node(prefix, hash_node->hash());
+    return nullptr;
 }
 
 } // namespace abc::ethereum::trie

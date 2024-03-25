@@ -44,6 +44,9 @@ ethereum_trie_category() -> std::error_category const &
                 case errc::over_sized_embedded_node:
                     return "over sized embedded node";
 
+                case errc::invalid_number_of_list_elements:
+                    return "invalid number of list elements";
+
                 default:
                     return "unknown error";
             }
