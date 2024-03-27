@@ -10,10 +10,10 @@
 
 #include "compact_bytes_view_decl.h"
 #include "compact_flag_decl.h"
-#include "nibble_bytes_fwd_decl.h"
-#include "nibble_bytes_view.h"
+#include "nibble_bytes_view_decl.h"
 
 #include <abc/byte.h>
+#include <abc/bytes_view_decl.h>
 
 #include <vector>
 

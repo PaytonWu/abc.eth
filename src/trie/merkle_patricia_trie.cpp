@@ -1,7 +1,15 @@
 // Copyright(c) 2024 - present, Payton Wu (payton.wu@outlook.com) & the contributors.
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
-#include "abc/ethereum/trie/merkle_patricia_trie.h"
+#include <abc/ethereum/trie/merkle_patricia_trie.h>
+
+#include <abc/ethereum/trie/compact_bytes.h>
+#include <abc/ethereum/trie/error.h>
+#include <abc/ethereum/trie/full_node.h>
+#include <abc/ethereum/trie/hash_node.h>
+#include <abc/ethereum/trie/nibble_bytes.h>
+#include <abc/ethereum/trie/short_node.h>
+#include <abc/ethereum/trie/value_node.h>
 
 namespace abc::ethereum::trie
 {

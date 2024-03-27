@@ -7,7 +7,11 @@
 #pragma once
 
 #include "compact_bytes_decl.h"
+
 #include "compact_bytes_view.h"
+#include "nibble_bytes_view.h"
+
+#include <abc/bytes_view.h>
 
 #include <cassert>
 #include <span>

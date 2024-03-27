@@ -8,14 +8,6 @@
 
 #include "merkle_patricia_trie_decl.h"
 
-#include "error.h"
-#include "full_node.h"
-#include "hash_node.h"
-#include "nibble_bytes.h"
-#include "nibble_bytes_view.h"
-#include "short_node.h"
-#include "value_node.h"
-
 #include <cassert>
 
 namespace abc::ethereum::trie
