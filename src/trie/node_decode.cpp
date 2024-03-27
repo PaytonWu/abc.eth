@@ -40,8 +40,8 @@ decode_ref(bytes_view_t buf) -> expected<std::pair<std::shared_ptr<node_face>, b
 
                 if (decoded_item.content.size() == h256_t{}.size())
                 {
-                    auto hash = h256_t::from(decoded_item.content);
-                    return std::make_pair(std::static_pointer_cast<trie::node_face>(std::make_shared<trie::hash_node>(hash)), decoded_item.rest);
+                    auto hash_result = h256_t::from(decoded_item.content);
+                    return std::make_pair(std::static_pointer_cast<trie::node_face>(std::make_shared<trie::hash_node>(hash_result.value())), decoded_item.rest);
                 }
 
                 [[fallthrough]];
