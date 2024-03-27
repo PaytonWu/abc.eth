@@ -33,6 +33,17 @@ decode_full_node(h256_t const & hash, bytes_view_t data) -> expected<std::shared
 auto
 decode_node_unsafe(h256_t const & hash, bytes_view_t data) -> expected<std::shared_ptr<node_face>, std::error_code>;
 
+auto
+must_decode_node_unsafe(h256_t const & hash, bytes_view_t data) -> std::shared_ptr<node_face>;
+
+auto
+decode_node(h256_t const & hash, bytes_view_t data) -> expected<std::shared_ptr<node_face>, std::error_code>;
+
+auto
+must_decode_node(h256_t const & hash, bytes_view_t data) -> std::shared_ptr<node_face>;
+
+auto
+
 }
 
 #endif // ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_NODE_DECODE

@@ -1,14 +1,18 @@
 // Copyright(c) 2024 - present, Payton Wu (payton.wu@outlook.com) & the contributors.
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
+#include <abc/ethereum/trie/node_decode.h>
+
 #include "abc/ethereum/trie/hash_node.h"
+#include <abc/converter.h>
 #include <abc/ethereum/rlp/error.h>
 #include <abc/ethereum/rlp/raw.h>
 #include <abc/ethereum/trie/compact_bytes.h>
 #include <abc/ethereum/trie/error.h>
 #include <abc/ethereum/trie/nibble_bytes.h>
-#include <abc/ethereum/trie/node_decode.h>
 #include <abc/ethereum/trie/value_node.h>
+
+#include <fmt/core.h>
 
 namespace abc::ethereum::trie
 {
@@ -26,7 +30,7 @@ decode_ref(bytes_view_t buf) -> expected<std::pair<std::shared_ptr<node_face>, b
                     return make_unexpected(make_error_code(errc::over_sized_embedded_node));
                 }
 
-                return decode_node_unsafe(h256_t{}, buf).transform([&decoded_item](auto && node) -> std::pair<std::shared_ptr<node_face>, bytes_view_t> {
+                return decode_node(h256_t{}, buf).transform([&decoded_item](auto && node) -> std::pair<std::shared_ptr<node_face>, bytes_view_t> {
                     return std::make_pair(std::static_pointer_cast<trie::node_face>(std::move(node)), decoded_item.rest);
                 });
             }
@@ -130,6 +134,26 @@ decode_node_unsafe(h256_t const & hash, bytes_view_t data) -> expected<std::shar
             }
         });
     });
+}
+
+auto
+must_decode_node_unsafe(h256_t const & hash, bytes_view_t data) -> std::shared_ptr<node_face>
+{
+    auto result = decode_node_unsafe(hash, data);
+    return result.expect(fmt::format("node {}: {}", convert_to<hex_string>::from(hash)->to_string(), result.error().value()));
+}
+
+auto
+decode_node(h256_t const & hash, bytes_view_t data) -> expected<std::shared_ptr<node_face>, std::error_code>
+{
+    return decode_node_unsafe(hash, data);
+}
+
+auto
+must_decode_node(h256_t const & hash, bytes_view_t data) -> std::shared_ptr<node_face>
+{
+    auto result = decode_node(hash, data);
+    return result.expect(fmt::format("node {}: {}", convert_to<hex_string>::from(hash)->to_string(), result.error().value()));
 }
 
 } // namespace abc::ethereum::trie
