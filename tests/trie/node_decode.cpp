@@ -5,21 +5,26 @@
 #include <abc/bytes_view.h>
 
 #include <gtest/gtest.h>
+#include <range/v3/algorithm/fill.hpp>
 
+#include <any>
 #include <array>
 #include <string_view>
+#include <utility>
 
 auto
-new_test_full_node(abc::bytes_view_t data) -> std::array<abc::bytes_t, 17>
+new_test_full_node(std::any data) -> std::array<std::any, 17>
 {
-    std::array<abc::bytes_t, 17> full_node_data{
-        abc::bytes_t{ 0x01 }, abc::bytes_t{ 0x02 }, abc::bytes_t{ 0x03 }, abc::bytes_t{ 0x04 }, abc::bytes_t{ 0x05 },
-        abc::bytes_t{ 0x06 }, abc::bytes_t{ 0x07 }, abc::bytes_t{ 0x08 }, abc::bytes_t{ 0x09 }, abc::bytes_t{ 0x0a },
-        abc::bytes_t{ 0x0b }, abc::bytes_t{ 0x0c }, abc::bytes_t{ 0x0d }, abc::bytes_t{ 0x0e },
-        abc::bytes_t{ 0x0f }, abc::bytes_t{ 0x10 }
-    };
+    std::array<std::any, 17> full_node_data;
+    for (auto i = 0u; i < 16; ++i)
+    {
+        abc::bytes_t bytes;
+        bytes.resize(32);
+        ranges::fill(bytes, static_cast<uint8_t>(i + 1));
+        full_node_data[i] = std::move(bytes);
+    }
 
-    full_node_data[16] = data;
+    full_node_data[16] = std::move(data);
 
     return full_node_data;
 }
@@ -32,5 +37,7 @@ TEST(node_decode, decode_nested_node)
 
     std::array<abc::bytes_t, 17> data;
     data[16] = abc::bytes_view_t{"subnode"};
-    // full_node_data[15] = data;
+    full_node_data[15] = data;
+
+
 }
