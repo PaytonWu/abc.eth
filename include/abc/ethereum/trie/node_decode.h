@@ -42,8 +42,6 @@ decode_node(h256_t const & hash, bytes_view_t data) -> expected<std::shared_ptr<
 auto
 must_decode_node(h256_t const & hash, bytes_view_t data) -> std::shared_ptr<node_face>;
 
-auto
-
 }
 
 #endif // ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_NODE_DECODE
