@@ -2,6 +2,7 @@
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
 #include <abc/ethereum/trie/node_decode.h>
+#include <abc/ethereum/rlp/simple_buffer.h>
 #include <abc/bytes_view.h>
 
 #include <gtest/gtest.h>
@@ -11,6 +12,8 @@
 #include <array>
 #include <string_view>
 #include <utility>
+#include <variant>
+#include <memory>
 
 auto
 new_test_full_node(std::any data) -> std::array<std::any, 17>
@@ -31,6 +34,10 @@ new_test_full_node(std::any data) -> std::array<std::any, 17>
 
 TEST(node_decode, decode_nested_node)
 {
+    struct full_node_data
+    {
+        abc::bytes32_t data0{};
+    };
     std::string_view raw = "fullnode";
     abc::bytes_view_t input{raw };
     auto full_node_data = new_test_full_node(input);
@@ -39,5 +46,6 @@ TEST(node_decode, decode_nested_node)
     data[16] = abc::bytes_view_t{"subnode"};
     full_node_data[15] = data;
 
+    abc::ethereum::rlp::simple_buffer buf;
 
 }
