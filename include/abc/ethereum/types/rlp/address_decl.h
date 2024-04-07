@@ -8,7 +8,18 @@
 
 #include "address_fwd_decl.h"
 
+#include <abc/ethereum/rlp/type_traits.h>
 #include <abc/ethereum/types/address_decl.h>
+
+namespace abc::ethereum::rlp
+{
+
+template <>
+struct is_list<types::address> : std::false_type
+{
+};
+
+} // namespace abc::ethereum::rlp
 
 namespace abc::ethereum::rlp::adaptor
 {

@@ -10,17 +10,6 @@
 
 #include <abc/ethereum/rlp/adaptor/adaptor_base.h>
 #include <abc/ethereum/rlp/pack.h>
-#include <abc/ethereum/rlp/type_traits.h>
-
-namespace abc::ethereum::rlp
-{
-
-template <>
-struct is_list<types::address> : std::false_type
-{
-};
-
-} // namespace abc::ethereum::rlp
 
 namespace abc::ethereum::rlp::adaptor
 {
