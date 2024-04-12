@@ -10,6 +10,7 @@
 #include "abc/bytes_view.h"
 #include "abc/fixed_bytes.h"
 #include "abc/uint128.h"
+#include "cpp/array.h"
 #include "cpp/optional.h"
 #include "cpp/shared_ptr.h"
 #include "unsigned_integral.h"
