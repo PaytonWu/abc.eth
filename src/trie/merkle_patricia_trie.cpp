@@ -8,6 +8,7 @@
 #include <abc/ethereum/trie/full_node.h>
 #include <abc/ethereum/trie/hash_node.h>
 #include <abc/ethereum/trie/nibble_bytes.h>
+#include <abc/ethereum/trie/rlp/node_decode.h>
 #include <abc/ethereum/trie/short_node.h>
 #include <abc/ethereum/trie/value_node.h>
 
@@ -66,6 +67,15 @@ auto
 merkle_patricia_trie::insert(std::shared_ptr<node_face> const & node, nibble_bytes_view prefix, nibble_bytes_view key, std::shared_ptr<node_face> const & value)
     -> expected<update_result, std::error_code>
 {
+    if (node == nullptr)
+    {
+        // New short node is created and track it in the tracer. The node identifier
+        // passed is the path from the root node. Note the valueNode won't be tracked
+        // since it's always embedded in its parent.
+        // t.tracer.onInsert(prefix);
+        return update_result{.node = std::make_shared<short_node>(key, value, hash_flag{}), .dirty = true};
+    }
+
     if (key.empty())
     {
         if (node->type() == node_type::value_node && value->type() == node_type::value_node &&
@@ -101,12 +111,15 @@ merkle_patricia_trie::insert(std::shared_ptr<node_face> const & node, nibble_byt
             // Otherwise branch out at the index where they differ.
             auto branch_node = std::make_shared<trie::full_node>();
             auto result = insert(nullptr, prefix + short_node->nibble_keys().first(cpl + 1), short_node->nibble_keys().nibbles_view(cpl + 1), short_node->value())
-                              .transform([&short_node, &branch_node, cpl](auto && result) { branch_node->children(short_node->nibble_keys()[cpl]) = result.node; })
-                              .transform([this, prefix, key, &value, &branch_node, cpl]() {
-                                  insert(nullptr, prefix + key.first(cpl + 1), key.subview(cpl + 1), value).transform([&branch_node, &key, cpl](auto && result) {
-                                      branch_node->children(key[cpl]) = result.node;
-                                  });
-                              });
+                              .transform([&short_node, &branch_node, cpl](auto && result) { branch_node->children(short_node->nibble_keys()[cpl]) = result.node; });
+            if (result.is_err())
+            {
+                return make_unexpected(result.error());
+            }
+
+            result = insert(nullptr, prefix + key.first(cpl + 1), key.subview(cpl + 1), value).transform([&branch_node, &key, cpl](auto && result) {
+                branch_node->children(key[cpl]) = result.node;
+            });
             if (result.is_err())
             {
                 return make_unexpected(result.error());
@@ -159,6 +172,7 @@ merkle_patricia_trie::insert(std::shared_ptr<node_face> const & node, nibble_byt
             // the node and insert into it. This leaves all child nodes on
             // the path to the value in the trie.
             auto hash_node = std::static_pointer_cast<trie::hash_node>(node);
+            assert(hash_node != nullptr);
             return resolve(hash_node.get(), prefix).and_then([this, prefix, key, &value](auto && node) { return insert(node, prefix, key, value); });
         }
 
@@ -177,8 +191,9 @@ auto
 merkle_patricia_trie::resolve(trie::hash_node * hash_node, abc::ethereum::trie::nibble_bytes_view prefix) -> expected<std::shared_ptr<node_face>, std::error_code>
 {
     assert(db_reader_ != nullptr);
-    auto result = db_reader_->node(prefix, hash_node->hash());
-    return nullptr;
+    assert(hash_node != nullptr);
+
+    return db_reader_->node(prefix, hash_node->hash()).transform([hash_node](auto && bytes) { return ethereum::trie::rlp::must_decode_node(hash_node->hash(), bytes); });
 }
 
 } // namespace abc::ethereum::trie
