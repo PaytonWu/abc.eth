@@ -10,10 +10,10 @@
 
 #include "compact_bytes_view_decl.h"
 #include "compact_flag_decl.h"
-#include "nibble_bytes_fwd_decl.h"
-#include "nibble_bytes_view.h"
+#include "nibble_bytes_view_decl.h"
 
 #include <abc/byte.h>
+#include <abc/bytes_view_decl.h>
 
 #include <vector>
 
@@ -45,6 +45,7 @@ private:
 
 public:
     constexpr compact_bytes(nibble_bytes_view view);
+    constexpr compact_bytes(bytes_view_t view);
 
     constexpr auto
     flag() const noexcept -> compact_flag;

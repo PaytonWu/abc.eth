@@ -21,6 +21,9 @@
 namespace abc::ethereum::trie
 {
 
+constexpr auto
+operator+(nibble_bytes_view lhs, nibble_bytes_view rhs) -> nibble_bytes;
+
 class nibble_bytes
 {
 public:
@@ -47,8 +50,8 @@ public:
 
 private:
     explicit constexpr nibble_bytes(bytes_view_t bytes_view);
-    explicit constexpr nibble_bytes(std::initializer_list<byte> il);
     explicit constexpr nibble_bytes(nibble_bytes_view view);
+    constexpr nibble_bytes(std::initializer_list<byte> il);
 
 public:
     nibble_bytes() = default;
@@ -64,6 +67,9 @@ public:
     template <typename BytesT> // requires std::is_continuous_container_v<BytesT>
     auto
     to() const -> expected<BytesT, std::error_code>;
+
+    constexpr auto
+    append(nibble_bytes_view view) -> nibble_bytes &;
 
     [[nodiscard]] constexpr auto
     has_terminator() const noexcept -> bool;
@@ -102,13 +108,16 @@ public:
     back() const -> const_reference;
 
     [[nodiscard]] constexpr auto
-    first(size_t const count) const noexcept -> nibble_bytes_view;
+    first(size_t count) const noexcept -> nibble_bytes_view;
 
     [[nodiscard]] constexpr auto
-    last(size_t const count) const noexcept -> nibble_bytes_view;
+    last(size_t count) const noexcept -> nibble_bytes_view;
 
     [[nodiscard]] friend constexpr auto
     operator==(nibble_bytes const & lhs, nibble_bytes const & rhs) noexcept -> bool = default;
+
+    friend constexpr auto
+    operator+(nibble_bytes_view lhs, nibble_bytes_view rhs) -> nibble_bytes;
 };
 
 } // namespace abc::ethereum::trie

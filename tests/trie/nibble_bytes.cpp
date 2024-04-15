@@ -60,7 +60,7 @@ TEST(nibble_bytes, nibble_bytes_view)
     nibble_bytes_view nbv1{ nb1 };
     EXPECT_EQ(nbv1.size(), 9);
     EXPECT_FALSE(nbv1.empty());
-    EXPECT_TRUE(nbv1.has_termintor());
+    EXPECT_TRUE(nbv1.has_terminator());
     EXPECT_EQ(nbv1[0], 0x01);
     EXPECT_EQ(nbv1[1], 0x02);
     EXPECT_EQ(nbv1[2], 0x03);
@@ -75,7 +75,7 @@ TEST(nibble_bytes, nibble_bytes_view)
     nibble_bytes_view nbv2{ nb2 };
     EXPECT_EQ(nbv2.size(), 17);
     EXPECT_FALSE(nbv2.empty());
-    EXPECT_TRUE(nbv2.has_termintor());
+    EXPECT_TRUE(nbv2.has_terminator());
     EXPECT_EQ(nbv2[0], 0x01);
     EXPECT_EQ(nbv2[1], 0x02);
     EXPECT_EQ(nbv2[2], 0x03);
@@ -102,7 +102,7 @@ TEST(nibble_bytes_view, subview)
     auto subview1 = nbv1.subview(2);
     EXPECT_EQ(subview1.size(), 7);
     EXPECT_FALSE(subview1.empty());
-    EXPECT_TRUE(subview1.has_termintor());
+    EXPECT_TRUE(subview1.has_terminator());
     EXPECT_EQ(subview1[0], 0x03);
     EXPECT_EQ(subview1[1], 0x04);
     EXPECT_EQ(subview1[2], 0x05);
@@ -114,14 +114,14 @@ TEST(nibble_bytes_view, subview)
     auto subview2 = nbv1.subview(2, 2);
     EXPECT_EQ(subview2.size(), 2);
     EXPECT_FALSE(subview2.empty());
-    EXPECT_FALSE(subview2.has_termintor());
+    EXPECT_FALSE(subview2.has_terminator());
     EXPECT_EQ(subview2[0], 0x03);
     EXPECT_EQ(subview2[1], 0x04);
 
     auto subview4 = nbv1.subview(4, 8);
     EXPECT_EQ(subview4.size(), 5);
     EXPECT_FALSE(subview4.empty());
-    EXPECT_TRUE(subview4.has_termintor());
+    EXPECT_TRUE(subview4.has_terminator());
     EXPECT_EQ(subview4[0], 0x05);
     EXPECT_EQ(subview4[1], 0x06);
     EXPECT_EQ(subview4[2], 0x07);
@@ -131,7 +131,7 @@ TEST(nibble_bytes_view, subview)
     auto subview5 = nbv1.subview(4, 0);
     EXPECT_EQ(subview5.size(), 0);
     EXPECT_TRUE(subview5.empty());
-    EXPECT_FALSE(subview5.has_termintor());
+    EXPECT_FALSE(subview5.has_terminator());
 }
 
 TEST(nibble_bytes, compact_bytes_view)

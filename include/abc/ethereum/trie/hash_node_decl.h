@@ -25,14 +25,16 @@ public:
     hash_node(hash_node &&) = default;
     ~hash_node() override = default;
 
+    constexpr hash_node(h256_t const & hash);
+
     constexpr auto
     operator=(hash_node const &) -> hash_node & = default;
 
     constexpr auto
     operator=(hash_node &&) -> hash_node & = default;
 
-    [[nodiscard]] auto
-    cache() const -> std::tuple<hash_node, bool> override;
+    [[nodiscard]] constexpr auto
+    cache() const -> hash_flag override;
 
 //    auto
 //    encode(rlp::sbuffer & buffer) const -> void override;
@@ -42,6 +44,9 @@ public:
 
     constexpr auto
     type() const noexcept -> node_type override;
+
+    constexpr auto
+    hash() const noexcept -> h256_t const &;
 };
 
 } // namespace abc::ethereum::trie

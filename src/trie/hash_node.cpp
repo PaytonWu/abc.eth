@@ -5,22 +5,8 @@
 
 #include <abc/hex_string.h>
 
-// #include <fmt/core.h>
-
 namespace abc::ethereum::trie
 {
-
-auto
-hash_node::cache() const -> std::tuple<hash_node, bool>
-{
-    return std::make_tuple(hash_node{}, true);
-}
-
-//auto
-//hash_node::encode(rlp::sbuffer & buffer) const -> void
-//{
-//    buffer.append(hash_);
-//}
 
 auto
 hash_node::fstring(std::string_view) const -> std::string

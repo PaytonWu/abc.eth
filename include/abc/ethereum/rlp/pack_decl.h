@@ -24,18 +24,15 @@ private:
 
 public:
     packer() = delete;
-
     packer(packer const &) = delete;
+    packer(packer &&) = default;
+    ~packer() = default;
 
     auto
     operator=(packer const &) -> packer & = delete;
 
-    packer(packer &&) = default;
-
     auto
     operator=(packer &&) -> packer & = default;
-
-    ~packer() = default;
 
     explicit packer(Stream & stream) noexcept;
 
@@ -51,19 +48,21 @@ public:
     pack_bytes(bytes<ByteNumbering> const & input) -> packer &;
 
     auto
-    pack_uint128(uint128_t const value) -> packer &;
+    pack_uint128(uint128_t value) -> packer &;
 
     template <std::unsigned_integral T>
     auto
-    pack_unsigned_integral(T const value) -> packer &;
+    pack_unsigned_integral(T value) -> packer &;
 
     template <std::size_t N, byte_numbering ByteNumbering>
     auto
     pack_bytes(fixed_bytes<N, ByteNumbering> const & value) -> packer &;
 
-    template <typename T>
     auto
-    pack_optional(std::optional<T> const & object) -> packer &;
+    pack_empty_bytes() -> packer &;
+
+    auto
+    pack_empty_list() -> packer &;
 
     template <typename T>
     auto
@@ -83,7 +82,13 @@ private:
     encode_bytes(bytes_le_view_t input, bytes_t & output) -> void;
 
     auto
-    append_buffer(bytes_view_t const input) -> void;
+    append_buffer(bytes_view_t input) -> void;
+
+    auto
+    append_empty_bytes() -> void;
+
+    auto
+    append_empty_list() -> void;
 };
 
 }

@@ -54,6 +54,9 @@ public:
 
     nibble_bytes_view(std::nullptr_t) = delete;
 
+    [[nodiscard]] friend constexpr auto
+    operator==(nibble_bytes_view lhs, nibble_bytes_view rhs) noexcept -> bool = default;
+
     template <typename BytesT> // requires std::is_continuous_container_v<BytesT>
     auto
     in_place_fill(BytesT & bytes) const -> expected<std::size_t, std::error_code>;
@@ -63,7 +66,7 @@ public:
     to() const -> expected<BytesT, std::error_code>;
 
     [[nodiscard]] constexpr auto
-    has_termintor() const noexcept -> bool;
+    has_terminator() const noexcept -> bool;
 
     [[nodiscard]] constexpr auto
     begin() const noexcept -> const_iterator;
@@ -127,6 +130,9 @@ public:
     constexpr auto
     subview(size_type offset, size_type count = npos) const -> nibble_bytes_view;
 };
+
+[[nodiscard]] constexpr auto
+common_prefix_length(nibble_bytes_view lhs, nibble_bytes_view rhs) noexcept -> std::size_t;
 
 } // namespace abc::ethereum::trie
 

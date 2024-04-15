@@ -7,7 +7,11 @@
 #pragma once
 
 #include "compact_bytes_decl.h"
+
 #include "compact_bytes_view.h"
+#include "nibble_bytes_view.h"
+
+#include <abc/bytes_view.h>
 
 #include <cassert>
 #include <span>
@@ -18,7 +22,7 @@ namespace abc::ethereum::trie
 constexpr compact_bytes::compact_bytes(nibble_bytes_view view)
 {
     byte terminator{static_cast<byte>(0)};
-    if (view.has_termintor())
+    if (view.has_terminator())
     {
         terminator = static_cast<byte>(1);
         view = view.first(view.size() - 1);
@@ -41,6 +45,10 @@ constexpr compact_bytes::compact_bytes(nibble_bytes_view view)
         auto const size = view.in_place_fill(bytes_span).expect("fill_bytes failed");
         assert(size == bytes_span.size());
     }
+}
+
+constexpr compact_bytes::compact_bytes(bytes_view_t view) : bytes_{view.begin(), view.end()}
+{
 }
 
 constexpr auto
