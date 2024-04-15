@@ -1,29 +1,29 @@
 // Copyright(c) 2024 - present, Payton Wu (payton.wu@outlook.com) & the contributors.
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
 
-#include <abc/ethereum/trie/node_decode.h>
-
-#include "abc/ethereum/trie/hash_node.h"
-#include <abc/converter.h>
 #include <abc/ethereum/rlp/error.h>
 #include <abc/ethereum/rlp/raw.h>
 #include <abc/ethereum/trie/compact_bytes.h>
 #include <abc/ethereum/trie/error.h>
+#include <abc/ethereum/trie/hash_node.h>
 #include <abc/ethereum/trie/nibble_bytes.h>
+#include <abc/ethereum/trie/rlp/node_decode.h>
 #include <abc/ethereum/trie/value_node.h>
+
+#include <abc/converter.h>
 
 #include <fmt/core.h>
 
-namespace abc::ethereum::trie
+namespace abc::ethereum::trie::rlp
 {
 
 auto
 decode_ref(bytes_view_t buf) -> expected<std::pair<std::shared_ptr<node_face>, bytes_view_t>, std::error_code>
 {
-    return rlp::split(buf).and_then([buf](auto && decoded_item) -> expected<std::pair<std::shared_ptr<node_face>, bytes_view_t>, std::error_code> {
+    return ethereum::rlp::split(buf).and_then([buf](auto && decoded_item) -> expected<std::pair<std::shared_ptr<node_face>, bytes_view_t>, std::error_code> {
         switch (decoded_item.type)
         {
-            case rlp::type::list:
+            case  ethereum::rlp::type::list:
             {
                 if (auto const size = buf.size() - decoded_item.rest.size(); size > h256_t{}.size())
                 {
@@ -35,7 +35,7 @@ decode_ref(bytes_view_t buf) -> expected<std::pair<std::shared_ptr<node_face>, b
                 });
             }
 
-            case rlp::type::bytes:
+            case  ethereum::rlp::type::bytes:
             {
                 if (decoded_item.content.empty())
                 {
@@ -51,11 +51,11 @@ decode_ref(bytes_view_t buf) -> expected<std::pair<std::shared_ptr<node_face>, b
                 [[fallthrough]];
             }
 
-            case rlp::type::byte:
+            case ethereum::rlp::type::byte:
                 [[fallthrough]];
             default:
             {
-                return make_unexpected(make_error_code(rlp::errc::non_canonical_size));
+                return make_unexpected(make_error_code(ethereum::rlp::errc::non_canonical_size));
             }
         }
     });
@@ -64,12 +64,12 @@ decode_ref(bytes_view_t buf) -> expected<std::pair<std::shared_ptr<node_face>, b
 auto
 decode_short_node(h256_t const & hash, bytes_view_t encoded_data) -> expected<std::shared_ptr<short_node>, std::error_code>
 {
-    return rlp::split_bytes(encoded_data).and_then([&hash](auto && decoded_item) {
+    return ethereum::rlp::split_bytes(encoded_data).and_then([&hash](auto && decoded_item) {
         hash_flag hf{hash};
         auto key = nibble_bytes{compact_bytes{decoded_item.content}};
         if (key.has_terminator())
         {
-            return rlp::split_bytes(decoded_item.rest).transform([&key, &hf](auto && value_item) {
+            return ethereum::rlp::split_bytes(decoded_item.rest).transform([&key, &hf](auto && value_item) {
                 return std::make_shared<trie::short_node>(key, std::make_shared<trie::value_node>(value_item.content), hf);
             });
         }
@@ -93,7 +93,7 @@ decode_full_node(h256_t const & hash, bytes_view_t encoded_data) -> expected<std
         }
     }
 
-    auto result = rlp::split_bytes(encoded_data).transform([&full_node](auto && decoded_item) {
+    auto result = ethereum::rlp::split_bytes(encoded_data).transform([&full_node](auto && decoded_item) {
         if (!decoded_item.content.empty())
         {
             full_node->children(16) = std::make_shared<trie::value_node>(decoded_item.content);
@@ -115,8 +115,8 @@ decode_node_unsafe(h256_t const & hash, bytes_view_t data) -> expected<std::shar
         return make_unexpected(make_error_code(errc::unexpected_eof));
     }
 
-    return rlp::split_list(data).and_then([&hash](auto const & decoded_item) {
-        return rlp::count_value(decoded_item.content).and_then([&decoded_item, &hash](std::uint64_t const count) -> expected<std::shared_ptr<node_face>, std::error_code> {
+    return ethereum::rlp::split_list(data).and_then([&hash](auto const & decoded_item) {
+        return ethereum::rlp::count_value(decoded_item.content).and_then([&decoded_item, &hash](std::uint64_t const count) -> expected<std::shared_ptr<node_face>, std::error_code> {
             switch (count)
             {
                 case 2:

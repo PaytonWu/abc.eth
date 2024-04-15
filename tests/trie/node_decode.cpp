@@ -6,7 +6,7 @@
 #include "full_node_wrong_size.h"
 #include "nested_full_node_data.h"
 
-#include <abc/ethereum/trie/node_decode.h>
+#include <abc/ethereum/trie/rlp/node_decode.h>
 
 #include <abc/ethereum/rlp/pack.h>
 #include <abc/ethereum/rlp/simple_buffer.h>
@@ -22,7 +22,7 @@ TEST(node_decode, nested_node)
     abc::ethereum::rlp::packer packer{buf};
     packer.pack(fn_data);
 
-    auto r = abc::ethereum::trie::decode_node(abc::h256_t::from(abc::bytes_view_t{"0123456789abcdef0123456789abcdef"}).value(), buf.bytes_view());
+    auto r = abc::ethereum::trie::rlp::decode_node(abc::h256_t::from(abc::bytes_view_t{"0123456789abcdef0123456789abcdef"}).value(), buf.bytes_view());
     ASSERT_TRUE(r.has_value());
 }
 
@@ -35,7 +35,7 @@ TEST(node_decode, full_node_wrong_size_child)
     abc::ethereum::rlp::packer packer{buf};
     packer.pack(fn_data);
 
-    auto r = abc::ethereum::trie::decode_node(abc::h256_t::from(abc::bytes_view_t{"0123456789abcdef0123456789abcdef"}).value(), buf.bytes_view());
+    auto r = abc::ethereum::trie::rlp::decode_node(abc::h256_t::from(abc::bytes_view_t{"0123456789abcdef0123456789abcdef"}).value(), buf.bytes_view());
     ASSERT_FALSE(r.has_value());
 }
 
@@ -55,7 +55,7 @@ TEST(node_decode, full_node_wrong_nested_full_node_data)
     abc::ethereum::rlp::packer packer{buf};
     packer.pack(fn_data);
 
-    auto r = abc::ethereum::trie::decode_node(abc::h256_t::from(abc::bytes_view_t{"0123456789abcdef0123456789abcdef"}).value(), buf.bytes_view());
+    auto r = abc::ethereum::trie::rlp::decode_node(abc::h256_t::from(abc::bytes_view_t{"0123456789abcdef0123456789abcdef"}).value(), buf.bytes_view());
     ASSERT_FALSE(r.has_value());
 }
 
@@ -68,6 +68,6 @@ TEST(node_decode, full_node)
     abc::ethereum::rlp::packer packer{buf};
     packer.pack(fn_data);
 
-    auto r = abc::ethereum::trie::decode_node(abc::h256_t::from(abc::bytes_view_t{"0123456789abcdef0123456789abcdef"}).value(), buf.bytes_view());
+    auto r = abc::ethereum::trie::rlp::decode_node(abc::h256_t::from(abc::bytes_view_t{"0123456789abcdef0123456789abcdef"}).value(), buf.bytes_view());
     ASSERT_TRUE(r.has_value());
 }
