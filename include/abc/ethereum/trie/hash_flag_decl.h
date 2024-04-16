@@ -37,6 +37,9 @@ public:
 
     constexpr auto
     dirty(bool value) -> void;
+
+    constexpr auto
+    reset() -> void;
 };
 
 } // namespace abc::ethereum::trie

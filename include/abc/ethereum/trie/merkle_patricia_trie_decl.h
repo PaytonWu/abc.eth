@@ -72,7 +72,7 @@ private:
     insert(std::shared_ptr<node_face> const & node, nibble_bytes_view prefix, nibble_bytes_view key, std::shared_ptr<node_face> const & value) -> expected<update_result, std::error_code>;
 
     auto
-    remove(bytes_view_t key) -> expected<void, std::error_code>;
+    remove(std::shared_ptr<node_face> const & node, nibble_bytes_view prefix, nibble_bytes_view key) -> expected<update_result, std::error_code>;
 
     auto
     resolve(trie::hash_node * hash_node, nibble_bytes_view prefix) -> expected<std::shared_ptr<node_face>, std::error_code>;

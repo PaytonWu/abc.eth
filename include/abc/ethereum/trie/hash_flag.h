@@ -47,6 +47,13 @@ hash_flag::dirty(bool value) -> void
     dirty_ = value;
 }
 
+constexpr auto
+hash_flag::reset() -> void
+{
+    hash_.clear();
+    dirty_ = true;
+}
+
 } // namespace abc::ethereum::trie
 
 #endif // ABC_ETH_INCLUDE_ABC_ETHEREUM_TRIE_HASH_FLAG

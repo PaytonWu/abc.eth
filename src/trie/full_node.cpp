@@ -4,6 +4,9 @@
 #include <abc/ethereum/trie/full_node.h>
 #include <abc/ethereum/trie/hash_flag.h>
 
+#include <range/v3/view/transform.hpp>
+#include <range/v3/algorithm/copy.hpp>
+
 namespace abc::ethereum::trie
 {
 
@@ -32,15 +35,31 @@ full_node::fstring(std::string_view /*indent*/) const -> std::string
 }
 
 auto
-full_node::children(std::size_t index) const noexcept -> observer_ptr<node_face>
+full_node::child(std::size_t index) const noexcept -> observer_ptr<node_face>
 {
     return make_observer(children_[index].get());
 }
 
 auto
-full_node::children(std::size_t index) noexcept -> std::shared_ptr<node_face> &
+full_node::child(std::size_t index) noexcept -> std::shared_ptr<node_face> &
 {
     return children_[index];
+}
+
+auto
+full_node::children() const noexcept -> std::vector<observer_ptr<node_face>>
+{
+    std::vector<observer_ptr<node_face>> result;
+    result.reserve(children_size);
+
+    ranges::copy(children_ | ranges::views::transform([](auto & child) { return make_observer(child.get()); }), std::back_inserter(result));
+    return result;
+}
+
+auto
+full_node::reset_hash_flag() -> void
+{
+    flag_.reset();
 }
 
 } // namespace abc::ethereum::trie

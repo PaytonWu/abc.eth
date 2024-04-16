@@ -16,6 +16,7 @@
 
 #include <array>
 #include <memory>
+#include <vector>
 
 namespace abc::ethereum::trie
 {
@@ -62,10 +63,16 @@ public:
     type() const noexcept -> node_type override;
 
     [[nodiscard]] auto
-    children(std::size_t index) const noexcept -> observer_ptr<node_face>;
+    child(std::size_t index) const noexcept -> observer_ptr<node_face>;
 
     [[nodiscard]] auto
-    children(std::size_t index) noexcept -> std::shared_ptr<node_face> &;
+    child(std::size_t index) noexcept -> std::shared_ptr<node_face> &;
+
+    [[nodiscard]] auto
+    children() const noexcept -> std::vector<observer_ptr<node_face>>;
+
+    auto
+    reset_hash_flag() -> void;
 };
 
 } // namespace abc::ethereum::trie
