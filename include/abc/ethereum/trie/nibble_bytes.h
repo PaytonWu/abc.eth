@@ -8,10 +8,12 @@
 
 #include "nibble_bytes_decl.h"
 
+#include "byte_value.h"
 #include "compact_bytes_view.h"
 
 #include <abc/bytes_view.h>
 
+#include <range/v3/algorithm/any_of.hpp>
 #include <range/v3/algorithm/copy.hpp>
 #include <range/v3/view/enumerate.hpp>
 
@@ -54,20 +56,36 @@ constexpr nibble_bytes::nibble_bytes(bytes_view_t bytes_view) : nibbles_(bytes_v
     }
 }
 
-constexpr nibble_bytes::nibble_bytes(std::initializer_list<byte> il) : nibbles_(static_cast<bool>(il.size()) ? il.size() * 2 + 1 : 0uz)
+constexpr nibble_bytes::nibble_bytes(std::initializer_list<byte> il) : nibble_bytes{il, byte_value_type<abc::ethereum::trie::byte_value::raw>{}}
 {
-    for (auto [index, b] : ranges::views::enumerate(il))
-    {
-        auto const high = static_cast<abc::byte>(b >> 4);
-        auto const low = static_cast<abc::byte>(b & 0x0F);
+}
 
-        nibbles_[index * 2] = high;
-        nibbles_[index * 2 + 1] = low;
+template <byte_value ByteValue>
+constexpr nibble_bytes::nibble_bytes(std::initializer_list<byte> il, byte_value_type<ByteValue>) : nibbles_(ByteValue == abc::ethereum::trie::byte_value::nibble ? il.size() : (std::empty(il) ? 0uz : il.size() * 2 + 1))
+{
+    if constexpr (ByteValue == abc::ethereum::trie::byte_value::nibble)
+    {
+        ranges::copy(il, nibbles_.begin());
     }
-
-    if (!nibbles_.empty())
+    else if (ByteValue == abc::ethereum::trie::byte_value::raw)
     {
-        nibbles_.back() = terminator;
+        for (auto [index, b] : ranges::views::enumerate(il))
+        {
+            auto const high = static_cast<abc::byte>(b >> 4);
+            auto const low = static_cast<abc::byte>(b & 0x0F);
+
+            nibbles_[index * 2] = high;
+            nibbles_[index * 2 + 1] = low;
+        }
+
+        if (!nibbles_.empty())
+        {
+            nibbles_.back() = terminator;
+        }
+    }
+    else
+    {
+        assert(false);
     }
 }
 
@@ -87,6 +105,39 @@ constexpr auto
 nibble_bytes::from(std::initializer_list<byte> il) -> nibble_bytes
 {
     return nibble_bytes{il};
+}
+
+template <byte_value ByteValue>
+auto
+nibble_bytes::from(std::initializer_list<byte> il) -> expected<nibble_bytes, std::error_code>
+{
+    if constexpr (ByteValue == abc::ethereum::trie::byte_value::nibble)
+    {
+//        if (il.size() % 2 != 0)
+//        {
+//            return make_unexpected(make_error_code(std::errc::invalid_argument));
+//        }
+
+        if (ranges::any_of(il, [](byte b) { return b > static_cast<byte>(terminator); }))
+        {
+            return make_unexpected(make_error_code(std::errc::invalid_argument));
+        }
+
+        if (ranges::any_of(il, [](byte b) { return b == static_cast<byte>(terminator); }) && *std::end(il) != terminator)
+        {
+            return make_unexpected(make_error_code(std::errc::invalid_argument));
+        }
+
+        return nibble_bytes{il, byte_value_type<ByteValue>{}};
+    }
+    else if constexpr (ByteValue == abc::ethereum::trie::byte_value::raw)
+    {
+        return nibble_bytes{il};
+    }
+    else
+    {
+        return unexpected{std::make_error_code(std::errc::invalid_argument)};
+    }
 }
 
 template <typename BytesT> // requires std::is_continuous_container_v<BytesT>

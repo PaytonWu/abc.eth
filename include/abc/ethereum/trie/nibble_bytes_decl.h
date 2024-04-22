@@ -7,8 +7,10 @@
 #pragma once
 
 #include "nibble_bytes_fwd_decl.h"
-#include "nibble_bytes_view.h"
+
+#include "byte_value_type_decl.h"
 #include "compact_bytes_view_decl.h"
+#include "nibble_bytes_view.h"
 
 #include <abc/bytes.h>
 #include <abc/error.h>
@@ -16,6 +18,7 @@
 
 #include <initializer_list>
 #include <limits>
+#include <system_error>
 #include <vector>
 
 namespace abc::ethereum::trie
@@ -52,6 +55,8 @@ private:
     explicit constexpr nibble_bytes(bytes_view_t bytes_view);
     explicit constexpr nibble_bytes(nibble_bytes_view view);
     constexpr nibble_bytes(std::initializer_list<byte> il);
+    template <byte_value ByteValue>
+    constexpr nibble_bytes(std::initializer_list<byte> il, byte_value_type<ByteValue>);
 
 public:
     nibble_bytes() = default;
@@ -63,6 +68,10 @@ public:
 
     static constexpr auto
     from(std::initializer_list<byte> il) -> nibble_bytes;
+
+    template <byte_value ByteValue>
+    static auto
+    from(std::initializer_list<byte> il) -> expected<nibble_bytes, std::error_code>;
 
     template <typename BytesT> // requires std::is_continuous_container_v<BytesT>
     auto

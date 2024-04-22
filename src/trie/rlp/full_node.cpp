@@ -22,7 +22,7 @@ as<trie::full_node>::operator()(rlp::object const & o) const -> trie::full_node
     {
         if (o.data.array.ptr[i].is_nil())
         {
-            result.children(i) = nullptr;
+            result.child(i) = nullptr;
         }
         else
         {
@@ -44,7 +44,7 @@ convert<trie::full_node>::operator()(rlp::object const & o, trie::full_node & v)
     {
         if (o.data.array.ptr[i].is_nil())
         {
-            v.children(i) = nullptr;
+            v.child(i) = nullptr;
         }
         else
         {

@@ -84,7 +84,7 @@ decode_full_node(h256_t const & hash, bytes_view_t encoded_data) -> expected<std
     for (auto i = 0u; i < 16; ++i)
     {
         auto result = decode_ref(encoded_data).transform([&full_node, i, &encoded_data](auto && decoded_item) {
-            full_node->children(i) = decoded_item.first;
+            full_node->child(i) = decoded_item.first;
             encoded_data = decoded_item.second;
         });
         if (result.is_err())
@@ -96,7 +96,7 @@ decode_full_node(h256_t const & hash, bytes_view_t encoded_data) -> expected<std
     auto result = ethereum::rlp::split_bytes(encoded_data).transform([&full_node](auto && decoded_item) {
         if (!decoded_item.content.empty())
         {
-            full_node->children(16) = std::make_shared<trie::value_node>(decoded_item.content);
+            full_node->child(16) = std::make_shared<trie::value_node>(decoded_item.content);
         }
     });
     if (result.is_err())

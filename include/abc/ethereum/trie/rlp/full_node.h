@@ -26,7 +26,7 @@ pack<trie::full_node>::operator()(packer<Stream> & o, trie::full_node const & v)
 {
     for (auto i = 0uz; i < trie::full_node::children_size; ++i)
     {
-        auto child_ptr = v.children(i);
+        auto child_ptr = v.child(i);
         if (child_ptr != nullptr)
         {
             switch (child_ptr->type())

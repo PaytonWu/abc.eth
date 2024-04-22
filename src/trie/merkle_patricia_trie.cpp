@@ -335,7 +335,7 @@ merkle_patricia_trie::remove(std::shared_ptr<node_face> const & node, nibble_byt
                     }
                     // Otherwise, n is replaced by a one-nibble short node
                     // containing the child.
-                    return update_result{.node = std::make_shared<trie::short_node>(nibble_bytes{static_cast<byte>(pos)}, new_full_node->child(pos), hash_flag{}), .dirty = true};
+                    return update_result{.node = std::make_shared<trie::short_node>(nibble_bytes::from<byte_value::nibble>({static_cast<byte>(pos)}).value(), new_full_node->child(pos), hash_flag{}), .dirty = true};
                 }
                 // n still contains at least two values and cannot be reduced.
                 return update_result{.node = new_full_node, .dirty = true};
