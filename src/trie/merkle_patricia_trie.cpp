@@ -210,7 +210,7 @@ merkle_patricia_trie::remove(std::shared_ptr<node_face> const & node, nibble_byt
                 return update_result{.node = short_node, .dirty = false};
             }
 
-            if (cpl == short_node->nibble_keys().size())
+            if (cpl == key.size())
             {
                 // The matched short node is deleted entirely and track
                 // it in the deletion set. The same the valueNode doesn't
