@@ -31,9 +31,15 @@ value_node::type() const noexcept -> node_type
 }
 
 constexpr auto
-value_node::value() const noexcept -> bytes_view_t
+value_node::value() const & noexcept -> bytes_t const &
 {
     return value_;
+}
+
+constexpr auto
+value_node::value() && noexcept -> bytes_t &&
+{
+    return std::move(value_);
 }
 
 }

@@ -32,7 +32,8 @@ merkle_patricia_trie::get(bytes_view_t key) const -> expected<bytes_t, std::erro
         return make_unexpected(make_error_code(errc::trie_already_committed));
     }
 
-    return try_get(key);
+    auto nibble_key = nibble_bytes::from(key);
+    return try_get(root_, nibble_key, 0).transform([](auto && result) { return result.value; });
 }
 
 auto
@@ -53,10 +54,58 @@ merkle_patricia_trie::update(bytes_view_t key, bytes_view_t value) -> expected<v
 }
 
 auto
-merkle_patricia_trie::try_get(bytes_view_t /*key*/) const -> expected<bytes_t, std::error_code>
+merkle_patricia_trie::try_get(std::shared_ptr<node_face> const & node, nibble_bytes_view key, std::size_t pos_in_key) const -> expected<query_result, std::error_code>
 {
-    // return db_->try_get(key);
-    return {};
+    if (node == nullptr)
+    {
+        return query_result{};
+    }
+
+    assert(node != nullptr);
+    switch (node->type())
+    {
+        case node_type::value_node:
+        {
+            auto value_node = std::static_pointer_cast<trie::value_node>(node);
+            return query_result{.value = value_node->value(), .node = node, .did_resolve = false};
+        }
+
+        case node_type::short_node:
+        {
+            auto short_node = std::static_pointer_cast<trie::short_node>(node);
+            if (key.size() - pos_in_key < short_node->nibble_keys().size())
+            {
+                return query_result{.value = {}, .node = node, .did_resolve = false};
+            }
+
+            if (short_node->nibble_keys() == key.subview(pos_in_key, pos_in_key + short_node->nibble_keys().size()))
+            {
+                return query_result{.value = {}, .node = node, .did_resolve = false};
+            }
+
+            return try_get(short_node->value(), key, pos_in_key + short_node->nibble_keys().size()).transform([](auto && value) { return value; });
+        }
+
+        case node_type::full_node:
+        {
+            auto full_node = std::static_pointer_cast<trie::full_node>(node);
+            return try_get(full_node->child(key[pos_in_key]), key, pos_in_key + 1).transform([](auto && value) { return value; });
+        }
+
+        case node_type::hash_node:
+        {
+            auto hash_node = std::static_pointer_cast<trie::hash_node>(node);
+            assert(hash_node != nullptr);
+            return resolve(hash_node.get(), key.first(pos_in_key)).and_then([this, key, pos_in_key](auto && node) { return try_get(node, key, pos_in_key); });
+        }
+
+        default:
+        {
+            assert(false);
+            unreachable();
+            break;
+        }
+    }
 }
 
 auto
@@ -349,6 +398,9 @@ merkle_patricia_trie::remove(std::shared_ptr<node_face> const & node, nibble_byt
 
         case node_type::hash_node:
         {
+            // We've hit a part of the trie that isn't loaded yet. Load
+            // the node and delete from it. This leaves all child nodes on
+            // the path to the value in the trie
             auto hash_node = std::static_pointer_cast<trie::hash_node>(node);
             assert(hash_node != nullptr);
             return resolve(hash_node.get(), prefix).and_then([this, prefix, key](auto && node) { return remove(node, prefix, key); });
@@ -364,7 +416,7 @@ merkle_patricia_trie::remove(std::shared_ptr<node_face> const & node, nibble_byt
 }
 
 auto
-merkle_patricia_trie::resolve(trie::hash_node * hash_node, abc::ethereum::trie::nibble_bytes_view prefix) -> expected<std::shared_ptr<node_face>, std::error_code>
+merkle_patricia_trie::resolve(trie::hash_node * hash_node, abc::ethereum::trie::nibble_bytes_view prefix) const -> expected<std::shared_ptr<node_face>, std::error_code>
 {
     assert(db_reader_ != nullptr);
     assert(hash_node != nullptr);

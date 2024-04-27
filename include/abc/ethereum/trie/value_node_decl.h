@@ -40,8 +40,11 @@ public:
     constexpr auto
     type() const noexcept -> node_type override;
 
+    [[nodiscard]] constexpr auto
+    value() const & noexcept -> bytes_t const &;
+
     constexpr auto
-    value() const noexcept -> bytes_view_t;
+    value() && noexcept -> bytes_t &&;
 };
 
 }

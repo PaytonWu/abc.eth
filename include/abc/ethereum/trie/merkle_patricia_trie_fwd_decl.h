@@ -9,6 +9,10 @@
 namespace abc::ethereum::trie
 {
 
+struct [[nodiscard]] update_result;
+
+struct [[nodiscard]] query_result;
+
 // template <typename TrieDbT>
 class [[nodiscard]] merkle_patricia_trie;
 

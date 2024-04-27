@@ -28,6 +28,13 @@ struct update_result
     bool dirty{false};
 };
 
+struct query_result
+{
+    bytes_t value{};
+    std::shared_ptr<node_face> node{};
+    bool did_resolve{false};
+};
+
 // template <typename DbReaderT>
 class merkle_patricia_trie
 {
@@ -63,7 +70,7 @@ public:
 
 private:
     auto
-    try_get(bytes_view_t key) const -> expected<bytes_t, std::error_code>;
+    try_get(std::shared_ptr<node_face> const & node, nibble_bytes_view key, std::size_t pos_in_key) const -> expected<query_result, std::error_code>;
 
     auto
     try_update(bytes_view_t key, bytes_view_t value, std::error_code & ec) -> void;
@@ -75,7 +82,7 @@ private:
     remove(std::shared_ptr<node_face> const & node, nibble_bytes_view prefix, nibble_bytes_view key) -> expected<update_result, std::error_code>;
 
     auto
-    resolve(trie::hash_node * hash_node, nibble_bytes_view prefix) -> expected<std::shared_ptr<node_face>, std::error_code>;
+    resolve(trie::hash_node * hash_node, nibble_bytes_view prefix) const -> expected<std::shared_ptr<node_face>, std::error_code>;
 };
 
 } // namespace abc::ethereum::trie
