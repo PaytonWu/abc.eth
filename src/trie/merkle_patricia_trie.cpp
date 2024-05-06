@@ -58,7 +58,7 @@ merkle_patricia_trie::try_get(std::shared_ptr<node_face> const & node, nibble_by
 {
     if (node == nullptr)
     {
-        return query_result{};
+        return query_result{.value = {}, .node = nullptr, .did_resolve = false};
     }
 
     assert(node != nullptr);
@@ -83,13 +83,31 @@ merkle_patricia_trie::try_get(std::shared_ptr<node_face> const & node, nibble_by
                 return query_result{.value = {}, .node = node, .did_resolve = false};
             }
 
-            return try_get(short_node->value(), key, pos_in_key + short_node->nibble_keys().size()).transform([](auto && value) { return value; });
+            return try_get(short_node->value(), key, pos_in_key + short_node->nibble_keys().size()).transform([&short_node](auto && value)
+                                                                                                              {
+                                                                                                                  if (value.did_resolve)
+                                                                                                                  {
+                                                                                                                      value.node = short_node->clone();
+                                                                                                                      std::static_pointer_cast<trie::short_node>(value.node)->value(value.node);
+                                                                                                                  }
+
+                                                                                                                  return value;
+                                                                                                              });
         }
 
         case node_type::full_node:
         {
             auto full_node = std::static_pointer_cast<trie::full_node>(node);
-            return try_get(full_node->child(key[pos_in_key]), key, pos_in_key + 1).transform([](auto && value) { return value; });
+            return try_get(full_node->child(key[pos_in_key]), key, pos_in_key + 1).transform([&full_node, key, pos_in_key](auto && value)
+                                                                                             {
+                                                                                                 if (value.did_resolve)
+                                                                                                 {
+                                                                                                     value.node = full_node->clone();
+                                                                                                     std::static_pointer_cast<trie::full_node>(value.node)->child(key[pos_in_key]) = value.node;
+                                                                                                 }
+
+                                                                                                 return value;
+                                                                                             });
         }
 
         case node_type::hash_node:

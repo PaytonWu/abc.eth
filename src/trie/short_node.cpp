@@ -30,6 +30,14 @@ short_node::short_node(compact_bytes const & compact_key, std::shared_ptr<node_f
 }
 
 auto
+short_node::clone() const -> std::shared_ptr<short_node>
+{
+    auto cloned = std::make_shared_for_overwrite<short_node>();
+    *cloned = *this;
+    return cloned;
+}
+
+auto
 short_node::cache() const -> hash_flag
 {
     return flag_;
@@ -60,6 +68,12 @@ short_node::compact_keys() const -> compact_bytes const &
 {
     assert(std::holds_alternative<compact_bytes>(key_));
     return std::get<compact_bytes>(key_);
+}
+
+auto
+short_node::value(std::shared_ptr<node_face> v) -> void
+{
+    value_ = std::move(v);
 }
 
 } // namespace abc::ethereum::trie

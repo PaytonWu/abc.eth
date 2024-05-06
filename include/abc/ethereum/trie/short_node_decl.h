@@ -22,7 +22,9 @@
 namespace abc::ethereum::trie
 {
 
-class short_node : public node_face
+class short_node
+    : public node_face
+    , public clonable<short_node, std::shared_ptr<short_node>>
 {
     std::optional<bytes_t> bytes_key_{};
     std::optional<compact_bytes> compact_bytes_key_{};
@@ -35,7 +37,6 @@ class short_node : public node_face
 
 public:
     short_node() = default;
-    short_node(short_node const &) = delete;
     short_node(short_node &&) = default;
     ~short_node() override = default;
 
@@ -44,12 +45,18 @@ public:
     short_node(compact_bytes const & compact_key, std::shared_ptr<node_face> value, hash_flag flag);
 
     auto
-    operator=(short_node const &) -> short_node & = delete;
-
-    auto
     operator=(short_node &&) -> short_node & = default;
 
+private:
+    short_node(short_node const &) = default;
+
+    auto
+    operator=(short_node const &) -> short_node & = default;
+
 public:
+    [[nodiscard]] auto
+    clone() const -> std::shared_ptr<short_node> override;
+
     [[nodiscard]] auto
     cache() const -> hash_flag override;
 
@@ -70,6 +77,9 @@ public:
 
     [[nodiscard]] constexpr auto
     value() const noexcept -> std::shared_ptr<node_face> const &;
+
+    auto
+    value(std::shared_ptr<node_face> v) -> void;
 };
 
 }
