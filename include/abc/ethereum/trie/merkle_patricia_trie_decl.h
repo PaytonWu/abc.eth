@@ -82,6 +82,9 @@ private:
     remove(std::shared_ptr<node_face> const & node, nibble_bytes_view prefix, nibble_bytes_view key) -> expected<update_result, std::error_code>;
 
     auto
+    hash_root() const -> h256_t;
+
+    auto
     resolve(trie::hash_node * hash_node, nibble_bytes_view prefix) const -> expected<std::shared_ptr<node_face>, std::error_code>;
 };
 

@@ -434,6 +434,15 @@ merkle_patricia_trie::remove(std::shared_ptr<node_face> const & node, nibble_byt
 }
 
 auto
+merkle_patricia_trie::hash_root() const -> h256_t
+{
+    if (root_ == nullptr)
+    {
+        return h256_t{};
+    }
+}
+
+auto
 merkle_patricia_trie::resolve(trie::hash_node * hash_node, abc::ethereum::trie::nibble_bytes_view prefix) const -> expected<std::shared_ptr<node_face>, std::error_code>
 {
     assert(db_reader_ != nullptr);
